@@ -40,33 +40,33 @@ const MapController = ({ center, zoom }: { center: [number, number]; zoom: numbe
 };
 
 const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewProps) => {
-  const mapProps = {
-    center: center as LatLngExpression,
-    zoom,
-    scrollWheelZoom: true,
-    className: "h-full w-full"
-  };
-
   return (
     <div className="w-full h-[500px] rounded-lg overflow-hidden shadow-lg border border-border">
-      <MapContainer {...mapProps}>
-        <MapController center={center} zoom={zoom} />
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {locations.map((location, index) => (
-          <Marker 
-            key={index} 
-            position={[location.lat, location.lon] as LatLngExpression}
-          >
-            <Popup>
-              <div className="text-sm">
-                <h3 className="font-semibold mb-1">{location.name}</h3>
-                <p className="text-xs text-gray-600">{location.display_name}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+      <MapContainer 
+        center={center as LatLngExpression}
+        zoom={zoom}
+        scrollWheelZoom={true}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <>
+          <MapController center={center} zoom={zoom} />
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {locations.map((location, index) => (
+            <Marker 
+              key={index} 
+              position={[location.lat, location.lon] as LatLngExpression}
+            >
+              <Popup>
+                <div className="text-sm">
+                  <h3 className="font-semibold mb-1">{location.name}</h3>
+                  <p className="text-xs text-gray-600">{location.display_name}</p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </>
       </MapContainer>
     </div>
   );

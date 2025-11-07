@@ -5,8 +5,10 @@ import MapView from "@/components/MapView";
 import { searchLocation, NominatimResult } from "@/lib/nominatim";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Globe } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
+  const { t } = useTranslation();
   const [results, setResults] = useState<NominatimResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>([52.3676, 4.9041]);
@@ -25,20 +27,20 @@ const Index = () => {
         setMapZoom(12);
         
         toast({
-          title: "Zoekresultaten gevonden!",
-          description: `${searchResults.length} locatie${searchResults.length !== 1 ? 's' : ''} gevonden voor "${query}"`,
+          title: t("toast.resultsFound"),
+          description: t("toast.resultsFoundDesc", { count: searchResults.length, query }),
         });
       } else {
         toast({
-          title: "Geen resultaten",
-          description: "Probeer een andere zoekterm",
+          title: t("toast.noResults"),
+          description: t("toast.noResultsDesc"),
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Fout bij zoeken",
-        description: "Er ging iets mis bij het zoeken. Probeer het later opnieuw.",
+        title: t("toast.searchError"),
+        description: t("toast.searchErrorDesc"),
         variant: "destructive",
       });
     } finally {
@@ -67,13 +69,13 @@ const Index = () => {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">Aan het zoeken...</p>
+            <p className="text-muted-foreground">{t("results.searching")}</p>
           </div>
         ) : results.length > 0 ? (
           <div className="space-y-12">
             <div>
               <h2 className="text-3xl font-bold mb-6 text-foreground">
-                Kaart Weergave
+                {t("map.title")}
               </h2>
               <MapView 
                 locations={locations}
@@ -84,7 +86,7 @@ const Index = () => {
             
             <div>
               <h2 className="text-3xl font-bold mb-6 text-foreground">
-                Gevonden Locaties ({results.length})
+                {t("results.title")} ({results.length})
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {results.map((result) => (
@@ -105,10 +107,10 @@ const Index = () => {
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Globe className="h-20 w-20 text-muted-foreground mb-4" />
             <h3 className="text-2xl font-semibold mb-2 text-foreground">
-              Begin met zoeken
+              {t("results.noResults")}
             </h3>
             <p className="text-muted-foreground max-w-md">
-              Gebruik de zoekbalk hierboven om bestemmingen te vinden. Zoek op steden, landen of specifieke locaties.
+              {t("results.noResultsDesc")}
             </p>
           </div>
         )}

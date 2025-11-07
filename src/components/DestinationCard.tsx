@@ -1,6 +1,7 @@
 import { MapPin, Navigation } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface DestinationCardProps {
   name: string;
@@ -19,16 +20,12 @@ const DestinationCard = ({
   type,
   onViewOnMap 
 }: DestinationCardProps) => {
+  const { t } = useTranslation();
+  
   const getTypeLabel = (type: string) => {
-    const typeMap: Record<string, string> = {
-      city: "Stad",
-      town: "Plaats",
-      village: "Dorp",
-      country: "Land",
-      state: "Provincie",
-      administrative: "Administratief",
-    };
-    return typeMap[type] || type.charAt(0).toUpperCase() + type.slice(1);
+    const key = `card.${type}`;
+    const translated = t(key);
+    return translated !== key ? translated : type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   return (
@@ -63,7 +60,7 @@ const DestinationCard = ({
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <Navigation className="h-4 w-4 mr-2" />
-            Bekijk op Kaart
+            {t("card.viewOnMap")}
           </Button>
         </div>
       </CardContent>

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Index from "./pages/Index";
+import RestaurantDetail from "./pages/RestaurantDetail";
 import NotFound from "./pages/NotFound";
 import LanguageRedirect from "./pages/LanguageRedirect";
 
@@ -37,6 +38,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <Index />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/restaurant/:placeId"
+            element={
+              <LanguageWrapper>
+                <RestaurantDetail />
               </LanguageWrapper>
             }
           />

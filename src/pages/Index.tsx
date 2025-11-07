@@ -1,10 +1,12 @@
 import { useState } from "react";
 import Hero from "@/components/Hero";
-import DestinationCard from "@/components/DestinationCard";
+import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
-import { searchLocation, NominatimResult } from "@/lib/nominatim";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { searchRestaurants, NominatimResult } from "@/lib/nominatim";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Globe } from "lucide-react";
+import { Loader2, Utensils } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const Index = () => {
@@ -18,7 +20,7 @@ const Index = () => {
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     try {
-      const searchResults = await searchLocation(query);
+      const searchResults = await searchRestaurants(query);
       setResults(searchResults);
       
       if (searchResults.length > 0) {
@@ -62,7 +64,8 @@ const Index = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
       <Hero onSearch={handleSearch} />
       
       <div className="container mx-auto px-4 py-12">
@@ -90,8 +93,9 @@ const Index = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {results.map((result) => (
-                  <DestinationCard
+                  <RestaurantCard
                     key={result.place_id}
+                    placeId={result.place_id}
                     name={result.name || result.display_name.split(',')[0]}
                     displayName={result.display_name}
                     lat={parseFloat(result.lat)}
@@ -105,7 +109,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Globe className="h-20 w-20 text-muted-foreground mb-4" />
+            <Utensils className="h-20 w-20 text-muted-foreground mb-4" />
             <h3 className="text-2xl font-semibold mb-2 text-foreground">
               {t("results.noResults")}
             </h3>
@@ -115,6 +119,7 @@ const Index = () => {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };

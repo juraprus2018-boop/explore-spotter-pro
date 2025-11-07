@@ -40,6 +40,28 @@ export const searchLocation = async (query: string): Promise<NominatimResult[]> 
   }
 };
 
+export const searchRestaurants = async (query: string): Promise<NominatimResult[]> => {
+  try {
+    const response = await axios.get(`${NOMINATIM_BASE_URL}/search`, {
+      params: {
+        q: `restaurant ${query}`,
+        format: "json",
+        addressdetails: 1,
+        limit: 20,
+        amenity: "restaurant",
+      },
+      headers: {
+        "User-Agent": "TravelExplorer/1.0",
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error("Error searching restaurants:", error);
+    throw error;
+  }
+};
+
 export const reverseGeocode = async (lat: number, lon: number): Promise<NominatimResult> => {
   try {
     const response = await axios.get(`${NOMINATIM_BASE_URL}/reverse`, {

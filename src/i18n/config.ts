@@ -156,10 +156,13 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: "nl", // default language
+    lng: "nl",
     fallbackLng: "nl",
     interpolation: {
       escapeValue: false,
+    },
+    react: {
+      useSuspense: false,
     },
   });
 

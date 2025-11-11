@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Utensils } from "lucide-react";
+import SitemapGenerator from "./SitemapGenerator";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -33,6 +34,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.privacy")}</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.terms")}</a></li>
+              <li className="pt-2"><SitemapGenerator /></li>
             </ul>
           </div>
         </div>

@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Hero from "@/components/Hero";
 import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { searchRestaurants, NominatimResult } from "@/lib/nominatim";
+import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Utensils } from "lucide-react";
+import { Loader2, Utensils, Navigation } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -15,23 +17,75 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>([52.3676, 4.9041]);
   const [mapZoom, setMapZoom] = useState(6);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Get user's location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.log("Geolocation error:", error);
+        }
+      );
+    }
+  }, []);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     try {
-      const searchResults = await searchRestaurants(query);
+      // First, try to search in database
+      const dbResults = await searchRestaurantsInDatabase(query);
+      
+      let searchResults: NominatimResult[] = [];
+      
+      if (dbResults.length > 0) {
+        // Convert database results to Nominatim format
+        searchResults = dbResults.map(r => ({
+          place_id: r.place_id,
+          name: r.name,
+          display_name: r.display_name,
+          lat: r.lat.toString(),
+          lon: r.lon.toString(),
+          type: r.type || "restaurant",
+          class: "amenity",
+          osm_type: r.osm_type || "node",
+          osm_id: r.osm_id || 0,
+          licence: "",
+          place_rank: 0,
+          importance: 0,
+          addresstype: r.address_type || "amenity",
+          boundingbox: ["0", "0", "0", "0"],
+        }));
+        
+        toast({
+          title: t("toast.resultsFound"),
+          description: `${dbResults.length} restaurants gevonden in database`,
+        });
+      } else {
+        // If not in database, search via Nominatim API
+        searchResults = await searchRestaurants(query);
+        
+        // Save to database
+        if (searchResults.length > 0) {
+          await saveRestaurants(searchResults);
+        }
+        
+        toast({
+          title: t("toast.resultsFound"),
+          description: t("toast.resultsFoundDesc", { count: searchResults.length, query }),
+        });
+      }
+      
       setResults(searchResults);
       
       if (searchResults.length > 0) {
         const firstResult = searchResults[0];
         setMapCenter([parseFloat(firstResult.lat), parseFloat(firstResult.lon)]);
         setMapZoom(12);
-        
-        toast({
-          title: t("toast.resultsFound"),
-          description: t("toast.resultsFoundDesc", { count: searchResults.length, query }),
-        });
       } else {
         toast({
           title: t("toast.noResults"),
@@ -43,6 +97,65 @@ const Index = () => {
       toast({
         title: t("toast.searchError"),
         description: t("toast.searchErrorDesc"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNearbySearch = async () => {
+    if (!userLocation) {
+      toast({
+        title: "Locatie niet beschikbaar",
+        description: "Geef toestemming voor locatietoegang om restaurants in de buurt te vinden.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const nearbyRestaurants = await getNearbyRestaurants(userLocation[0], userLocation[1], 10);
+      
+      if (nearbyRestaurants.length > 0) {
+        // Convert to Nominatim format
+        const searchResults: NominatimResult[] = nearbyRestaurants.map(r => ({
+          place_id: r.place_id,
+          name: r.name,
+          display_name: r.display_name,
+          lat: r.lat.toString(),
+          lon: r.lon.toString(),
+          type: r.type || "restaurant",
+          class: "amenity",
+          osm_type: r.osm_type || "node",
+          osm_id: r.osm_id || 0,
+          licence: "",
+          place_rank: 0,
+          importance: 0,
+          addresstype: r.address_type || "amenity",
+          boundingbox: ["0", "0", "0", "0"],
+        }));
+        
+        setResults(searchResults);
+        setMapCenter(userLocation);
+        setMapZoom(12);
+        
+        toast({
+          title: "Restaurants in de buurt",
+          description: `${nearbyRestaurants.length} restaurants gevonden binnen 10 km`,
+        });
+      } else {
+        toast({
+          title: "Geen restaurants gevonden",
+          description: "Probeer een andere locatie of vergroot de zoekradius.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Fout bij zoeken",
+        description: "Er is een fout opgetreden bij het zoeken naar restaurants in de buurt.",
         variant: "destructive",
       });
     } finally {
@@ -67,6 +180,20 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <Hero onSearch={handleSearch} />
+      
+      {userLocation && (
+        <div className="container mx-auto px-4 pt-8">
+          <Button 
+            onClick={handleNearbySearch} 
+            variant="outline" 
+            size="lg"
+            disabled={isLoading}
+          >
+            <Navigation className="h-5 w-5 mr-2" />
+            {t("search.nearby")}
+          </Button>
+        </div>
+      )}
       
       <div className="container mx-auto px-4 py-12">
         {isLoading ? (

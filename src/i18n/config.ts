@@ -15,6 +15,9 @@ const resources = {
         viewDetails: "Bekijk Details",
         coordinates: "Coördinaten",
       },
+      search: {
+        nearby: "Restaurants in de buurt",
+      },
       map: {
         title: "Kaart Weergave",
       },
@@ -75,6 +78,9 @@ const resources = {
         viewOnMap: "View on Map",
         viewDetails: "View Details",
         coordinates: "Coordinates",
+      },
+      search: {
+        nearby: "Restaurants nearby",
       },
       map: {
         title: "Map View",
@@ -137,6 +143,9 @@ const resources = {
         viewDetails: "Details anzeigen",
         coordinates: "Koordinaten",
       },
+      search: {
+        nearby: "Restaurants in der Nähe",
+      },
       map: {
         title: "Kartenansicht",
       },
@@ -197,6 +206,9 @@ const resources = {
         viewOnMap: "Voir sur la carte",
         viewDetails: "Voir les détails",
         coordinates: "Coordonnées",
+      },
+      search: {
+        nearby: "Restaurants à proximité",
       },
       map: {
         title: "Vue de la carte",

@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      restaurants: {
+        Row: {
+          address_type: string | null
+          created_at: string | null
+          display_name: string
+          id: string
+          lat: number
+          lon: number
+          name: string
+          osm_id: number | null
+          osm_type: string | null
+          place_id: number
+          search_count: number | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address_type?: string | null
+          created_at?: string | null
+          display_name: string
+          id?: string
+          lat: number
+          lon: number
+          name: string
+          osm_id?: number | null
+          osm_type?: string | null
+          place_id: number
+          search_count?: number | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address_type?: string | null
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          lat?: number
+          lon?: number
+          name?: string
+          osm_id?: number | null
+          osm_type?: string | null
+          place_id?: number
+          search_count?: number | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

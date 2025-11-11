@@ -48,7 +48,6 @@ export const searchRestaurants = async (query: string): Promise<NominatimResult[
         format: "json",
         addressdetails: 1,
         limit: 20,
-        amenity: "restaurant",
       },
       headers: {
         "User-Agent": "TravelExplorer/1.0",

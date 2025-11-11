@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { reverseGeocode, NominatimResult } from "@/lib/nominatim";
@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 const RestaurantDetail = () => {
   const { placeId, lang } = useParams();
   const navigate = useNavigate();
+  const routerLocation = useLocation();
   const { t } = useTranslation();
   const { toast } = useToast();
   const [restaurant, setRestaurant] = useState<NominatimResult | null>(null);
@@ -24,23 +25,18 @@ const RestaurantDetail = () => {
       
       setIsLoading(true);
       try {
-        // In a real app, you'd fetch by place_id
-        // For now, we'll simulate with stored data or reverse geocode
-        // This is a limitation of the free Nominatim API
-        toast({
-          title: t("detail.loading"),
-          description: t("detail.loadingDesc"),
-        });
+        // Get restaurant data from navigation state
+        const stateData = routerLocation.state as any;
         
-        // Simulate loading - in production you'd store restaurant data
-        setTimeout(() => {
+        if (stateData && stateData.name) {
+          // Use data passed from the card
           setRestaurant({
-            place_id: parseInt(placeId),
-            name: "Restaurant Example",
-            display_name: "Example Street 123, City",
-            lat: "52.3676",
-            lon: "4.9041",
-            type: "restaurant",
+            place_id: stateData.placeId,
+            name: stateData.name,
+            display_name: stateData.displayName,
+            lat: stateData.lat.toString(),
+            lon: stateData.lon.toString(),
+            type: stateData.type || "restaurant",
             class: "amenity",
             osm_type: "node",
             osm_id: 0,
@@ -50,8 +46,15 @@ const RestaurantDetail = () => {
             addresstype: "amenity",
             boundingbox: ["0", "0", "0", "0"],
           });
-          setIsLoading(false);
-        }, 1000);
+        } else {
+          // Fallback if no state data
+          toast({
+            title: t("detail.error"),
+            description: t("detail.errorDesc"),
+            variant: "destructive",
+          });
+        }
+        setIsLoading(false);
       } catch (error) {
         console.error("Error loading restaurant:", error);
         toast({
@@ -64,7 +67,7 @@ const RestaurantDetail = () => {
     };
 
     loadRestaurant();
-  }, [placeId, t, toast]);
+  }, [placeId, routerLocation.state, t, toast]);
 
   if (isLoading) {
     return (

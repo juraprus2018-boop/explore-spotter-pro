@@ -20,7 +20,16 @@ const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, onViewOnMa
   const { lang } = useParams();
 
   const handleViewDetails = () => {
-    navigate(`/${lang}/restaurant/${placeId}`);
+    navigate(`/${lang}/restaurant/${placeId}`, {
+      state: {
+        placeId,
+        name,
+        displayName,
+        lat,
+        lon,
+        type,
+      }
+    });
   };
 
   return (

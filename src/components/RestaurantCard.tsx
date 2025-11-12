@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Eye } from "lucide-react";
+import { MapPin, Eye, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -32,6 +32,23 @@ const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, onViewOnMa
     });
   };
 
+  // Extract city name from display_name
+  const getCityName = () => {
+    const parts = displayName.split(',').map(p => p.trim());
+    if (parts.length >= 2) {
+      return parts[parts.length - 3] || parts[parts.length - 2] || "";
+    }
+    return "";
+  };
+
+  const cityName = getCityName();
+
+  const handleViewCity = () => {
+    if (cityName) {
+      navigate(`/${lang}/city/${encodeURIComponent(cityName)}`);
+    }
+  };
+
   return (
     <Card className="hover:shadow-lg transition-shadow duration-300">
       <CardHeader>
@@ -49,6 +66,16 @@ const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, onViewOnMa
             <span className="font-medium">{t("card.coordinates")}:</span>
             <span>{lat.toFixed(4)}, {lon.toFixed(4)}</span>
           </div>
+          {cityName && (
+            <Button
+              onClick={handleViewCity}
+              variant="link"
+              className="h-auto p-0 text-sm text-primary"
+            >
+              <Building2 className="h-3 w-3 mr-1" />
+              Meer restaurants in {cityName}
+            </Button>
+          )}
         </div>
       </CardContent>
       <CardFooter className="flex gap-2">

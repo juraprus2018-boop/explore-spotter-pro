@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Index from "./pages/Index";
 import RestaurantDetail from "./pages/RestaurantDetail";
+import CityPage from "./pages/CityPage";
 import NotFound from "./pages/NotFound";
 import LanguageRedirect from "./pages/LanguageRedirect";
 
@@ -38,6 +39,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <Index />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/city/:city"
+            element={
+              <LanguageWrapper>
+                <CityPage />
               </LanguageWrapper>
             }
           />

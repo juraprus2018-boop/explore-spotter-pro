@@ -4,6 +4,7 @@ import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CitiesOverview from "@/components/CitiesOverview";
 import { searchRestaurants, searchNearbyRestaurants, NominatimResult } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
@@ -253,14 +254,18 @@ const Index = () => {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Utensils className="h-20 w-20 text-muted-foreground mb-4" />
-            <h3 className="text-2xl font-semibold mb-2 text-foreground">
-              {t("results.noResults")}
-            </h3>
-            <p className="text-muted-foreground max-w-md">
-              {t("results.noResultsDesc")}
-            </p>
+          <div className="space-y-12">
+            <CitiesOverview />
+            
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Utensils className="h-20 w-20 text-muted-foreground mb-4" />
+              <h3 className="text-2xl font-semibold mb-2 text-foreground">
+                {t("results.noResults")}
+              </h3>
+              <p className="text-muted-foreground max-w-md">
+                {t("results.noResultsDesc")}
+              </p>
+            </div>
           </div>
         )}
       </div>

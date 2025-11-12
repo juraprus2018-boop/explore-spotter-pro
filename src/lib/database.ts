@@ -149,3 +149,54 @@ export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: n
     return [];
   }
 };
+
+export const getRestaurantsByCity = async (cityName: string): Promise<DatabaseRestaurant[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('restaurants')
+      .select('*')
+      .ilike('display_name', `%${cityName}%`)
+      .order('search_count', { ascending: false });
+
+    if (error) {
+      console.error("Error fetching restaurants by city:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getRestaurantsByCity:", error);
+    return [];
+  }
+};
+
+export const getAllCities = async (): Promise<string[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('restaurants')
+      .select('display_name');
+
+    if (error) {
+      console.error("Error fetching cities:", error);
+      return [];
+    }
+
+    // Extract city names from display_name
+    const cities = new Set<string>();
+    data?.forEach(restaurant => {
+      const parts = restaurant.display_name.split(',').map(p => p.trim());
+      // Usually the city is in the later parts of the address
+      if (parts.length >= 2) {
+        const city = parts[parts.length - 3] || parts[parts.length - 2];
+        if (city && city.length > 0 && !city.match(/^\d/)) {
+          cities.add(city);
+        }
+      }
+    });
+
+    return Array.from(cities).sort();
+  } catch (error) {
+    console.error("Error in getAllCities:", error);
+    return [];
+  }
+};

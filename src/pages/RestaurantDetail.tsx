@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ArrowLeft, MapPin, Globe, Phone, Clock } from "lucide-react";
 import MapView from "@/components/MapView";
+import RouteNavigation from "@/components/RouteNavigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -155,6 +156,12 @@ const RestaurantDetail = () => {
             </div>
 
             <div className="space-y-6">
+              <RouteNavigation
+                destinationLat={location.lat}
+                destinationLon={location.lon}
+                destinationName={location.name}
+              />
+              
               <Card>
                 <CardHeader>
                   <CardTitle>{t("detail.information")}</CardTitle>

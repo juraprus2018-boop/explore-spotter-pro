@@ -61,6 +61,34 @@ export const searchRestaurants = async (query: string): Promise<NominatimResult[
   }
 };
 
+export const searchNearbyRestaurants = async (lat: number, lon: number, radiusKm: number = 10): Promise<NominatimResult[]> => {
+  try {
+    // Nominatim doesn't have a direct radius search, so we search in a bounding box
+    // 1 degree ≈ 111 km
+    const latDiff = radiusKm / 111;
+    const lonDiff = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
+    
+    const response = await axios.get(`${NOMINATIM_BASE_URL}/search`, {
+      params: {
+        q: "restaurant",
+        format: "json",
+        addressdetails: 1,
+        limit: 50,
+        viewbox: `${lon - lonDiff},${lat + latDiff},${lon + lonDiff},${lat - latDiff}`,
+        bounded: 1,
+      },
+      headers: {
+        "User-Agent": "TravelExplorer/1.0",
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error("Error searching nearby restaurants:", error);
+    throw error;
+  }
+};
+
 export const reverseGeocode = async (lat: number, lon: number): Promise<NominatimResult> => {
   try {
     const response = await axios.get(`${NOMINATIM_BASE_URL}/reverse`, {

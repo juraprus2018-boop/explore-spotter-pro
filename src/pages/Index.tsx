@@ -4,7 +4,7 @@ import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { searchRestaurants, NominatimResult } from "@/lib/nominatim";
+import { searchRestaurants, searchNearbyRestaurants, NominatimResult } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils, Navigation } from "lucide-react";
@@ -116,11 +116,14 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      const nearbyRestaurants = await getNearbyRestaurants(userLocation[0], userLocation[1], 10);
+      // First, try to search in database
+      const dbResults = await getNearbyRestaurants(userLocation[0], userLocation[1], 10);
       
-      if (nearbyRestaurants.length > 0) {
-        // Convert to Nominatim format
-        const searchResults: NominatimResult[] = nearbyRestaurants.map(r => ({
+      let searchResults: NominatimResult[] = [];
+      
+      if (dbResults.length > 0) {
+        // Convert database results to Nominatim format
+        searchResults = dbResults.map(r => ({
           place_id: r.place_id,
           name: r.name,
           display_name: r.display_name,
@@ -137,14 +140,29 @@ const Index = () => {
           boundingbox: ["0", "0", "0", "0"],
         }));
         
-        setResults(searchResults);
-        setMapCenter(userLocation);
-        setMapZoom(12);
+        toast({
+          title: "Restaurants in de buurt",
+          description: `${dbResults.length} restaurants gevonden in database`,
+        });
+      } else {
+        // If not in database, search via Nominatim API
+        searchResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 10);
+        
+        // Save to database
+        if (searchResults.length > 0) {
+          await saveRestaurants(searchResults);
+        }
         
         toast({
           title: "Restaurants in de buurt",
-          description: `${nearbyRestaurants.length} restaurants gevonden binnen 10 km`,
+          description: `${searchResults.length} restaurants gevonden via API en opgeslagen`,
         });
+      }
+      
+      if (searchResults.length > 0) {
+        setResults(searchResults);
+        setMapCenter(userLocation);
+        setMapZoom(12);
       } else {
         toast({
           title: "Geen restaurants gevonden",

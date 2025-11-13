@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet";
 import { getRestaurantByPlaceId, DatabaseRestaurant } from "@/lib/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -148,9 +149,24 @@ const RestaurantDetail = () => {
   const citySlug = restaurant.city?.slug || city || '';
   const provinceName = restaurant.city?.province?.name || province || '';
   const provinceSlug = restaurant.city?.province?.slug || province || '';
+  
+  // SEO meta tags
+  const seoTitle = `${restaurant.name} - ${cityName} | EatNavigator`;
+  const seoDescription = restaurant.cuisine 
+    ? `${restaurant.name} in ${cityName}. ${restaurant.cuisine} restaurant. Bekijk menu, openingstijden, reviews en locatie op EatNavigator.`
+    : `${restaurant.name} in ${cityName}. Bekijk menu, openingstijden, reviews en locatie op EatNavigator.`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="restaurant" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+      </Helmet>
       <HreflangAlternates />
       <StructuredData restaurant={restaurant} reviews={reviews} averageRating={averageRating} />
       <Header />

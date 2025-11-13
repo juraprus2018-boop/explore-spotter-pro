@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet";
 import { getRestaurantsByCity, getCityBySlug, DatabaseRestaurant, City } from "@/lib/database";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, MapPin, Home, Filter as FilterIcon, Map } from "lucide-react";
@@ -162,6 +163,10 @@ const CityPage = () => {
   const provinceSlug = cityData?.province?.slug || province || "";
 
   const displayRestaurants = filteredRestaurants.length > 0 ? filteredRestaurants : restaurants;
+  
+  // SEO meta tags
+  const seoTitle = `Restaurants in ${cityName}, ${provinceName} | EatNavigator`;
+  const seoDescription = `Ontdek ${displayRestaurants.length} restaurants in ${cityName}, ${provinceName}. Bekijk reviews, menu's, openingstijden en locaties. Vind het perfecte restaurant bij jou in de buurt.`;
 
   const locations = displayRestaurants.map(r => ({
     name: r.name,
@@ -176,6 +181,15 @@ const CityPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+      </Helmet>
       <HreflangAlternates />
       {cityData && restaurants.length > 0 && (
         <CityStructuredData 

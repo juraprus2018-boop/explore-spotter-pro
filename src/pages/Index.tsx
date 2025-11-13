@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import { useTranslation } from "react-i18next";
 import Hero from "@/components/Hero";
 import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
@@ -14,7 +16,6 @@ import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils } from "lucide-react";
-import { useTranslation } from "react-i18next";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -240,8 +241,21 @@ const Index = () => {
     display_name: r.display_name,
   }));
 
+  // SEO meta tags
+  const seoTitle = "EatNavigator - Vind de beste restaurants bij jou in de buurt";
+  const seoDescription = "Ontdek duizenden restaurants wereldwijd met EatNavigator. Zoek op locatie, bekijk reviews, menu's en openingstijden. Vind het perfecte restaurant voor elke gelegenheid.";
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+      </Helmet>
       <HreflangAlternates />
       <WebSiteStructuredData />
       <LanguageDetectionPopup />

@@ -4,7 +4,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import SearchAutocomplete from "./SearchAutocomplete";
 
 interface HeroProps {
-  onSearch: (query: string) => void;
+  onSearch: (query: string, location?: { lat: number; lon: number }) => void;
 }
 
 const Hero = ({ onSearch }: HeroProps) => {

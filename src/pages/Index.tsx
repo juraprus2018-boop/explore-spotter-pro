@@ -5,12 +5,14 @@ import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProvincesOverview from "@/components/ProvincesOverview";
+import NearbyRestaurants from "@/components/NearbyRestaurants";
+import HreflangAlternates from "@/components/HreflangAlternates";
+import LanguageDetectionPopup from "@/components/LanguageDetectionPopup";
 import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Utensils, Navigation } from "lucide-react";
+import { Loader2, Utensils } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -35,40 +37,54 @@ const Index = () => {
     }
   }, []);
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, location?: { lat: number; lon: number }) => {
     setIsLoading(true);
     try {
-      // First, try to search in database
-      let results = await searchRestaurantsInDatabase(query);
-      
-      if (results.length > 0) {
-        toast({
-          title: t("toast.resultsFound"),
-          description: `${results.length} restaurants gevonden in database`,
-        });
-      } else {
-        // If not in database, search via Nominatim API
-        const apiResults = await searchRestaurants(query);
+      let results: DatabaseRestaurant[] = [];
+
+      // If location is provided, search restaurants near that location
+      if (location) {
+        // First try database
+        results = await getNearbyRestaurants(location.lat, location.lon, 25);
         
-        // Save to database
-        if (apiResults.length > 0) {
-          await saveRestaurants(apiResults);
-          // Fetch again from database to get full data with relations
-          results = await searchRestaurantsInDatabase(query);
+        if (results.length === 0) {
+          // Search via API if not in database
+          const apiResults = await searchNearbyRestaurants(location.lat, location.lon, 25);
+          
+          if (apiResults.length > 0) {
+            await saveRestaurants(apiResults);
+            results = await getNearbyRestaurants(location.lat, location.lon, 25);
+          }
         }
+
+        setMapCenter([location.lat, location.lon]);
+        setMapZoom(12);
+      } else {
+        // Regular text search
+        results = await searchRestaurantsInDatabase(query);
         
-        toast({
-          title: t("toast.resultsFound"),
-          description: t("toast.resultsFoundDesc", { count: results.length, query }),
-        });
+        if (results.length === 0) {
+          const apiResults = await searchRestaurants(query);
+          
+          if (apiResults.length > 0) {
+            await saveRestaurants(apiResults);
+            results = await searchRestaurantsInDatabase(query);
+          }
+        }
+
+        if (results.length > 0) {
+          setMapCenter([results[0].lat, results[0].lon]);
+          setMapZoom(12);
+        }
       }
       
       setDbResults(results);
       
       if (results.length > 0) {
-        const firstResult = results[0];
-        setMapCenter([firstResult.lat, firstResult.lon]);
-        setMapZoom(12);
+        toast({
+          title: t("toast.resultsFound"),
+          description: t("toast.resultsFoundDesc", { count: results.length, query }),
+        });
       } else {
         toast({
           title: t("toast.noResults"),
@@ -161,25 +177,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <HreflangAlternates />
+      <LanguageDetectionPopup />
       <Header />
       <Hero onSearch={handleSearch} />
       <div className="container mx-auto px-4 py-12">
         {userLocation && dbResults.length === 0 && (
-          <div className="mb-8 text-center">
-            <Button
-              onClick={handleNearbySearch}
-              size="lg"
-              className="gap-2"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Navigation className="h-5 w-5" />
-              )}
-              Restaurants in de buurt
-            </Button>
-          </div>
+          <NearbyRestaurants onNearbySearch={handleNearbySearch} />
         )}
 
         {isLoading ? (

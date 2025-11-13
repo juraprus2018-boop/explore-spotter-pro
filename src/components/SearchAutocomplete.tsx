@@ -10,23 +10,24 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { searchRestaurantsInDatabase } from "@/lib/database";
-import { searchRestaurants } from "@/lib/nominatim";
+import { searchLocations } from "@/lib/nominatim";
 
 interface SearchAutocompleteProps {
-  onSearch: (query: string) => void;
+  onSearch: (query: string, location?: { lat: number; lon: number }) => void;
 }
 
-interface Suggestion {
+interface LocationSuggestion {
   name: string;
   displayName: string;
-  source: "database" | "api";
+  lat: number;
+  lon: number;
+  type: string;
 }
 
 const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
@@ -38,31 +39,19 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
 
     setIsLoadingSuggestions(true);
     try {
-      // Search in database first
-      const dbResults = await searchRestaurantsInDatabase(query);
-      const dbSuggestions: Suggestion[] = dbResults.slice(0, 5).map((r) => ({
+      // Search for locations only (cities, towns, countries)
+      const locationResults = await searchLocations(query);
+      const locationSuggestions: LocationSuggestion[] = locationResults.map((r) => ({
         name: r.name,
         displayName: r.display_name,
-        source: "database" as const,
+        lat: parseFloat(r.lat),
+        lon: parseFloat(r.lon),
+        type: r.type,
       }));
 
-      // If we have less than 5 results, fetch from API
-      if (dbSuggestions.length < 5) {
-        const apiResults = await searchRestaurants(query);
-        const apiSuggestions: Suggestion[] = apiResults
-          .slice(0, 5 - dbSuggestions.length)
-          .map((r) => ({
-            name: r.name || r.display_name.split(",")[0],
-            displayName: r.display_name,
-            source: "api" as const,
-          }));
-
-        setSuggestions([...dbSuggestions, ...apiSuggestions]);
-      } else {
-        setSuggestions(dbSuggestions);
-      }
+      setSuggestions(locationSuggestions);
     } catch (error) {
-      console.error("Error fetching suggestions:", error);
+      console.error("Error fetching location suggestions:", error);
     } finally {
       setIsLoadingSuggestions(false);
     }
@@ -88,10 +77,11 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
     }
   };
 
-  const handleSelectSuggestion = (suggestion: Suggestion) => {
+  const handleSelectSuggestion = (suggestion: LocationSuggestion) => {
     setSearchQuery(suggestion.name);
     setShowSuggestions(false);
-    onSearch(suggestion.name);
+    // Pass location coordinates to search for restaurants in that area
+    onSearch(suggestion.name, { lat: suggestion.lat, lon: suggestion.lon });
   };
 
   return (
@@ -116,18 +106,23 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
                   <CommandEmpty>
                     {isLoadingSuggestions ? "Laden..." : "Geen suggesties"}
                   </CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup heading="Locaties / Locations">
                     {suggestions.map((suggestion, index) => (
                       <CommandItem
                         key={`${suggestion.name}-${index}`}
                         onSelect={() => handleSelectSuggestion(suggestion)}
                         className="cursor-pointer"
                       >
-                        <div className="flex flex-col">
+                        <div className="flex flex-col w-full">
                           <span className="font-medium">{suggestion.name}</span>
-                          <span className="text-xs text-muted-foreground truncate">
-                            {suggestion.displayName}
-                          </span>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-muted-foreground truncate">
+                              {suggestion.displayName}
+                            </span>
+                            <span className="text-xs bg-secondary px-2 py-1 rounded whitespace-nowrap">
+                              {suggestion.type}
+                            </span>
+                          </div>
                         </div>
                       </CommandItem>
                     ))}

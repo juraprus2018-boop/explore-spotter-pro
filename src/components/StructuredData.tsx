@@ -4,6 +4,7 @@ interface Review {
   rating: number;
   comment: string | null;
   created_at: string;
+  photos: string[] | null;
   user_email?: string;
 }
 
@@ -52,10 +53,11 @@ const StructuredData = ({ restaurant, reviews, averageRating }: StructuredDataPr
         },
         "author": {
           "@type": "Person",
-          "name": review.user_email?.split('@')[0] || "Gebruiker",
+          "name": review.user_email?.split('@')[0] || "Anonieme gebruiker",
         },
         "datePublished": review.created_at,
         ...(review.comment && { "reviewBody": review.comment }),
+        ...(review.photos && review.photos.length > 0 && { "image": review.photos }),
       })),
     }),
   };

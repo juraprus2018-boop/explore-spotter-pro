@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, Loader2, Trash2, Edit2 } from "lucide-react";
+import { Star, Loader2, Trash2, Edit2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
@@ -11,11 +11,12 @@ import { nl } from "date-fns/locale";
 
 interface Review {
   id: string;
-  user_id: string;
+  user_id: string | null;
   rating: number;
   comment: string | null;
   created_at: string;
   updated_at: string;
+  photos: string[] | null;
   user_email?: string;
 }
 
@@ -36,6 +37,8 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [editingReview, setEditingReview] = useState<string | null>(null);
+  const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
 
   useEffect(() => {
     // Check auth state
@@ -65,13 +68,19 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
 
       if (error) throw error;
 
-      // Get user emails for reviews
+      // Get user emails for reviews that have user_id
       const reviewsWithEmails = await Promise.all(
         (data || []).map(async (review) => {
-          const { data: userData } = await supabase.auth.admin.getUserById(review.user_id);
+          if (review.user_id) {
+            const { data: userData } = await supabase.auth.admin.getUserById(review.user_id);
+            return {
+              ...review,
+              user_email: userData?.user?.email || "Gebruiker",
+            };
+          }
           return {
             ...review,
-            user_email: userData?.user?.email || "Gebruiker",
+            user_email: "Anonieme gebruiker",
           };
         })
       );
@@ -84,18 +93,20 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
     }
   };
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files).slice(0, 5 - uploadedPhotos.length);
+    setUploadedPhotos([...uploadedPhotos, ...newFiles]);
+  };
+
+  const removePhoto = (index: number) => {
+    setUploadedPhotos(uploadedPhotos.filter((_, i) => i !== index));
+  };
+
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!user) {
-      toast({
-        title: "Log in vereist",
-        description: "Je moet ingelogd zijn om een review achter te laten.",
-        variant: "destructive",
-      });
-      navigate(`/${lang}/auth`);
-      return;
-    }
 
     if (rating === 0) {
       toast({
@@ -108,6 +119,26 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
 
     setIsSubmitting(true);
     try {
+      // Upload photos first
+      const photoUrls: string[] = [];
+      for (const file of uploadedPhotos) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${restaurantId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('review-photos')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('review-photos')
+          .getPublicUrl(filePath);
+
+        photoUrls.push(publicUrl);
+      }
+
       if (editingReview) {
         // Update existing review
         const { error } = await supabase
@@ -115,6 +146,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
           .update({
             rating,
             comment: comment.trim() || null,
+            photos: photoUrls.length > 0 ? photoUrls : null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingReview);
@@ -126,38 +158,31 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
           description: "Je review is succesvol aangepast.",
         });
       } else {
-        // Create new review
+        // Create new review (anonymous or authenticated)
         const { error } = await supabase
           .from('reviews')
           .insert({
-            user_id: user.id,
+            user_id: user?.id || null,
             restaurant_id: restaurantId,
             rating,
             comment: comment.trim() || null,
+            photos: photoUrls.length > 0 ? photoUrls : null,
           });
 
-        if (error) {
-          if (error.code === '23505') { // Unique constraint violation
-            toast({
-              title: "Review bestaat al",
-              description: "Je hebt al een review geplaatst voor dit restaurant.",
-              variant: "destructive",
-            });
-          } else {
-            throw error;
-          }
-        } else {
-          toast({
-            title: "Review geplaatst!",
-            description: "Bedankt voor je review.",
-          });
-        }
+        if (error) throw error;
+
+        toast({
+          title: "Review geplaatst!",
+          description: "Bedankt voor je review.",
+        });
       }
 
       // Reset form
       setRating(0);
       setComment("");
       setEditingReview(null);
+      setUploadedPhotos([]);
+      setPhotoUrls([]);
       await fetchReviews();
     } catch (error: any) {
       toast({
@@ -173,6 +198,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
   const handleEditReview = (review: Review) => {
     setRating(review.rating);
     setComment(review.comment || "");
+    setPhotoUrls(review.photos || []);
     setEditingReview(review.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -282,6 +308,45 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
               </p>
             </div>
 
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Foto's toevoegen (max 5)
+              </label>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {uploadedPhotos.map((file, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Upload ${index + 1}`}
+                        className="h-20 w-20 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(index)}
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {uploadedPhotos.length < 5 && (
+                    <label className="h-20 w-20 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
+                      <Upload className="h-6 w-6 text-muted-foreground" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                        disabled={isSubmitting}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-2">
               <Button 
                 type="submit" 
@@ -315,20 +380,6 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
                 </Button>
               )}
             </div>
-
-            {!user && (
-              <p className="text-sm text-muted-foreground">
-                Je moet{" "}
-                <button
-                  type="button"
-                  onClick={() => navigate(`/${lang}/auth`)}
-                  className="text-primary hover:underline"
-                >
-                  ingelogd zijn
-                </button>{" "}
-                om een review te plaatsen.
-              </p>
-            )}
           </form>
         </CardContent>
       </Card>
@@ -367,6 +418,18 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
                     </p>
                     {review.comment && (
                       <p className="text-sm mt-2">{review.comment}</p>
+                    )}
+                    {review.photos && review.photos.length > 0 && (
+                      <div className="flex gap-2 mt-3 flex-wrap">
+                        {review.photos.map((photo, idx) => (
+                          <img
+                            key={idx}
+                            src={photo}
+                            alt={`Review foto ${idx + 1}`}
+                            className="h-20 w-20 object-cover rounded-lg"
+                          />
+                        ))}
+                      </div>
                     )}
                   </div>
 

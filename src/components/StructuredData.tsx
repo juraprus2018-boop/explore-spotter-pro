@@ -39,7 +39,9 @@ const StructuredData = ({ restaurant, reviews, averageRating }: StructuredDataPr
   // Parse opening hours if available
   const openingHours = restaurant.opening_hours 
     ? (typeof restaurant.opening_hours === 'string' 
-        ? JSON.parse(restaurant.opening_hours) 
+        ? (restaurant.opening_hours.trim().startsWith('{') || restaurant.opening_hours.trim().startsWith('[')
+            ? JSON.parse(restaurant.opening_hours)
+            : null) // Plain text opening hours string, skip structured data
         : restaurant.opening_hours)
     : null;
 

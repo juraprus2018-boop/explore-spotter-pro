@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NearbyRestaurants from "@/components/NearbyRestaurants";
 import HreflangAlternates from "@/components/HreflangAlternates";
+import WebSiteStructuredData from "@/components/WebSiteStructuredData";
 import LanguageDetectionPopup from "@/components/LanguageDetectionPopup";
 import InteractiveWorldMap from "@/components/InteractiveWorldMap";
 import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
@@ -242,6 +243,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <HreflangAlternates />
+      <WebSiteStructuredData />
       <LanguageDetectionPopup />
       <Header />
       <Hero onSearch={handleSearch} />

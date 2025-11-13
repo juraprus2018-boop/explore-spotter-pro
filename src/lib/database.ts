@@ -67,22 +67,21 @@ const extractLocationData = (result: NominatimResult) => {
   
   // Country
   let countryName = address?.country || "Nederland";
+  const countryCode = (address?.country_code || (countryName === "Nederland" ? "nl" : "xx")).toLowerCase();
   
-  return { cityName, provinceName, countryName };
+  return { cityName, provinceName, countryName, countryCode };
 };
 
 // Get or create country
 export const getOrCreateCountry = async (name: string, code: string): Promise<string | null> => {
   try {
     // Use upsert to handle duplicates gracefully
-    const { data, error } = await db
+    const { error } = await db
       .from('countries')
-      .upsert({ name, code }, { 
-        onConflict: 'code',
-        ignoreDuplicates: false 
-      })
-      .select('id')
-      .single();
+      .upsert(
+        { name, code }, 
+        { onConflict: 'code', ignoreDuplicates: false }
+      );
 
     if (error) {
       console.error("Error upserting country:", error);
@@ -96,7 +95,14 @@ export const getOrCreateCountry = async (name: string, code: string): Promise<st
       return existing?.id || null;
     }
 
-    return data.id;
+    // Fetch id after successful upsert without return=representation
+    const { data: existingAfter } = await db
+      .from('countries')
+      .select('id')
+      .eq('code', code)
+      .maybeSingle();
+
+    return existingAfter?.id || null;
   } catch (error) {
     console.error("Error in getOrCreateCountry:", error);
     // Try to find existing as fallback
@@ -120,17 +126,12 @@ export const getOrCreateProvince = async (name: string, countryId: string): Prom
     const slug = createSlug(name);
     
     // Use upsert to handle duplicates
-    const { data, error } = await db
+    const { error } = await db
       .from('provinces')
       .upsert(
         { name, slug, country_id: countryId },
-        { 
-          onConflict: 'name,country_id',
-          ignoreDuplicates: false
-        }
-      )
-      .select('id')
-      .single();
+        { onConflict: 'name,country_id', ignoreDuplicates: false }
+      );
 
     if (error) {
       console.error("Error upserting province:", error);
@@ -145,7 +146,15 @@ export const getOrCreateProvince = async (name: string, countryId: string): Prom
       return existing?.id || null;
     }
 
-    return data.id;
+    // Fetch id after successful upsert
+    const { data: existingAfter } = await db
+      .from('provinces')
+      .select('id')
+      .eq('name', name)
+      .eq('country_id', countryId)
+      .maybeSingle();
+
+    return existingAfter?.id || null;
   } catch (error) {
     console.error("Error in getOrCreateProvince:", error);
     try {
@@ -169,17 +178,12 @@ export const getOrCreateCity = async (name: string, provinceId: string): Promise
     const slug = createSlug(name);
     
     // Use upsert to handle duplicates
-    const { data, error } = await db
+    const { error } = await db
       .from('cities')
       .upsert(
         { name, slug, province_id: provinceId },
-        { 
-          onConflict: 'name,province_id',
-          ignoreDuplicates: false
-        }
-      )
-      .select('id')
-      .single();
+        { onConflict: 'name,province_id', ignoreDuplicates: false }
+      );
 
     if (error) {
       console.error("Error upserting city:", error);
@@ -194,7 +198,15 @@ export const getOrCreateCity = async (name: string, provinceId: string): Promise
       return existing?.id || null;
     }
 
-    return data.id;
+    // Fetch id after successful upsert
+    const { data: existingAfter } = await db
+      .from('cities')
+      .select('id')
+      .eq('name', name)
+      .eq('province_id', provinceId)
+      .maybeSingle();
+
+    return existingAfter?.id || null;
   } catch (error) {
     console.error("Error in getOrCreateCity:", error);
     try {
@@ -214,22 +226,43 @@ export const getOrCreateCity = async (name: string, provinceId: string): Promise
 
 export const saveRestaurants = async (restaurants: NominatimResult[]) => {
   try {
-    const restaurantsToSave = [];
+    const restaurantsToSave = [] as any[];
+    
+    // Simple in-memory caches to cut roundtrips dramatically
+    const countryCache = new Map<string, string>(); // key: countryCode -> id
+    const provinceCache = new Map<string, string>(); // key: `${countryId}:${provinceName}` -> id
+    const cityCache = new Map<string, string>(); // key: `${provinceId}:${cityName}` -> id
     
     for (const r of restaurants) {
-      const { cityName, provinceName, countryName } = extractLocationData(r);
+      const { cityName, provinceName, countryName, countryCode } = extractLocationData(r);
       
       if (!cityName || !provinceName) continue;
 
-      // Get or create location hierarchy
-      const countryId = await getOrCreateCountry(countryName, countryName === "Nederland" ? "nl" : "xx");
-      if (!countryId) continue;
+      // Country
+      let countryId = countryCache.get(countryCode);
+      if (!countryId) {
+        countryId = await getOrCreateCountry(countryName, countryCode);
+        if (!countryId) continue;
+        countryCache.set(countryCode, countryId);
+      }
 
-      const provinceId = await getOrCreateProvince(provinceName, countryId);
-      if (!provinceId) continue;
+      // Province
+      const provKey = `${countryId}:${provinceName.toLowerCase()}`;
+      let provinceId = provinceCache.get(provKey);
+      if (!provinceId) {
+        provinceId = await getOrCreateProvince(provinceName, countryId);
+        if (!provinceId) continue;
+        provinceCache.set(provKey, provinceId);
+      }
 
-      const cityId = await getOrCreateCity(cityName, provinceId);
-      if (!cityId) continue;
+      // City
+      const cityKey = `${provinceId}:${cityName.toLowerCase()}`;
+      let cityId = cityCache.get(cityKey);
+      if (!cityId) {
+        cityId = await getOrCreateCity(cityName, provinceId);
+        if (!cityId) continue;
+        cityCache.set(cityKey, cityId);
+      }
 
       restaurantsToSave.push({
         place_id: r.place_id,
@@ -247,20 +280,19 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
 
     if (restaurantsToSave.length === 0) return null;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('restaurants')
       .upsert(restaurantsToSave, {
         onConflict: 'place_id',
         ignoreDuplicates: false,
-      })
-      .select();
+      });
 
     if (error) {
       console.error("Error saving restaurants:", error);
       return null;
     }
 
-    return data;
+    return restaurantsToSave.length;
   } catch (error) {
     console.error("Error in saveRestaurants:", error);
     return null;

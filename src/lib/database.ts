@@ -55,6 +55,19 @@ export interface DatabaseRestaurant {
   description?: string | null;
   opening_hours?: any | null;
   photos?: string[] | null;
+  cuisine?: string | null;
+  amenity?: string | null;
+  brand?: string | null;
+  operator?: string | null;
+  building?: string | null;
+  wheelchair?: string | null;
+  outdoor_seating?: string | null;
+  takeaway?: string | null;
+  delivery?: string | null;
+  diet_options?: any | null;
+  payment_options?: any | null;
+  contact_info?: any | null;
+  extratags?: any | null;
   city?: City;
 }
 
@@ -290,6 +303,28 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
         cityCache.set(cityKey, cityId);
       }
 
+      const extratags = r.extratags || {};
+      
+      // Extract diet options
+      const dietOptions: any = {};
+      if (extratags['diet:vegetarian']) dietOptions.vegetarian = extratags['diet:vegetarian'];
+      if (extratags['diet:vegan']) dietOptions.vegan = extratags['diet:vegan'];
+      if (extratags['diet:gluten_free']) dietOptions.gluten_free = extratags['diet:gluten_free'];
+      if (extratags['diet:halal']) dietOptions.halal = extratags['diet:halal'];
+      if (extratags['diet:kosher']) dietOptions.kosher = extratags['diet:kosher'];
+      
+      // Extract payment options
+      const paymentOptions: any = {};
+      if (extratags['payment:cash']) paymentOptions.cash = extratags['payment:cash'];
+      if (extratags['payment:credit_cards']) paymentOptions.credit_cards = extratags['payment:credit_cards'];
+      if (extratags['payment:debit_cards']) paymentOptions.debit_cards = extratags['payment:debit_cards'];
+      
+      // Extract contact info
+      const contactInfo: any = {};
+      if (extratags.phone) contactInfo.phone = extratags.phone;
+      if (extratags.website) contactInfo.website = extratags.website;
+      if (extratags.email) contactInfo.email = extratags.email;
+
       restaurantsToSave.push({
         place_id: r.place_id,
         name: r.name || r.display_name.split(',')[0],
@@ -301,6 +336,22 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
         osm_id: r.osm_id,
         address_type: r.addresstype,
         city_id: cityId,
+        cuisine: extratags.cuisine || null,
+        amenity: extratags.amenity || null,
+        brand: extratags.brand || null,
+        operator: extratags.operator || null,
+        building: extratags.building || null,
+        wheelchair: extratags.wheelchair || null,
+        outdoor_seating: extratags.outdoor_seating || null,
+        takeaway: extratags.takeaway || null,
+        delivery: extratags.delivery || null,
+        diet_options: Object.keys(dietOptions).length > 0 ? dietOptions : null,
+        payment_options: Object.keys(paymentOptions).length > 0 ? paymentOptions : null,
+        contact_info: Object.keys(contactInfo).length > 0 ? contactInfo : null,
+        phone: extratags.phone || null,
+        website: extratags.website || null,
+        opening_hours: extratags.opening_hours || null,
+        extratags: extratags,
       });
     }
 

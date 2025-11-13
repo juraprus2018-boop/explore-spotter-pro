@@ -1,0 +1,15 @@
+-- Add additional columns to restaurants table for extended Nominatim data
+ALTER TABLE public.restaurants 
+ADD COLUMN IF NOT EXISTS cuisine TEXT,
+ADD COLUMN IF NOT EXISTS amenity TEXT,
+ADD COLUMN IF NOT EXISTS brand TEXT,
+ADD COLUMN IF NOT EXISTS operator TEXT,
+ADD COLUMN IF NOT EXISTS building TEXT,
+ADD COLUMN IF NOT EXISTS wheelchair TEXT,
+ADD COLUMN IF NOT EXISTS outdoor_seating TEXT,
+ADD COLUMN IF NOT EXISTS takeaway TEXT,
+ADD COLUMN IF NOT EXISTS delivery TEXT,
+ADD COLUMN IF NOT EXISTS diet_options JSONB DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS payment_options JSONB DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS contact_info JSONB DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS extratags JSONB DEFAULT '{}';

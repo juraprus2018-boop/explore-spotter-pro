@@ -1,9 +1,8 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Eye } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { MapPin } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface RestaurantCardProps {
   placeId: number;
@@ -15,57 +14,103 @@ interface RestaurantCardProps {
   citySlug: string;
   provinceSlug: string;
   onViewOnMap?: () => void;
+  cuisine?: string | null;
+  facilities?: {
+    wheelchair?: string;
+    outdoor_seating?: string;
+    takeaway?: string;
+    delivery?: string;
+  };
 }
 
 const RestaurantCard = ({
   placeId,
   name,
   displayName,
-  lat,
-  lon,
+  type,
   citySlug,
   provinceSlug,
   onViewOnMap,
+  cuisine,
+  facilities,
 }: RestaurantCardProps) => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
   const { lang } = useParams();
+  const navigate = useNavigate();
 
-  const handleViewDetails = () => {
+  const handleCardClick = () => {
     navigate(`/${lang}/${provinceSlug}/${citySlug}/${placeId}`);
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-300">
-      <CardHeader>
-        <CardTitle className="flex items-start justify-between gap-2">
-          <span className="line-clamp-2">{name}</span>
-        </CardTitle>
-        <CardDescription className="flex items-start gap-2">
-          <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-          <span className="line-clamp-2">{displayName}</span>
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{t("card.coordinates")}:</span>
-            <span>{lat.toFixed(4)}, {lon.toFixed(4)}</span>
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group" onClick={handleCardClick}>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle className="text-lg mb-1 group-hover:text-primary transition-colors">
+              {name}
+            </CardTitle>
+            {cuisine && (
+              <p className="text-sm text-muted-foreground capitalize mb-1">
+                {cuisine.replace(/_/g, ' ')}
+              </p>
+            )}
+            <CardDescription className="text-sm">
+              {displayName.split(",").slice(1, 3).join(",")}
+            </CardDescription>
           </div>
+          <Badge variant="secondary" className="shrink-0 capitalize">
+            {type}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {facilities && (Object.values(facilities).some(v => v === 'yes')) && (
+          <div className="flex flex-wrap gap-1.5">
+            {facilities.wheelchair === 'yes' && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary" title="Rolstoeltoegankelijk">
+                ♿
+              </span>
+            )}
+            {facilities.outdoor_seating === 'yes' && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary" title="Terras">
+                🌤️
+              </span>
+            )}
+            {facilities.takeaway === 'yes' && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary" title="Afhalen">
+                🥡
+              </span>
+            )}
+            {facilities.delivery === 'yes' && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary" title="Bezorgen">
+                🚚
+              </span>
+            )}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            className="flex-1"
+            onClick={handleCardClick}
+          >
+            Meer info
+          </Button>
+          {onViewOnMap && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewOnMap();
+              }}
+            >
+              <MapPin className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2">
-        {onViewOnMap && (
-          <Button onClick={onViewOnMap} variant="outline" className="flex-1">
-            <MapPin className="h-4 w-4 mr-2" />
-            {t("card.viewOnMap")}
-          </Button>
-        )}
-        <Button onClick={handleViewDetails} className="flex-1">
-          <Eye className="h-4 w-4 mr-2" />
-          {t("card.viewDetails")}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

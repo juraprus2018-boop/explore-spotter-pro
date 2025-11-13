@@ -3,12 +3,21 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getRestaurantsByCity, getCityBySlug, DatabaseRestaurant, City } from "@/lib/database";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, MapPin, Home } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Home, Filter as FilterIcon } from "lucide-react";
 import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -25,8 +34,12 @@ const CityPage = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [restaurants, setRestaurants] = useState<DatabaseRestaurant[]>([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState<DatabaseRestaurant[]>([]);
   const [cityData, setCityData] = useState<City | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCuisine, setSelectedCuisine] = useState<string>("all");
+  const [selectedFacility, setSelectedFacility] = useState<string>("all");
+  const [selectedDiet, setSelectedDiet] = useState<string>("all");
 
   useEffect(() => {
     const loadData = async () => {
@@ -64,19 +77,78 @@ const CityPage = () => {
     loadData();
   }, [city, toast]);
 
+  // Filter restaurants when filters change
+  useEffect(() => {
+    let filtered = [...restaurants];
+
+    // Filter by cuisine
+    if (selectedCuisine !== "all") {
+      filtered = filtered.filter(r => (r as any).cuisine === selectedCuisine);
+    }
+
+    // Filter by facility
+    if (selectedFacility !== "all") {
+      filtered = filtered.filter(r => {
+        const restaurant = r as any;
+        switch (selectedFacility) {
+          case "wheelchair":
+            return restaurant.wheelchair === "yes";
+          case "outdoor_seating":
+            return restaurant.outdoor_seating === "yes";
+          case "takeaway":
+            return restaurant.takeaway === "yes";
+          case "delivery":
+            return restaurant.delivery === "yes";
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Filter by diet
+    if (selectedDiet !== "all") {
+      filtered = filtered.filter(r => {
+        const dietOptions = (r as any).diet_options;
+        if (!dietOptions) return false;
+        return dietOptions[selectedDiet] === "yes";
+      });
+    }
+
+    setFilteredRestaurants(filtered);
+  }, [restaurants, selectedCuisine, selectedFacility, selectedDiet]);
+
+  // Get unique cuisines from restaurants
+  const uniqueCuisines = Array.from(
+    new Set(
+      restaurants
+        .map(r => (r as any).cuisine)
+        .filter(c => c && c !== null)
+    )
+  ).sort();
+
+  const clearFilters = () => {
+    setSelectedCuisine("all");
+    setSelectedFacility("all");
+    setSelectedDiet("all");
+  };
+
+  const hasActiveFilters = selectedCuisine !== "all" || selectedFacility !== "all" || selectedDiet !== "all";
+
   const cityName = cityData?.name || city || "";
   const provinceName = cityData?.province?.name || province || "";
   const provinceSlug = cityData?.province?.slug || province || "";
 
-  const locations = restaurants.map(r => ({
+  const displayRestaurants = filteredRestaurants.length > 0 ? filteredRestaurants : restaurants;
+
+  const locations = displayRestaurants.map(r => ({
     name: r.name,
     lat: r.lat,
     lon: r.lon,
     display_name: r.display_name,
   }));
 
-  const mapCenter: [number, number] = restaurants.length > 0
-    ? [restaurants[0].lat, restaurants[0].lon]
+  const mapCenter: [number, number] = displayRestaurants.length > 0
+    ? [displayRestaurants[0].lat, displayRestaurants[0].lon]
     : [52.3676, 4.9041];
 
   return (
@@ -125,7 +197,92 @@ const CityPage = () => {
               <p className="text-muted-foreground">Restaurants laden...</p>
             </div>
           ) : restaurants.length > 0 ? (
-            <div className="space-y-12">
+            <div className="space-y-8">
+              {/* Filters */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FilterIcon className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-semibold">Filters</h3>
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="ml-auto"
+                      >
+                        Wis filters
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Cuisine filter */}
+                    {uniqueCuisines.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Keuken type</label>
+                        <Select value={selectedCuisine} onValueChange={setSelectedCuisine}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Alle keukens" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Alle keukens</SelectItem>
+                            {uniqueCuisines.map(cuisine => (
+                              <SelectItem key={cuisine} value={cuisine}>
+                                {cuisine.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Facility filter */}
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Faciliteiten</label>
+                      <Select value={selectedFacility} onValueChange={setSelectedFacility}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Alle faciliteiten" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle faciliteiten</SelectItem>
+                          <SelectItem value="wheelchair">♿ Rolstoeltoegankelijk</SelectItem>
+                          <SelectItem value="outdoor_seating">🌤️ Terras</SelectItem>
+                          <SelectItem value="takeaway">🥡 Afhalen</SelectItem>
+                          <SelectItem value="delivery">🚚 Bezorgen</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Diet filter */}
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Dieet opties</label>
+                      <Select value={selectedDiet} onValueChange={setSelectedDiet}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Alle diëten" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle diëten</SelectItem>
+                          <SelectItem value="vegetarian">🥗 Vegetarisch</SelectItem>
+                          <SelectItem value="vegan">🌱 Veganistisch</SelectItem>
+                          <SelectItem value="gluten_free">🌾 Glutenvrij</SelectItem>
+                          <SelectItem value="halal">☪️ Halal</SelectItem>
+                          <SelectItem value="kosher">✡️ Koosjer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {hasActiveFilters && (
+                    <div className="mt-4 pt-4 border-t">
+                      <p className="text-sm text-muted-foreground">
+                        {filteredRestaurants.length} van {restaurants.length} restaurants gevonden
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               <div>
                 <h2 className="text-3xl font-bold mb-6 text-foreground">
                   {t("map.title")}
@@ -139,26 +296,46 @@ const CityPage = () => {
 
               <div>
                 <h2 className="text-3xl font-bold mb-6 text-foreground">
-                  Alle restaurants
+                  {hasActiveFilters ? `Gefilterde restaurants (${filteredRestaurants.length})` : 'Alle restaurants'}
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {restaurants.map((restaurant) => (
-                    <RestaurantCard
-                      key={restaurant.place_id}
-                      placeId={restaurant.place_id}
-                      name={restaurant.name}
-                      displayName={restaurant.display_name}
-                      lat={restaurant.lat}
-                      lon={restaurant.lon}
-                      type={restaurant.type || "restaurant"}
-                      citySlug={cityData?.slug || city || ""}
-                      provinceSlug={provinceSlug}
-                      onViewOnMap={() => {
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                    />
-                  ))}
-                </div>
+                {displayRestaurants.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center">
+                      <p className="text-muted-foreground">
+                        Geen restaurants gevonden met de geselecteerde filters.
+                      </p>
+                      <Button onClick={clearFilters} className="mt-4">
+                        Wis filters
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {displayRestaurants.map((restaurant) => (
+                      <RestaurantCard
+                        key={restaurant.place_id}
+                        placeId={restaurant.place_id}
+                        name={restaurant.name}
+                        displayName={restaurant.display_name}
+                        lat={restaurant.lat}
+                        lon={restaurant.lon}
+                        type={restaurant.type || "restaurant"}
+                        citySlug={cityData?.slug || city || ""}
+                        provinceSlug={provinceSlug}
+                        cuisine={(restaurant as any).cuisine}
+                        facilities={{
+                          wheelchair: (restaurant as any).wheelchair,
+                          outdoor_seating: (restaurant as any).outdoor_seating,
+                          takeaway: (restaurant as any).takeaway,
+                          delivery: (restaurant as any).delivery,
+                        }}
+                        onViewOnMap={() => {
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ) : (

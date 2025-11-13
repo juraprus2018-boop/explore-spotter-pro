@@ -35,6 +35,29 @@ export interface NominatimResult {
   boundingbox: string[];
   address?: NominatimAddress;
   city?: string | null;
+  extratags?: {
+    cuisine?: string;
+    amenity?: string;
+    brand?: string;
+    operator?: string;
+    building?: string;
+    wheelchair?: string;
+    outdoor_seating?: string;
+    takeaway?: string;
+    delivery?: string;
+    phone?: string;
+    website?: string;
+    opening_hours?: string;
+    'diet:vegetarian'?: string;
+    'diet:vegan'?: string;
+    'diet:gluten_free'?: string;
+    'diet:halal'?: string;
+    'diet:kosher'?: string;
+    'payment:cash'?: string;
+    'payment:credit_cards'?: string;
+    'payment:debit_cards'?: string;
+    [key: string]: any;
+  };
 }
 
 export const searchLocation = async (query: string): Promise<NominatimResult[]> => {
@@ -65,6 +88,7 @@ export const searchRestaurants = async (query: string): Promise<NominatimResult[
         q: `restaurant ${query}`,
         format: "json",
         addressdetails: 1,
+        extratags: 1,
         limit: 20,
       },
       headers: {
@@ -91,6 +115,7 @@ export const searchNearbyRestaurants = async (lat: number, lon: number, radiusKm
         q: "restaurant",
         format: "json",
         addressdetails: 1,
+        extratags: 1,
         limit: 100,
         viewbox: `${lon - lonDiff},${lat + latDiff},${lon + lonDiff},${lat - latDiff}`,
         bounded: 1,

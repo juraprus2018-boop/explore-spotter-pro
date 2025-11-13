@@ -19,6 +19,11 @@ const Header = () => {
     { code: "en", name: "English" },
     { code: "de", name: "Deutsch" },
     { code: "fr", name: "Français" },
+    { code: "es", name: "Español" },
+    { code: "it", name: "Italiano" },
+    { code: "hr", name: "Hrvatski" },
+    { code: "pt", name: "Português" },
+    { code: "pl", name: "Polski" },
   ];
 
   const changeLanguage = (newLang: string) => {

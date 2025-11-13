@@ -126,3 +126,37 @@ export const reverseGeocode = async (lat: number, lon: number): Promise<Nominati
     throw error;
   }
 };
+
+// Search for locations only (cities, towns, countries) - for autocomplete
+export const searchLocations = async (query: string): Promise<NominatimResult[]> => {
+  if (!query || query.length < 2) {
+    return [];
+  }
+
+  try {
+    const response = await axios.get(`${NOMINATIM_BASE_URL}/search`, {
+      params: {
+        q: query,
+        format: "json",
+        addressdetails: 1,
+        limit: 10,
+        // Only search for administrative places (cities, towns, countries, etc.)
+        featuretype: "settlement",
+      },
+      headers: {
+        "User-Agent": "RestaurantFinder/1.0",
+      },
+    });
+
+    // Filter to only include cities, towns, villages, countries, states
+    const locationResults = response.data.filter((result: NominatimResult) => {
+      const acceptedTypes = ['city', 'town', 'village', 'county', 'state', 'country', 'municipality'];
+      return acceptedTypes.includes(result.type) || acceptedTypes.includes(result.class);
+    });
+
+    return locationResults;
+  } catch (error) {
+    console.error("Error searching locations:", error);
+    return [];
+  }
+};

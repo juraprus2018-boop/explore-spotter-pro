@@ -114,22 +114,22 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
           />
           
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 z-50">
-              <Command className="rounded-lg border shadow-md bg-background">
-                <CommandList>
+            <div className="absolute top-full left-0 right-0 mt-2 z-[99999]">
+              <Command className="rounded-xl border border-border/50 shadow-2xl bg-background">
+                <CommandList className="max-h-[300px]">
                   <CommandEmpty>
                     {isLoadingSuggestions ? "Laden..." : "Geen suggesties"}
                   </CommandEmpty>
-                  <CommandGroup heading="Locaties">
+                  <CommandGroup>
                     {suggestions.map((suggestion, index) => (
                       <CommandItem
                         key={`${suggestion.name}-${suggestion.country}-${index}`}
                         onSelect={() => handleSelectSuggestion(suggestion)}
-                        className="cursor-pointer"
+                        className="cursor-pointer py-3 px-4 hover:bg-muted/50 aria-selected:bg-muted"
                       >
                         <div className="flex items-center justify-between w-full gap-3">
                           <div className="flex flex-col flex-1 min-w-0">
-                            <span className="font-semibold text-base">
+                            <span className="font-medium text-base text-foreground">
                               {suggestion.name}
                               {suggestion.region && `, ${suggestion.region}`}
                             </span>
@@ -137,7 +137,7 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
                               {suggestion.country}
                             </span>
                           </div>
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full whitespace-nowrap capitalize">
+                          <span className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-md whitespace-nowrap capitalize font-medium">
                             {suggestion.type}
                           </span>
                         </div>
@@ -152,7 +152,7 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
         <Button
           type="submit"
           size="lg"
-          className="rounded-full px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="rounded-full px-8"
         >
           {t("hero.searchButton")}
         </Button>

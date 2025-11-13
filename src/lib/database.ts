@@ -74,31 +74,43 @@ const extractLocationData = (result: NominatimResult) => {
 // Get or create country
 export const getOrCreateCountry = async (name: string, code: string): Promise<string | null> => {
   try {
-    // Try to find existing
-    const { data: existing, error: findError } = await db
-      .from('countries')
-      .select('id')
-      .eq('name', name)
-      .maybeSingle();
-
-    if (existing) return existing.id;
-
-    // Create new
+    // Use upsert to handle duplicates gracefully
     const { data, error } = await db
       .from('countries')
-      .insert({ name, code })
+      .upsert({ name, code }, { 
+        onConflict: 'code',
+        ignoreDuplicates: false 
+      })
       .select('id')
       .single();
 
     if (error) {
-      console.error("Error creating country:", error);
-      return null;
+      console.error("Error upserting country:", error);
+      // If upsert fails, try to find existing by code
+      const { data: existing } = await db
+        .from('countries')
+        .select('id')
+        .eq('code', code)
+        .maybeSingle();
+      
+      return existing?.id || null;
     }
 
     return data.id;
   } catch (error) {
     console.error("Error in getOrCreateCountry:", error);
-    return null;
+    // Try to find existing as fallback
+    try {
+      const { data: existing } = await db
+        .from('countries')
+        .select('id')
+        .eq('code', code)
+        .maybeSingle();
+      
+      return existing?.id || null;
+    } catch {
+      return null;
+    }
   }
 };
 
@@ -107,32 +119,47 @@ export const getOrCreateProvince = async (name: string, countryId: string): Prom
   try {
     const slug = createSlug(name);
     
-    // Try to find existing
-    const { data: existing, error: findError } = await db
-      .from('provinces')
-      .select('id')
-      .eq('name', name)
-      .eq('country_id', countryId)
-      .maybeSingle();
-
-    if (existing) return existing.id;
-
-    // Create new
+    // Use upsert to handle duplicates
     const { data, error } = await db
       .from('provinces')
-      .insert({ name, slug, country_id: countryId })
+      .upsert(
+        { name, slug, country_id: countryId },
+        { 
+          onConflict: 'name,country_id',
+          ignoreDuplicates: false
+        }
+      )
       .select('id')
       .single();
 
     if (error) {
-      console.error("Error creating province:", error);
-      return null;
+      console.error("Error upserting province:", error);
+      // Fallback: try to find existing
+      const { data: existing } = await db
+        .from('provinces')
+        .select('id')
+        .eq('name', name)
+        .eq('country_id', countryId)
+        .maybeSingle();
+      
+      return existing?.id || null;
     }
 
     return data.id;
   } catch (error) {
     console.error("Error in getOrCreateProvince:", error);
-    return null;
+    try {
+      const { data: existing } = await db
+        .from('provinces')
+        .select('id')
+        .eq('name', name)
+        .eq('country_id', countryId)
+        .maybeSingle();
+      
+      return existing?.id || null;
+    } catch {
+      return null;
+    }
   }
 };
 
@@ -141,32 +168,47 @@ export const getOrCreateCity = async (name: string, provinceId: string): Promise
   try {
     const slug = createSlug(name);
     
-    // Try to find existing
-    const { data: existing, error: findError } = await db
-      .from('cities')
-      .select('id')
-      .eq('name', name)
-      .eq('province_id', provinceId)
-      .maybeSingle();
-
-    if (existing) return existing.id;
-
-    // Create new
+    // Use upsert to handle duplicates
     const { data, error } = await db
       .from('cities')
-      .insert({ name, slug, province_id: provinceId })
+      .upsert(
+        { name, slug, province_id: provinceId },
+        { 
+          onConflict: 'name,province_id',
+          ignoreDuplicates: false
+        }
+      )
       .select('id')
       .single();
 
     if (error) {
-      console.error("Error creating city:", error);
-      return null;
+      console.error("Error upserting city:", error);
+      // Fallback: try to find existing
+      const { data: existing } = await db
+        .from('cities')
+        .select('id')
+        .eq('name', name)
+        .eq('province_id', provinceId)
+        .maybeSingle();
+      
+      return existing?.id || null;
     }
 
     return data.id;
   } catch (error) {
     console.error("Error in getOrCreateCity:", error);
-    return null;
+    try {
+      const { data: existing } = await db
+        .from('cities')
+        .select('id')
+        .eq('name', name)
+        .eq('province_id', provinceId)
+        .maybeSingle();
+      
+      return existing?.id || null;
+    } catch {
+      return null;
+    }
   }
 };
 

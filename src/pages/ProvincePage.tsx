@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet";
 import { getCitiesByProvince, getProvinceBySlug, City } from "@/lib/database";
 import { DUTCH_PROVINCES } from "@/lib/constants";
 import { Loader2, MapPin, Home } from "lucide-react";
@@ -63,9 +64,22 @@ const ProvincePage = () => {
   const handleCityClick = (citySlug: string) => {
     navigate(`/${lang}/${province}/${citySlug}`);
   };
+  
+  // SEO meta tags
+  const seoTitle = `Steden in ${provinceData?.name || province} | EatNavigator`;
+  const seoDescription = `Ontdek restaurants in ${cities.length} steden in ${provinceData?.name || province}. Vind de beste eetgelegenheden per stad met reviews, menu's en locaties.`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+      </Helmet>
       <HreflangAlternates />
       <Header />
 

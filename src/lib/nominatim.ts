@@ -2,6 +2,22 @@ import axios from "axios";
 
 const NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org";
 
+export interface NominatimAddress {
+  amenity?: string;
+  road?: string;
+  house_number?: string;
+  suburb?: string;
+  city?: string;
+  town?: string;
+  village?: string;
+  municipality?: string;
+  county?: string;
+  state?: string;
+  postcode?: string;
+  country?: string;
+  country_code?: string;
+}
+
 export interface NominatimResult {
   place_id: number;
   licence: string;
@@ -17,6 +33,7 @@ export interface NominatimResult {
   name: string;
   display_name: string;
   boundingbox: string[];
+  address?: NominatimAddress;
   city?: string | null;
 }
 
@@ -62,7 +79,7 @@ export const searchRestaurants = async (query: string): Promise<NominatimResult[
   }
 };
 
-export const searchNearbyRestaurants = async (lat: number, lon: number, radiusKm: number = 10): Promise<NominatimResult[]> => {
+export const searchNearbyRestaurants = async (lat: number, lon: number, radiusKm: number = 25): Promise<NominatimResult[]> => {
   try {
     // Nominatim doesn't have a direct radius search, so we search in a bounding box
     // 1 degree ≈ 111 km
@@ -74,7 +91,7 @@ export const searchNearbyRestaurants = async (lat: number, lon: number, radiusKm
         q: "restaurant",
         format: "json",
         addressdetails: 1,
-        limit: 50,
+        limit: 100,
         viewbox: `${lon - lonDiff},${lat + latDiff},${lon + lonDiff},${lat - latDiff}`,
         bounded: 1,
       },

@@ -54,14 +54,18 @@ export const createSlug = (text: string): string => {
     .replace(/^-+|-+$/g, "");
 };
 
-// Extract location data from display_name
-const extractLocationData = (displayName: string) => {
-  const parts = displayName.split(',').map(p => p.trim());
+// Extract location data from Nominatim address
+const extractLocationData = (result: NominatimResult) => {
+  const address = result.address;
   
-  // Typical format: "Restaurant Name, City, Province, Country"
-  let cityName = parts.length >= 2 ? parts[1] : null;
-  let provinceName = parts.length >= 3 ? parts[2] : null;
-  let countryName = parts.length >= 4 ? parts[parts.length - 1] : "Nederland";
+  // Province is typically in the "state" field for Netherlands
+  let provinceName = address?.state || null;
+  
+  // City can be in multiple fields, prioritize in this order
+  let cityName = address?.city || address?.town || address?.village || address?.municipality || null;
+  
+  // Country
+  let countryName = address?.country || "Nederland";
   
   return { cityName, provinceName, countryName };
 };
@@ -170,7 +174,7 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
     const restaurantsToSave = [];
     
     for (const r of restaurants) {
-      const { cityName, provinceName, countryName } = extractLocationData(r.display_name);
+      const { cityName, provinceName, countryName } = extractLocationData(r);
       
       if (!cityName || !provinceName) continue;
 
@@ -307,7 +311,7 @@ export const searchRestaurantsInDatabase = async (query: string): Promise<Databa
   }
 };
 
-export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: number = 10): Promise<DatabaseRestaurant[]> => {
+export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: number = 25): Promise<DatabaseRestaurant[]> => {
   try {
     const latDiff = radiusKm / 111;
     const lonDiff = radiusKm / (111 * Math.cos(lat * Math.PI / 180));

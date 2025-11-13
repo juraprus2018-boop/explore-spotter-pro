@@ -120,6 +120,7 @@ const CityPage = () => {
                       lat={restaurant.lat}
                       lon={restaurant.lon}
                       type={restaurant.type || "restaurant"}
+                      city={restaurant.city}
                       onViewOnMap={() => {
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }}

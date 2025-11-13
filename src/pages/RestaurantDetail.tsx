@@ -115,18 +115,9 @@ const RestaurantDetail = () => {
     display_name: restaurant.display_name,
   };
 
-  // Extract city name from display_name for breadcrumb
-  // Format is usually: "Restaurant name, City, Province, Country"
-  const getCityName = () => {
-    const parts = restaurant.display_name.split(',').map(p => p.trim());
-    // City is typically the second part (index 1)
-    if (parts.length >= 2) {
-      return parts[1];
-    }
-    return "";
-  };
-
-  const cityName = getCityName();
+  // Get city from state data
+  const stateData = routerLocation.state as any;
+  const cityName = stateData?.city || "";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

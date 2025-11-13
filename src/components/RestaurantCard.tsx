@@ -11,10 +11,11 @@ interface RestaurantCardProps {
   lat: number;
   lon: number;
   type: string;
+  city?: string | null;
   onViewOnMap: () => void;
 }
 
-const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, onViewOnMap }: RestaurantCardProps) => {
+const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, city, onViewOnMap }: RestaurantCardProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { lang } = useParams();
@@ -28,26 +29,14 @@ const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, onViewOnMa
         lat,
         lon,
         type,
+        city,
       }
     });
   };
 
-  // Extract city name from display_name
-  // Format is usually: "Restaurant name, City, Province, Country"
-  const getCityName = () => {
-    const parts = displayName.split(',').map(p => p.trim());
-    // City is typically the second part (index 1)
-    if (parts.length >= 2) {
-      return parts[1];
-    }
-    return "";
-  };
-
-  const cityName = getCityName();
-
   const handleViewCity = () => {
-    if (cityName) {
-      navigate(`/${lang}/city/${encodeURIComponent(cityName)}`);
+    if (city) {
+      navigate(`/${lang}/city/${encodeURIComponent(city)}`);
     }
   };
 
@@ -68,14 +57,14 @@ const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, onViewOnMa
             <span className="font-medium">{t("card.coordinates")}:</span>
             <span>{lat.toFixed(4)}, {lon.toFixed(4)}</span>
           </div>
-          {cityName && (
+          {city && (
             <Button
               onClick={handleViewCity}
               variant="link"
               className="h-auto p-0 text-sm text-primary"
             >
               <Building2 className="h-3 w-3 mr-1" />
-              Meer restaurants in {cityName}
+              Meer restaurants in {city}
             </Button>
           )}
         </div>

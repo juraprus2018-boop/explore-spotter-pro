@@ -17,6 +17,7 @@ export interface NominatimResult {
   name: string;
   display_name: string;
   boundingbox: string[];
+  city?: string | null;
 }
 
 export const searchLocation = async (query: string): Promise<NominatimResult[]> => {

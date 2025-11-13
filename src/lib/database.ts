@@ -12,6 +12,7 @@ export interface DatabaseRestaurant {
   osm_type: string | null;
   osm_id: number | null;
   address_type: string | null;
+  city: string | null;
   search_count: number;
   created_at: string;
   updated_at: string;
@@ -19,17 +20,24 @@ export interface DatabaseRestaurant {
 
 export const saveRestaurants = async (restaurants: NominatimResult[]) => {
   try {
-    const restaurantsToSave = restaurants.map(r => ({
-      place_id: r.place_id,
-      name: r.name || r.display_name.split(',')[0],
-      display_name: r.display_name,
-      lat: parseFloat(r.lat),
-      lon: parseFloat(r.lon),
-      type: r.type,
-      osm_type: r.osm_type,
-      osm_id: r.osm_id,
-      address_type: r.addresstype,
-    }));
+    const restaurantsToSave = restaurants.map(r => {
+      // Extract city from display_name (typically second part)
+      const parts = r.display_name.split(',').map(p => p.trim());
+      const city = parts.length >= 2 ? parts[1] : null;
+      
+      return {
+        place_id: r.place_id,
+        name: r.name || r.display_name.split(',')[0],
+        display_name: r.display_name,
+        lat: parseFloat(r.lat),
+        lon: parseFloat(r.lon),
+        type: r.type,
+        osm_type: r.osm_type,
+        osm_id: r.osm_id,
+        address_type: r.addresstype,
+        city: city,
+      };
+    });
 
     const { data, error } = await supabase
       .from('restaurants')
@@ -155,7 +163,7 @@ export const getRestaurantsByCity = async (cityName: string): Promise<DatabaseRe
     const { data, error } = await supabase
       .from('restaurants')
       .select('*')
-      .ilike('display_name', `%${cityName}%`)
+      .ilike('city', cityName)
       .order('search_count', { ascending: false });
 
     if (error) {
@@ -174,23 +182,20 @@ export const getAllCities = async (): Promise<string[]> => {
   try {
     const { data, error } = await supabase
       .from('restaurants')
-      .select('display_name');
+      .select('city')
+      .not('city', 'is', null)
+      .order('city');
 
     if (error) {
       console.error("Error fetching cities:", error);
       return [];
     }
 
-    // Extract city names from display_name
+    // Get unique city names
     const cities = new Set<string>();
     data?.forEach(restaurant => {
-      const parts = restaurant.display_name.split(',').map(p => p.trim());
-      // Usually the city is in the later parts of the address
-      if (parts.length >= 2) {
-        const city = parts[parts.length - 3] || parts[parts.length - 2];
-        if (city && city.length > 0 && !city.match(/^\d/)) {
-          cities.add(city);
-        }
+      if (restaurant.city && restaurant.city.length > 0) {
+        cities.add(restaurant.city);
       }
     });
 

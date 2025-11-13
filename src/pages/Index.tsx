@@ -60,6 +60,7 @@ const Index = () => {
           importance: 0,
           addresstype: r.address_type || "amenity",
           boundingbox: ["0", "0", "0", "0"],
+          city: r.city,
         }));
         
         toast({
@@ -139,6 +140,7 @@ const Index = () => {
           importance: 0,
           addresstype: r.address_type || "amenity",
           boundingbox: ["0", "0", "0", "0"],
+          city: r.city,
         }));
         
         toast({
@@ -247,6 +249,7 @@ const Index = () => {
                     lat={parseFloat(result.lat)}
                     lon={parseFloat(result.lon)}
                     type={result.type}
+                    city={(result as any).city}
                     onViewOnMap={() => handleViewOnMap(parseFloat(result.lat), parseFloat(result.lon))}
                   />
                 ))}

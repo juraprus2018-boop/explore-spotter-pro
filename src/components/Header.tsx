@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { Globe, Utensils, LogIn, LogOut, Shield, Store } from "lucide-react";
+import { Globe, Utensils, LogIn, LogOut, Shield, Store, Navigation } from "lucide-react";
 import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,9 +18,11 @@ const Header = () => {
   const { t, i18n } = useTranslation();
   const { lang } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [hasClaimedRestaurant, setHasClaimedRestaurant] = useState(false);
   const { isModerator } = useUserRole();
+  const [isNearbyLoading, setIsNearbyLoading] = useState(false);
 
   useEffect(() => {
     // Check auth state
@@ -75,6 +78,36 @@ const Header = () => {
     navigate(`/${newLang}`);
   };
 
+  const handleNearbyClick = () => {
+    setIsNearbyLoading(true);
+    if (!navigator.geolocation) {
+      toast({
+        title: "Niet ondersteund",
+        description: "Je browser ondersteunt geolocatie niet.",
+        variant: "destructive",
+      });
+      setIsNearbyLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        navigate(`/${lang || 'nl'}?lat=${latitude}&lon=${longitude}&nearby=true`);
+        setIsNearbyLoading(false);
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        toast({
+          title: "Locatie toegang geweigerd",
+          description: "Geef toegang tot je locatie om restaurants in de buurt te vinden.",
+          variant: "destructive",
+        });
+        setIsNearbyLoading(false);
+      }
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
@@ -83,7 +116,18 @@ const Header = () => {
           <span className="text-xl font-bold text-foreground">RestaurantFinder</span>
         </div>
         
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2 md:gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNearbyClick}
+            disabled={isNearbyLoading}
+            className="gap-2"
+          >
+            <Navigation className="h-4 w-4" />
+            <span className="hidden sm:inline">In de buurt</span>
+          </Button>
+          
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

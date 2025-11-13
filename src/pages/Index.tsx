@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Hero from "@/components/Hero";
 import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
@@ -16,6 +17,7 @@ import { useTranslation } from "react-i18next";
 
 const Index = () => {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
   const [dbResults, setDbResults] = useState<DatabaseRestaurant[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>([52.3676, 4.9041]);
@@ -36,6 +38,67 @@ const Index = () => {
       );
     }
   }, []);
+
+  // Handle nearby search from URL parameters
+  useEffect(() => {
+    const lat = searchParams.get('lat');
+    const lon = searchParams.get('lon');
+    const nearby = searchParams.get('nearby');
+
+    if (lat && lon && nearby === 'true') {
+      handleNearbySearchFromUrl(parseFloat(lat), parseFloat(lon));
+    }
+  }, [searchParams]);
+
+  const handleNearbySearchFromUrl = async (lat: number, lon: number) => {
+    setIsLoading(true);
+    try {
+      // Step 1: Check database first (fast)
+      const dbRestaurants = await getNearbyRestaurants(lat, lon, 5);
+      
+      if (dbRestaurants.length > 0) {
+        // Show database results immediately
+        setDbResults(dbRestaurants);
+        setMapCenter([lat, lon]);
+        setMapZoom(13);
+        toast({
+          title: "Restaurants in de buurt",
+          description: `${dbRestaurants.length} restaurants gevonden`,
+        });
+      }
+
+      // Step 2: Search API in background and add new ones
+      setTimeout(async () => {
+        try {
+          const apiResults = await searchNearbyRestaurants(lat, lon, 5);
+          if (apiResults.length > 0) {
+            await saveRestaurants(apiResults);
+            // Refresh from database
+            const updatedResults = await getNearbyRestaurants(lat, lon, 5);
+            if (updatedResults.length > dbRestaurants.length) {
+              setDbResults(updatedResults);
+              toast({
+                title: "Meer restaurants gevonden",
+                description: `${updatedResults.length} restaurants in totaal`,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Background API search error:", error);
+        }
+      }, 100);
+
+    } catch (error) {
+      console.error("Nearby search error:", error);
+      toast({
+        title: "Fout bij zoeken",
+        description: "Er is een fout opgetreden bij het zoeken naar restaurants.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearch = async (query: string, location?: { lat: number; lon: number }) => {
     setIsLoading(true);
@@ -115,35 +178,45 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      // ALWAYS search via Nominatim API first to get real nearby restaurants
-      const apiResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 25);
+      // Step 1: Check database first (fast)
+      const dbRestaurants = await getNearbyRestaurants(userLocation[0], userLocation[1], 5);
       
-      if (apiResults.length > 0) {
-        // Save new results to database
-        await saveRestaurants(apiResults);
-        
-        // Now fetch from database to get full data with relations (city, province, country)
-        const results = await getNearbyRestaurants(userLocation[0], userLocation[1], 25);
-        
-        setDbResults(results);
+      if (dbRestaurants.length > 0) {
+        // Show database results immediately
+        setDbResults(dbRestaurants);
         setMapCenter(userLocation);
         setMapZoom(13);
-        
         toast({
-          title: t("nearby.title"),
-          description: `${results.length} ${t("search.nearby").toLowerCase()}`,
-        });
-      } else {
-        toast({
-          title: t("toast.noResults"),
-          description: "Er zijn geen restaurants in de buurt gevonden.",
-          variant: "destructive",
+          title: "Restaurants in de buurt",
+          description: `${dbRestaurants.length} restaurants gevonden`,
         });
       }
+
+      // Step 2: Search API in background and add new ones
+      setTimeout(async () => {
+        try {
+          const apiResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 5);
+          if (apiResults.length > 0) {
+            await saveRestaurants(apiResults);
+            // Refresh from database
+            const updatedResults = await getNearbyRestaurants(userLocation[0], userLocation[1], 5);
+            if (updatedResults.length > dbRestaurants.length) {
+              setDbResults(updatedResults);
+              toast({
+                title: "Meer restaurants gevonden",
+                description: `${updatedResults.length} restaurants in totaal`,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Background API search error:", error);
+        }
+      }, 100);
+
     } catch (error) {
       console.error("Nearby search error:", error);
       toast({
-        title: t("toast.searchError"),
+        title: "Fout bij zoeken",
         description: "Er is een fout opgetreden bij het zoeken naar restaurants in de buurt.",
         variant: "destructive",
       });

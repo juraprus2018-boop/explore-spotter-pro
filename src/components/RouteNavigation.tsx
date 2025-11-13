@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import { useState, useEffect, useCallback, useRef } from "react";
+// Using Leaflet core directly for map rendering to avoid Context.Consumer issues
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
@@ -31,15 +31,40 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-// Component to fit map bounds
-function FitBounds({ bounds }: { bounds: [[number, number], [number, number]] }) {
-  const map = useMap();
+// Internal Leaflet map using core API to avoid react-leaflet Context.Consumer
+function RouteLeafletMap({ userLocation, destination, route, bounds }: { userLocation: [number, number]; destination: [number, number]; route: [number, number][]; bounds: [[number, number],[number, number]] }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.LayerGroup | null>(null);
+  const routeRef = useRef<L.Polyline | null>(null);
+
   useEffect(() => {
-    if (bounds) {
-      map.fitBounds(bounds, { padding: [50, 50] });
+    if (!containerRef.current || mapRef.current) return;
+    const map = L.map(containerRef.current, { center: userLocation, zoom: 13, scrollWheelZoom: false });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {}).addTo(map);
+    markersRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !markersRef.current) return;
+    const group = markersRef.current;
+    group.clearLayers();
+    L.marker(userLocation).bindPopup("Uw locatie").addTo(group);
+    L.marker(destination).bindPopup(`${destination[0]}, ${destination[1]}`).addTo(group);
+    if (routeRef.current) {
+      mapRef.current.removeLayer(routeRef.current);
+      routeRef.current = null;
     }
-  }, [bounds, map]);
-  return null;
+    if (route && route.length > 1) {
+      routeRef.current = L.polyline(route, { color: "#3b82f6", weight: 5, opacity: 0.7 }).addTo(mapRef.current);
+    }
+    const allPoints = [...(route || []), userLocation, destination];
+    const llb = L.latLngBounds(allPoints.map((p) => L.latLng(p[0], p[1])));
+    mapRef.current.fitBounds(llb, { padding: [50, 50] });
+  }, [userLocation.join("|"), destination.join("|"), JSON.stringify(route), JSON.stringify(bounds)]);
+
+  return <div ref={containerRef} style={{ height: "100%", width: "100%" }} />;
 }
 
 const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: RouteNavigationProps) => {
@@ -321,39 +346,12 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
 
         {showRoute && (
           <div className="h-[400px] rounded-lg overflow-hidden border">
-            <MapContainer
-              center={userLocation}
-              zoom={13}
-              style={{ height: "100%", width: "100%" }}
-              scrollWheelZoom={false}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              
-              {/* User location marker */}
-              <Marker position={userLocation}>
-                <Popup>Uw locatie</Popup>
-              </Marker>
-
-              {/* Destination marker */}
-              <Marker position={[destinationLat, destinationLon]}>
-                <Popup>{destinationName}</Popup>
-              </Marker>
-
-              {/* Route line */}
-              {routeData && (
-                <Polyline
-                  positions={routeData.coordinates}
-                  color="#3b82f6"
-                  weight={5}
-                  opacity={0.7}
-                />
-              )}
-
-              <FitBounds bounds={bounds} />
-            </MapContainer>
+            <RouteLeafletMap
+              userLocation={userLocation}
+              destination={[destinationLat, destinationLon]}
+              route={routeData?.coordinates || []}
+              bounds={bounds}
+            />
           </div>
         )}
       </CardContent>

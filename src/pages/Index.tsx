@@ -4,7 +4,6 @@ import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ProvincesOverview from "@/components/ProvincesOverview";
 import NearbyRestaurants from "@/components/NearbyRestaurants";
 import HreflangAlternates from "@/components/HreflangAlternates";
 import LanguageDetectionPopup from "@/components/LanguageDetectionPopup";
@@ -219,8 +218,6 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-12">
-            <ProvincesOverview />
-            
             <div>
               <h2 className="text-3xl font-bold mb-4 text-center text-foreground">
                 Of ontdek restaurants via de wereldkaart

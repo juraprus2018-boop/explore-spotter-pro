@@ -9,6 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useTranslation } from "react-i18next";
 
 interface Review {
   id: string;
@@ -30,6 +31,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
   const { lang } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,8 +115,8 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
 
     if (rating === 0) {
       toast({
-        title: "Rating vereist",
-        description: "Geef een rating tussen 1 en 5 sterren.",
+        title: t("reviews.ratingRequired"),
+        description: t("reviews.ratingRequiredDesc"),
         variant: "destructive",
       });
       return;

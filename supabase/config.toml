@@ -2,3 +2,6 @@ project_id = "htpnlpmktvmswzkhkfwy"
 
 [functions.submit-review]
 verify_jwt = false
+
+[functions.ingest-restaurants]
+verify_jwt = false

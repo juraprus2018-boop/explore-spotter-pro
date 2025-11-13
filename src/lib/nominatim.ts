@@ -164,18 +164,22 @@ export const searchLocations = async (query: string): Promise<NominatimResult[]>
         q: query,
         format: "json",
         addressdetails: 1,
-        namedetails: 1,
         limit: 10,
-        dedupe: 1,
+      },
+      headers: {
+        "User-Agent": "EatNavigator/1.0",
       },
     });
 
+    console.log("Nominatim search results for", query, ":", response.data);
+
     // Filter to only include cities, towns, villages, countries, states
-    const acceptedTypes = ['city', 'town', 'village', 'county', 'state', 'country', 'municipality'];
+    const acceptedTypes = ['city', 'town', 'village', 'county', 'state', 'country', 'municipality', 'administrative'];
     const locationResults = (response.data as NominatimResult[]).filter((result) =>
-      acceptedTypes.includes(result.type)
+      acceptedTypes.includes(result.type) || acceptedTypes.includes(result.class)
     );
 
+    console.log("Filtered location results:", locationResults);
     return locationResults;
   } catch (error) {
     console.error("Error searching locations:", error);

@@ -41,8 +41,10 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
 
     setIsLoadingSuggestions(true);
     try {
-      // Search for locations only (cities, towns, countries)
+      console.log("Fetching suggestions for:", query);
       const locationResults = await searchLocations(query);
+      console.log("Got location results:", locationResults);
+      
       const locationSuggestions: LocationSuggestion[] = locationResults.map((r) => {
         const addr = r.address || {};
         const name = r.name || addr.city || addr.town || addr.village || addr.municipality || r.display_name.split(',')[0]?.trim() || query;
@@ -60,6 +62,7 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
         };
       });
 
+      console.log("Setting suggestions:", locationSuggestions);
       setSuggestions(locationSuggestions);
     } catch (error) {
       console.error("Error fetching location suggestions:", error);

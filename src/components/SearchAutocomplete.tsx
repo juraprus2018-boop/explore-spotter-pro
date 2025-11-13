@@ -44,19 +44,19 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
       // Search for locations only (cities, towns, countries)
       const locationResults = await searchLocations(query);
       const locationSuggestions: LocationSuggestion[] = locationResults.map((r) => {
-        // Parse display_name to extract country (last part after last comma)
-        const parts = r.display_name.split(',').map(p => p.trim());
-        const country = parts[parts.length - 1] || '';
-        const region = parts.length > 2 ? parts[parts.length - 2] : '';
+        const addr = r.address || {};
+        const name = r.name || addr.city || addr.town || addr.village || addr.municipality || r.display_name.split(',')[0]?.trim() || query;
+        const country = addr.country || r.display_name.split(',').pop()?.trim() || '';
+        const region = addr.state || addr.county || addr.municipality || '';
         
         return {
-          name: r.name,
+          name,
           displayName: r.display_name,
           lat: parseFloat(r.lat),
           lon: parseFloat(r.lon),
           type: r.type,
-          country: country,
-          region: region,
+          country,
+          region,
         };
       });
 

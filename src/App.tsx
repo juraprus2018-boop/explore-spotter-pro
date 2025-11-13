@@ -14,6 +14,7 @@ import LanguageRedirect from "./pages/LanguageRedirect";
 import Auth from "./pages/Auth";
 import AddRestaurant from "./pages/AddRestaurant";
 import AdminDashboard from "./pages/AdminDashboard";
+import OwnerDashboard from "./pages/OwnerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <AdminDashboard />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/owner-dashboard"
+            element={
+              <LanguageWrapper>
+                <OwnerDashboard />
               </LanguageWrapper>
             }
           />

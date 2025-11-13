@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { Globe, Utensils, LogIn, LogOut, Shield } from "lucide-react";
+import { Globe, Utensils, LogIn, LogOut, Shield, Store } from "lucide-react";
 import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
@@ -18,20 +18,39 @@ const Header = () => {
   const { lang } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [hasClaimedRestaurant, setHasClaimedRestaurant] = useState(false);
   const { isModerator } = useUserRole();
 
   useEffect(() => {
     // Check auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        checkClaimedRestaurant(session.user.id);
+      } else {
+        setHasClaimedRestaurant(false);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        checkClaimedRestaurant(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkClaimedRestaurant = async (userId: string) => {
+    const { data } = await (supabase as any)
+      .from('restaurants')
+      .select('id')
+      .eq('owner_id', userId)
+      .single();
+    
+    setHasClaimedRestaurant(!!data);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -78,6 +97,15 @@ const Header = () => {
                     <DropdownMenuItem onClick={() => navigate(`/${lang}/admin`)}>
                       <Shield className="h-4 w-4 mr-2" />
                       Admin Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                {hasClaimedRestaurant && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate(`/${lang}/owner-dashboard`)}>
+                      <Store className="h-4 w-4 mr-2" />
+                      Mijn Restaurant
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>

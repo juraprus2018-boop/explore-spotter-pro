@@ -8,7 +8,7 @@ const createTranslations = (lang: string) => {
       hero: {
         title: "Vind Jouw Favoriete Restaurant",
         subtitle: "Zoek naar duizenden restaurants wereldwijd met real-time kaarten en locatiegegevens",
-        searchPlaceholder: "Zoek een restaurant of locatie...",
+        searchPlaceholder: "Zoek een stad of plaats...",
         searchButton: "Zoeken",
       },
       card: {
@@ -130,7 +130,7 @@ const createTranslations = (lang: string) => {
       hero: {
         title: "Find Your Favorite Restaurant",
         subtitle: "Search thousands of restaurants worldwide with real-time maps and location data",
-        searchPlaceholder: "Search for a restaurant or location...",
+        searchPlaceholder: "Search for a city or place...",
         searchButton: "Search",
       },
       card: {
@@ -252,7 +252,7 @@ const createTranslations = (lang: string) => {
       hero: {
         title: "Finden Sie Ihr Lieblingsrestaurant",
         subtitle: "Durchsuchen Sie Tausende von Restaurants weltweit mit Echtzeit-Karten und Standortdaten",
-        searchPlaceholder: "Suchen Sie ein Restaurant oder einen Ort...",
+        searchPlaceholder: "Suchen Sie eine Stadt oder einen Ort...",
         searchButton: "Suchen",
       },
       card: {
@@ -374,7 +374,7 @@ const createTranslations = (lang: string) => {
       hero: {
         title: "Trouvez Votre Restaurant Préféré",
         subtitle: "Recherchez des milliers de restaurants dans le monde avec des cartes en temps réel et des données de localisation",
-        searchPlaceholder: "Rechercher un restaurant ou un lieu...",
+        searchPlaceholder: "Rechercher une ville ou un lieu...",
         searchButton: "Rechercher",
       },
       card: {

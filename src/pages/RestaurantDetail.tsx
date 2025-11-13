@@ -7,9 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, MapPin, Home } from "lucide-react";
 import MapView from "@/components/MapView";
 import RouteNavigation from "@/components/RouteNavigation";
+import ReviewSection from "@/components/ReviewSection";
+import StructuredData from "@/components/StructuredData";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -27,6 +30,8 @@ const RestaurantDetail = () => {
   const { toast } = useToast();
   const [restaurant, setRestaurant] = useState<DatabaseRestaurant | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
     const loadRestaurant = async () => {
@@ -45,6 +50,24 @@ const RestaurantDetail = () => {
         }
         
         setRestaurant(data);
+        
+        // Fetch reviews
+        if (data) {
+          const { data: reviewsData } = await supabase
+            .from('reviews')
+            .select('*')
+            .eq('restaurant_id', data.id)
+            .order('created_at', { ascending: false });
+          
+          if (reviewsData) {
+            setReviews(reviewsData);
+            const avg = reviewsData.length > 0 
+              ? reviewsData.reduce((sum, r) => sum + r.rating, 0) / reviewsData.length 
+              : 0;
+            setAverageRating(avg);
+          }
+        }
+        
         setIsLoading(false);
       } catch (error) {
         console.error("Error loading restaurant:", error);
@@ -74,9 +97,16 @@ const RestaurantDetail = () => {
   }
 
   if (!restaurant) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      {restaurant && (
+        <StructuredData 
+          restaurant={restaurant} 
+          reviews={reviews} 
+          averageRating={averageRating}
+        />
+      )}
+      <Header />
         <div className="flex-1 flex flex-col items-center justify-center py-20">
           <p className="text-muted-foreground">{t("detail.notFound")}</p>
           <Button onClick={() => navigate(`/${lang}`)} className="mt-4">
@@ -202,6 +232,14 @@ const RestaurantDetail = () => {
               destinationLat={restaurant.lat}
               destinationLon={restaurant.lon}
               destinationName={restaurant.name}
+            />
+          </div>
+
+          {/* Reviews Section */}
+          <div className="mt-12">
+            <ReviewSection 
+              restaurantId={restaurant.id}
+              restaurantName={restaurant.name}
             />
           </div>
         </div>

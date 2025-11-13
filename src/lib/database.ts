@@ -352,6 +352,7 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
         website: extratags.website || null,
         opening_hours: extratags.opening_hours || null,
         extratags: extratags,
+        status: 'approved', // OpenStreetMap restaurants are automatically approved
       });
     }
 

@@ -11,6 +11,7 @@ import CityPage from "./pages/CityPage";
 import ProvincePage from "./pages/ProvincePage";
 import NotFound from "./pages/NotFound";
 import LanguageRedirect from "./pages/LanguageRedirect";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,7 @@ const LanguageWrapper = ({ children }: { children: React.ReactNode }) => {
   const { i18n } = useTranslation();
 
   useEffect(() => {
-    if (lang && ["nl", "en", "de", "fr"].includes(lang)) {
+    if (lang && ["nl", "en", "de", "fr", "es", "it", "hr", "pt", "pl"].includes(lang)) {
       i18n.changeLanguage(lang);
     }
   }, [lang, i18n]);
@@ -56,6 +57,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <CityPage />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/auth"
+            element={
+              <LanguageWrapper>
+                <Auth />
               </LanguageWrapper>
             }
           />

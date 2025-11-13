@@ -1,18 +1,41 @@
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { Globe, Utensils } from "lucide-react";
+import { Globe, Utensils, LogIn, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
 
 const Header = () => {
   const { t, i18n } = useTranslation();
   const { lang } = useParams();
   const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    navigate(`/${lang || 'nl'}`);
+  };
 
   const languages = [
     { code: "nl", name: "Nederlands" },
@@ -40,6 +63,31 @@ const Header = () => {
         </div>
         
         <nav className="flex items-center gap-4">
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  {user.email?.split('@')[0]}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Uitloggen
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/${lang}/auth`)}
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Inloggen
+            </Button>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2">

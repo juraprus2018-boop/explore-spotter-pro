@@ -1,13 +1,12 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { reverseGeocode, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 // Fix for default marker icons in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -17,35 +16,51 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-interface MapEventsProps {
-  onLocationClick: (lat: number, lon: number) => void;
-  clickedPosition: [number, number] | null;
-}
-
-function MapEvents({ onLocationClick, clickedPosition }: MapEventsProps) {
-  useMapEvents({
-    click: (e) => {
-      onLocationClick(e.latlng.lat, e.latlng.lng);
-    },
-  });
-  
-  return clickedPosition ? (
-    <Marker position={clickedPosition}>
-      <Popup>Restaurants laden...</Popup>
-    </Marker>
-  ) : null;
-}
-
 const InteractiveWorldMap = () => {
   const navigate = useNavigate();
   const { lang = "nl" } = useParams();
   const { toast } = useToast();
-  const [clickedPosition, setClickedPosition] = useState<[number, number] | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<L.Marker | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    // Initialize map
+    const map = L.map(mapContainerRef.current).setView([20, 0], 2);
+    
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    mapRef.current = map;
+
+    // Add click handler
+    map.on("click", async (e) => {
+      await handleLocationClick(e.latlng.lat, e.latlng.lng);
+    });
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, []);
+
   const handleLocationClick = async (lat: number, lon: number) => {
-    setClickedPosition([lat, lon]);
+    if (!mapRef.current) return;
+    
     setIsProcessing(true);
+
+    // Add temporary marker
+    if (markerRef.current) {
+      markerRef.current.remove();
+    }
+    markerRef.current = L.marker([lat, lon]).addTo(mapRef.current);
+    markerRef.current.bindPopup("Restaurants laden...").openPopup();
 
     try {
       // 1. Reverse geocode to get location details
@@ -65,6 +80,10 @@ const InteractiveWorldMap = () => {
           description: "Er zijn geen restaurants gevonden in een straal van 2 km.",
           variant: "destructive",
         });
+        if (markerRef.current) {
+          markerRef.current.remove();
+          markerRef.current = null;
+        }
         setIsProcessing(false);
         return;
       }
@@ -78,6 +97,10 @@ const InteractiveWorldMap = () => {
           description: "Kon restaurants niet opslaan in de database.",
           variant: "destructive",
         });
+        if (markerRef.current) {
+          markerRef.current.remove();
+          markerRef.current = null;
+        }
         setIsProcessing(false);
         return;
       }
@@ -91,6 +114,10 @@ const InteractiveWorldMap = () => {
           description: "Kon de stad niet bepalen voor deze locatie.",
           variant: "destructive",
         });
+        if (markerRef.current) {
+          markerRef.current.remove();
+          markerRef.current = null;
+        }
         setIsProcessing(false);
         return;
       }
@@ -121,37 +148,34 @@ const InteractiveWorldMap = () => {
         variant: "destructive",
       });
     } finally {
+      if (markerRef.current) {
+        markerRef.current.remove();
+        markerRef.current = null;
+      }
       setIsProcessing(false);
-      setClickedPosition(null);
     }
   };
 
   return (
     <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-border shadow-lg">
-      <MapContainer
-        center={[20, 0]}
-        zoom={2}
-        style={{ height: "100%", width: "100%" }}
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <MapEvents 
-          onLocationClick={handleLocationClick}
-          clickedPosition={clickedPosition}
-        />
-      </MapContainer>
+      <div ref={mapContainerRef} className="w-full h-full" />
 
       {isProcessing && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-[1000]">
           <div className="bg-card p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-sm font-medium">Restaurants laden...</p>
+            <p className="text-xs text-muted-foreground">Even geduld...</p>
           </div>
         </div>
       )}
+      
+      <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm p-3 rounded-lg shadow-lg z-[999]">
+        <div className="flex items-center gap-2 text-sm">
+          <MapPin className="h-4 w-4 text-primary" />
+          <span className="text-muted-foreground">Klik op de kaart om restaurants te vinden</span>
+        </div>
+      </div>
     </div>
   );
 };

@@ -6,12 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface ContactRequest {
-  name: string;
+interface SignupNotification {
   email: string;
-  subject: string;
-  message: string;
-  recaptchaToken: string;
+  userId: string;
 }
 
 serve(async (req) => {
@@ -20,28 +17,9 @@ serve(async (req) => {
   }
 
   try {
-    const { name, email, subject, message, recaptchaToken }: ContactRequest = await req.json();
+    const { email, userId }: SignupNotification = await req.json();
 
-    // Verify reCAPTCHA
-    const recaptchaSecret = Deno.env.get('RECAPTCHA_SECRET_KEY');
-    const recaptchaResponse = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecret}&response=${recaptchaToken}`,
-      { method: 'POST' }
-    );
-    
-    const recaptchaData = await recaptchaResponse.json();
-    
-    if (!recaptchaData.success) {
-      return new Response(
-        JSON.stringify({ error: 'reCAPTCHA verification failed' }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Send email via SMTP
+    // Send notification email via SMTP
     const client = new SMTPClient({
       connection: {
         hostname: Deno.env.get('SMTP_HOST')!,
@@ -57,35 +35,30 @@ serve(async (req) => {
     await client.send({
       from: Deno.env.get('SMTP_FROM_EMAIL')!,
       to: 'info@eatnavigator.com',
-      subject: `Contact Form: ${subject}`,
+      subject: 'Nieuwe gebruiker aanmelding - EatNavigator',
       content: `
-        New contact form submission:
+        Er heeft zich een nieuwe gebruiker aangemeld op EatNavigator.
         
-        Name: ${name}
         Email: ${email}
-        Subject: ${subject}
-        
-        Message:
-        ${message}
+        User ID: ${userId}
+        Tijdstip: ${new Date().toLocaleString('nl-NL')}
       `,
       html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
+        <h2>Nieuwe Gebruiker Aanmelding</h2>
         <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <h3>Message:</h3>
-        <p>${message.replace(/\n/g, '<br>')}</p>
+        <p><strong>User ID:</strong> ${userId}</p>
+        <p><strong>Tijdstip:</strong> ${new Date().toLocaleString('nl-NL')}</p>
       `,
     });
 
     await client.close();
 
-    console.log('Contact email sent successfully');
+    console.log('Signup notification sent successfully');
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: 'Contact form received successfully' 
+        message: 'Notification sent' 
       }),
       {
         status: 200,
@@ -93,7 +66,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in send-contact-email:', error);
+    console.error('Error in notify-new-signup:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { 

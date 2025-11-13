@@ -63,7 +63,7 @@ const Auth = () => {
     try {
       const redirectUrl = `${window.location.origin}/${lang || 'nl'}`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -82,6 +82,20 @@ const Auth = () => {
           throw error;
         }
       } else {
+        // Send notification email to admin
+        if (data.user) {
+          try {
+            await supabase.functions.invoke('notify-new-signup', {
+              body: {
+                email: data.user.email,
+                userId: data.user.id,
+              },
+            });
+          } catch (notifyError) {
+            console.error('Error sending signup notification:', notifyError);
+          }
+        }
+        
         toast({
           title: "Account aangemaakt!",
           description: "Je kunt nu inloggen met je gegevens.",

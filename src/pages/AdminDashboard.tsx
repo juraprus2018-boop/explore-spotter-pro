@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, FileCheck, AlertCircle, Loader2, BarChart3, Edit } from "lucide-react";
+import { Shield, FileCheck, AlertCircle, Loader2, BarChart3, Edit, Eye } from "lucide-react";
 import ReviewModeration from "@/components/admin/ReviewModeration";
 import RestaurantVerification from "@/components/admin/RestaurantVerification";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import SuggestionModeration from "@/components/admin/SuggestionModeration";
+import PageViewsAnalytics from "@/components/admin/PageViewsAnalytics";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -59,10 +60,14 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-4xl">
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
               Statistieken
+            </TabsTrigger>
+            <TabsTrigger value="pageviews">
+              <Eye className="h-4 w-4 mr-2" />
+              Page Views
             </TabsTrigger>
             <TabsTrigger value="reviews">
               Review Moderatie
@@ -78,6 +83,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="analytics" className="space-y-4">
             <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="pageviews" className="space-y-4">
+            <PageViewsAnalytics />
           </TabsContent>
 
           <TabsContent value="reviews" className="space-y-4">

@@ -7,7 +7,7 @@ interface HreflangAlternatesProps {
 }
 
 const HreflangAlternates = ({ 
-  languages = ["nl", "en", "de", "fr", "es", "it", "hr", "pt", "pl"],
+  languages = ["nl", "en", "de", "fr", "es", "it", "pt", "pl", "hr", "ru", "ja", "zh", "ar", "tr", "sv", "da", "no", "fi", "cs", "ro"],
   baseUrl = "https://www.eatnavigator.com"
 }: HreflangAlternatesProps) => {
   const location = useLocation();

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HreflangAlternates from "@/components/HreflangAlternates";
 import AddRestaurantForm from "@/components/AddRestaurantForm";
 import { Loader2 } from "lucide-react";
 
@@ -37,6 +38,7 @@ const AddRestaurant = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <HreflangAlternates />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
         <AddRestaurantForm />

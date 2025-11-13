@@ -10,6 +10,7 @@ import { Loader2, Utensils } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HreflangAlternates from "@/components/HreflangAlternates";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Ongeldig email adres");
@@ -141,6 +142,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <HreflangAlternates />
       <Header />
       
       <main className="flex-1 flex items-center justify-center py-12 px-4">

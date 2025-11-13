@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -116,7 +116,7 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-2 z-[99999]">
               <Command className="rounded-xl border border-border shadow-2xl bg-popover text-popover-foreground overflow-hidden">
-                <CommandList className="max-h-[320px] overflow-auto">
+                <CommandList className="max-h-[320px] overflow-auto divide-y divide-border/60">
                   <CommandEmpty>
                     {isLoadingSuggestions ? "Laden..." : "Geen suggesties"}
                   </CommandEmpty>
@@ -127,13 +127,14 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
                         onSelect={() => handleSelectSuggestion(suggestion)}
                         className="cursor-pointer py-3 px-4 hover:bg-muted/60 aria-selected:bg-muted"
                       >
-                        <div className="flex items-center justify-between w-full gap-3">
+                        <div className="flex items-center w-full gap-3">
+                          <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
                           <div className="flex flex-col flex-1 min-w-0">
-                            <span className="font-medium text-base text-foreground">
+                            <span className="font-medium text-base text-foreground truncate">
                               {suggestion.name}
                               {suggestion.region && `, ${suggestion.region}`}
                             </span>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-muted-foreground truncate">
                               {suggestion.country}
                             </span>
                           </div>

@@ -469,10 +469,11 @@ export const searchRestaurantsInDatabase = async (query: string): Promise<Databa
   }
 };
 
-export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: number = 25): Promise<DatabaseRestaurant[]> => {
+export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: number = 5): Promise<DatabaseRestaurant[]> => {
   try {
-    const latDiff = radiusKm / 111;
-    const lonDiff = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
+    // Optimized query with smaller bounding box for faster results
+    const latRange = radiusKm / 111; // 1 degree latitude ≈ 111 km
+    const lonRange = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
 
     const { data, error } = await db
       .from('restaurants')
@@ -486,10 +487,10 @@ export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: n
           )
         )
       `)
-      .gte('lat', lat - latDiff)
-      .lte('lat', lat + latDiff)
-      .gte('lon', lon - lonDiff)
-      .lte('lon', lon + lonDiff)
+      .gte('lat', lat - latRange)
+      .lte('lat', lat + latRange)
+      .gte('lon', lon - lonRange)
+      .lte('lon', lon + lonRange)
       .limit(50);
 
     if (error) {
@@ -497,6 +498,7 @@ export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: n
       return [];
     }
 
+    // Calculate actual distances and filter by radius
     const restaurantsWithDistance = (data || []).map(r => ({
       ...r,
       distance: Math.sqrt(
@@ -507,7 +509,7 @@ export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: n
 
     return restaurantsWithDistance
       .sort((a, b) => a.distance - b.distance)
-      .slice(0, 20);
+      .slice(0, 30);
   } catch (error) {
     console.error("Error in getNearbyRestaurants:", error);
     return [];

@@ -69,9 +69,6 @@ export const searchLocation = async (query: string): Promise<NominatimResult[]> 
         addressdetails: 1,
         limit: 10,
       },
-      headers: {
-        "User-Agent": "TravelExplorer/1.0",
-      },
     });
     
     return response.data;
@@ -90,9 +87,6 @@ export const searchRestaurants = async (query: string): Promise<NominatimResult[
         addressdetails: 1,
         extratags: 1,
         limit: 20,
-      },
-      headers: {
-        "User-Agent": "TravelExplorer/1.0",
       },
     });
     
@@ -120,9 +114,6 @@ export const searchNearbyRestaurants = async (lat: number, lon: number, radiusKm
         viewbox: `${lon - lonDiff},${lat + latDiff},${lon + lonDiff},${lat - latDiff}`,
         bounded: 1,
       },
-      headers: {
-        "User-Agent": "TravelExplorer/1.0",
-      },
     });
     
     return response.data;
@@ -139,9 +130,6 @@ export const reverseGeocode = async (lat: number, lon: number): Promise<Nominati
         lat,
         lon,
         format: "json",
-      },
-      headers: {
-        "User-Agent": "TravelExplorer/1.0",
       },
     });
     

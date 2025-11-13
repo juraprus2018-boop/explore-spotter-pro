@@ -53,6 +53,8 @@ export interface DatabaseRestaurant {
   phone?: string | null;
   website?: string | null;
   description?: string | null;
+  opening_hours?: any | null;
+  photos?: string[] | null;
   city?: City;
 }
 

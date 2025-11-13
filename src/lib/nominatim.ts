@@ -169,7 +169,7 @@ export const searchLocations = async (query: string): Promise<NominatimResult[]>
         featuretype: "settlement",
       },
       headers: {
-        "User-Agent": "RestaurantFinder/1.0",
+        "User-Agent": "EatNavigator/1.0",
       },
     });
 

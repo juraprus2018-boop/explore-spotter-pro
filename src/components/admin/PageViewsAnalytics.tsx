@@ -30,21 +30,21 @@ const PageViewsAnalytics = () => {
     try {
       // Get total views
       const { count: total } = await supabase
-        .from('page_views')
+        .from('page_views' as any)
         .select('*', { count: 'exact', head: true });
 
       setTotalViews(total || 0);
 
       // Get page views grouped by URL
       const { data: pages, error: pagesError } = await supabase
-        .from('page_views')
+        .from('page_views' as any)
         .select('page_url')
         .order('created_at', { ascending: false });
 
       if (pagesError) throw pagesError;
 
       // Count views per page
-      const pageCounts = pages?.reduce((acc: Record<string, number>, item) => {
+      const pageCounts = (pages as any[])?.reduce((acc: Record<string, number>, item: any) => {
         acc[item.page_url] = (acc[item.page_url] || 0) + 1;
         return acc;
       }, {});
@@ -58,14 +58,14 @@ const PageViewsAnalytics = () => {
 
       // Get city views
       const { data: cities, error: citiesError } = await supabase
-        .from('page_views')
+        .from('page_views' as any)
         .select('city_name')
         .not('city_name', 'is', null);
 
       if (citiesError) throw citiesError;
 
       // Count views per city
-      const cityCounts = cities?.reduce((acc: Record<string, number>, item) => {
+      const cityCounts = (cities as any[])?.reduce((acc: Record<string, number>, item: any) => {
         if (item.city_name) {
           acc[item.city_name] = (acc[item.city_name] || 0) + 1;
         }

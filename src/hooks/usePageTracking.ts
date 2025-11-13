@@ -17,11 +17,11 @@ export const usePageTracking = () => {
           cityName = pathParts[2];
         }
 
-        await supabase.from('page_views').insert({
+        await supabase.from('page_views' as any).insert({
           page_url: location.pathname,
           city_name: cityName,
           user_agent: navigator.userAgent,
-        });
+        } as any);
       } catch (error) {
         console.error('Error tracking page view:', error);
       }

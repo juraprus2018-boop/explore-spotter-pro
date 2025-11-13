@@ -126,6 +126,26 @@ const CityPage = () => {
     )
   ).sort();
 
+  // Get available facilities from restaurants
+  const availableFacilities = {
+    wheelchair: restaurants.some(r => (r as any).wheelchair === "yes"),
+    outdoor_seating: restaurants.some(r => (r as any).outdoor_seating === "yes"),
+    takeaway: restaurants.some(r => (r as any).takeaway === "yes"),
+    delivery: restaurants.some(r => (r as any).delivery === "yes"),
+  };
+
+  // Get available diet options from restaurants
+  const availableDietOptions = {
+    vegetarian: restaurants.some(r => (r as any).diet_options?.vegetarian === "yes"),
+    vegan: restaurants.some(r => (r as any).diet_options?.vegan === "yes"),
+    gluten_free: restaurants.some(r => (r as any).diet_options?.gluten_free === "yes"),
+    halal: restaurants.some(r => (r as any).diet_options?.halal === "yes"),
+    kosher: restaurants.some(r => (r as any).diet_options?.kosher === "yes"),
+  };
+
+  const hasAnyFacilities = Object.values(availableFacilities).some(v => v);
+  const hasAnyDietOptions = Object.values(availableDietOptions).some(v => v);
+
   const clearFilters = () => {
     setSelectedCuisine("all");
     setSelectedFacility("all");
@@ -238,39 +258,61 @@ const CityPage = () => {
                     )}
 
                     {/* Facility filter */}
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Faciliteiten</label>
-                      <Select value={selectedFacility} onValueChange={setSelectedFacility}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Alle faciliteiten" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Alle faciliteiten</SelectItem>
-                          <SelectItem value="wheelchair">♿ Rolstoeltoegankelijk</SelectItem>
-                          <SelectItem value="outdoor_seating">🌤️ Terras</SelectItem>
-                          <SelectItem value="takeaway">🥡 Afhalen</SelectItem>
-                          <SelectItem value="delivery">🚚 Bezorgen</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {hasAnyFacilities && (
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Faciliteiten</label>
+                        <Select value={selectedFacility} onValueChange={setSelectedFacility}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Alle faciliteiten" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Alle faciliteiten</SelectItem>
+                            {availableFacilities.wheelchair && (
+                              <SelectItem value="wheelchair">♿ Rolstoeltoegankelijk</SelectItem>
+                            )}
+                            {availableFacilities.outdoor_seating && (
+                              <SelectItem value="outdoor_seating">🌤️ Terras</SelectItem>
+                            )}
+                            {availableFacilities.takeaway && (
+                              <SelectItem value="takeaway">🥡 Afhalen</SelectItem>
+                            )}
+                            {availableFacilities.delivery && (
+                              <SelectItem value="delivery">🚚 Bezorgen</SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
                     {/* Diet filter */}
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Dieet opties</label>
-                      <Select value={selectedDiet} onValueChange={setSelectedDiet}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Alle diëten" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Alle diëten</SelectItem>
-                          <SelectItem value="vegetarian">🥗 Vegetarisch</SelectItem>
-                          <SelectItem value="vegan">🌱 Veganistisch</SelectItem>
-                          <SelectItem value="gluten_free">🌾 Glutenvrij</SelectItem>
-                          <SelectItem value="halal">☪️ Halal</SelectItem>
-                          <SelectItem value="kosher">✡️ Koosjer</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {hasAnyDietOptions && (
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Dieet opties</label>
+                        <Select value={selectedDiet} onValueChange={setSelectedDiet}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Alle diëten" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Alle diëten</SelectItem>
+                            {availableDietOptions.vegetarian && (
+                              <SelectItem value="vegetarian">🥗 Vegetarisch</SelectItem>
+                            )}
+                            {availableDietOptions.vegan && (
+                              <SelectItem value="vegan">🌱 Veganistisch</SelectItem>
+                            )}
+                            {availableDietOptions.gluten_free && (
+                              <SelectItem value="gluten_free">🌾 Glutenvrij</SelectItem>
+                            )}
+                            {availableDietOptions.halal && (
+                              <SelectItem value="halal">☪️ Halal</SelectItem>
+                            )}
+                            {availableDietOptions.kosher && (
+                              <SelectItem value="kosher">✡️ Koosjer</SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                   
                   {hasActiveFilters && (

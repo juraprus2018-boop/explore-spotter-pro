@@ -67,7 +67,14 @@ const SuggestionModeration = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { error } = await (supabase as any)
+      // Get the suggestion details
+      const suggestion = suggestions.find(s => s.id === suggestionId);
+      if (!suggestion) {
+        throw new Error('Suggestion not found');
+      }
+
+      // Update suggestion status
+      const { error: suggestionError } = await (supabase as any)
         .from('restaurant_suggestions')
         .update({
           status: newStatus,
@@ -77,11 +84,18 @@ const SuggestionModeration = () => {
         })
         .eq('id', suggestionId);
 
-      if (error) throw error;
+      if (suggestionError) throw suggestionError;
+
+      // If approved, update the restaurant data automatically
+      if (newStatus === 'approved') {
+        await applyApprovedSuggestion(suggestion);
+      }
 
       toast({
-        title: newStatus === 'approved' ? "Goedgekeurd" : "Afgewezen",
-        description: `Suggestie is ${newStatus === 'approved' ? 'goedgekeurd' : 'afgewezen'}`,
+        title: newStatus === 'approved' ? "Goedgekeurd en toegepast" : "Afgewezen",
+        description: newStatus === 'approved' 
+          ? 'Suggestie is goedgekeurd en de restaurant gegevens zijn automatisch bijgewerkt'
+          : 'Suggestie is afgewezen',
       });
 
       fetchSuggestions();
@@ -92,6 +106,92 @@ const SuggestionModeration = () => {
         description: "Kon suggestie niet modereren",
         variant: "destructive",
       });
+    }
+  };
+
+  const applyApprovedSuggestion = async (suggestion: Suggestion) => {
+    try {
+      // Prepare update object based on suggestion type
+      let updateData: any = {};
+
+      switch (suggestion.suggestion_type) {
+        case 'address':
+          // Update display_name with the suggested address
+          if (suggestion.suggested_value) {
+            updateData.display_name = suggestion.suggested_value;
+          }
+          break;
+        
+        case 'phone':
+          if (suggestion.suggested_value) {
+            updateData.phone = suggestion.suggested_value;
+          }
+          break;
+        
+        case 'website':
+          if (suggestion.suggested_value) {
+            updateData.website = suggestion.suggested_value;
+          }
+          break;
+        
+        case 'hours':
+          // Parse opening hours if provided in a structured format
+          if (suggestion.suggested_value) {
+            try {
+              // Try to parse as JSON, otherwise store as text
+              updateData.opening_hours = JSON.parse(suggestion.suggested_value);
+            } catch {
+              // If not valid JSON, store as a simple object with the text
+              updateData.opening_hours = { hours: suggestion.suggested_value };
+            }
+          }
+          break;
+        
+        case 'photos':
+          // Add photos to the restaurant's photo array
+          if (suggestion.photos && suggestion.photos.length > 0) {
+            // First fetch current photos
+            const { data: restaurant } = await (supabase as any)
+              .from('restaurants')
+              .select('photos')
+              .eq('id', suggestion.restaurant_id)
+              .maybeSingle();
+
+            const currentPhotos = restaurant?.photos || [];
+            updateData.photos = [...currentPhotos, ...suggestion.photos];
+          }
+          break;
+        
+        case 'other':
+          // For 'other' types, we might need manual intervention
+          // But if there's a suggested value, we can add it to description
+          if (suggestion.suggested_value && suggestion.description) {
+            const { data: restaurant } = await (supabase as any)
+              .from('restaurants')
+              .select('description')
+              .eq('id', suggestion.restaurant_id)
+              .maybeSingle();
+
+            const currentDescription = restaurant?.description || '';
+            updateData.description = currentDescription 
+              ? `${currentDescription}\n\nUpdate: ${suggestion.description}`
+              : suggestion.description;
+          }
+          break;
+      }
+
+      // Apply the update if there's data to update
+      if (Object.keys(updateData).length > 0) {
+        const { error: updateError } = await (supabase as any)
+          .from('restaurants')
+          .update(updateData)
+          .eq('id', suggestion.restaurant_id);
+
+        if (updateError) throw updateError;
+      }
+    } catch (error) {
+      console.error('Error applying suggestion to restaurant:', error);
+      throw error;
     }
   };
 

@@ -194,6 +194,30 @@ const RestaurantDetail = () => {
             </div>
           </div>
 
+          {/* Restaurant Photos */}
+          {(restaurant as any).photos && (restaurant as any).photos.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">Foto's</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {(restaurant as any).photos.map((photo: string, index: number) => (
+                  <a
+                    key={index}
+                    href={photo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative aspect-square overflow-hidden rounded-lg border border-border hover:opacity-90 transition-opacity"
+                  >
+                    <img
+                      src={photo}
+                      alt={`${restaurant.name} - foto ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <Card>
               <CardHeader>
@@ -210,6 +234,37 @@ const RestaurantDetail = () => {
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">{t("detail.type")}</p>
                     <p className="font-medium capitalize">{restaurant.type}</p>
+                  </div>
+                )}
+                {(restaurant as any).phone && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Telefoonnummer</p>
+                    <a href={`tel:${(restaurant as any).phone}`} className="font-medium text-primary hover:underline">
+                      {(restaurant as any).phone}
+                    </a>
+                  </div>
+                )}
+                {(restaurant as any).website && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Website</p>
+                    <a 
+                      href={(restaurant as any).website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="font-medium text-primary hover:underline"
+                    >
+                      Bezoek website
+                    </a>
+                  </div>
+                )}
+                {(restaurant as any).opening_hours && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Openingstijden</p>
+                    <p className="font-medium">
+                      {typeof (restaurant as any).opening_hours === 'object' 
+                        ? (restaurant as any).opening_hours.hours || JSON.stringify((restaurant as any).opening_hours)
+                        : (restaurant as any).opening_hours}
+                    </p>
                   </div>
                 )}
                 {cityName && (

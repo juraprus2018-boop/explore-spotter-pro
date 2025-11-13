@@ -281,14 +281,17 @@ const RestaurantDetail = () => {
                 )}
                 
                 {/* Ownership and Claim Section */}
-                {(restaurant as any).owner_id ? (
+                {(restaurant as any).claim_status === 'approved' && (restaurant as any).owner_id ? (
                   <div className="pt-4 border-t">
-                    <p className="text-sm text-muted-foreground mb-1">Eigenaar</p>
-                    <p className="font-medium text-primary">
-                      {(restaurant as any).claim_status === 'approved' ? 'Geclaimd en geverifieerd' : 'Claim in behandeling'}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">Status</p>
+                    <p className="font-medium text-primary">Geclaimd en geverifieerd</p>
                   </div>
-                ) : currentUser && (
+                ) : (restaurant as any).claim_status === 'pending' && (restaurant as any).owner_id ? (
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground mb-1">Status</p>
+                    <p className="font-medium text-yellow-600">Claim in behandeling</p>
+                  </div>
+                ) : currentUser && !(restaurant as any).owner_id ? (
                   <div className="pt-4 border-t">
                     <ClaimRestaurantDialog
                       restaurantId={restaurant.id}
@@ -296,7 +299,7 @@ const RestaurantDetail = () => {
                       onClaimed={refreshRestaurant}
                     />
                   </div>
-                )}
+                ) : null}
                 
                 {/* Suggest Changes Section */}
                 <div className="pt-4 border-t">

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, XCircle, Clock, Loader2, FileText, ExternalLink } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -144,27 +144,6 @@ const RestaurantVerification = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {restaurant.verification_documents && restaurant.verification_documents.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Verificatie documenten:</p>
-                      <div className="space-y-2">
-                        {restaurant.verification_documents.map((doc, idx) => (
-                          <a
-                            key={idx}
-                            href={doc}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-sm text-primary hover:underline"
-                          >
-                            <FileText className="h-4 w-4" />
-                            Document {idx + 1}
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   {activeTab === 'pending' && (
                     <div className="space-y-3 pt-3 border-t">
                       <Textarea

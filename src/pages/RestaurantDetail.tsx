@@ -4,12 +4,21 @@ import { useTranslation } from "react-i18next";
 import { reverseGeocode, NominatimResult } from "@/lib/nominatim";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, MapPin, Globe, Phone, Clock } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Globe, Phone, Clock, Home } from "lucide-react";
 import MapView from "@/components/MapView";
 import RouteNavigation from "@/components/RouteNavigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { NavLink } from "@/components/NavLink";
 
 const RestaurantDetail = () => {
   const { placeId, lang } = useParams();
@@ -106,20 +115,50 @@ const RestaurantDetail = () => {
     display_name: restaurant.display_name,
   };
 
+  // Extract city name from display_name for breadcrumb
+  const getCityName = () => {
+    const parts = restaurant.display_name.split(',').map(p => p.trim());
+    if (parts.length >= 2) {
+      return parts[parts.length - 3] || parts[parts.length - 2] || "";
+    }
+    return "";
+  };
+
+  const cityName = getCityName();
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          <Button 
-            onClick={() => navigate(`/${lang}`)} 
-            variant="ghost" 
-            className="mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {t("detail.backToSearch")}
-          </Button>
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <NavLink to={`/${lang}`}>
+                    <Home className="h-4 w-4" />
+                  </NavLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              {cityName && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <NavLink to={`/${lang}/city/${encodeURIComponent(cityName)}`}>
+                        {cityName}
+                      </NavLink>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{location.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">

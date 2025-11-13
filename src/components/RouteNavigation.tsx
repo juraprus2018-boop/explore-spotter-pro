@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Navigation, Car, Footprints, Loader2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 interface RouteNavigationProps {
   destinationLat: number;
@@ -20,18 +20,34 @@ type TravelMode = "walking" | "driving";
 interface RouteData {
   distance: number;
   duration: number;
-  geometry: any;
+  coordinates: [number, number][];
+}
+
+// Fix Leaflet default marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
+
+// Component to fit map bounds
+function FitBounds({ bounds }: { bounds: [[number, number], [number, number]] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [bounds, map]);
+  return null;
 }
 
 const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: RouteNavigationProps) => {
-  const [mapboxToken, setMapboxToken] = useState("");
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [travelMode, setTravelMode] = useState<TravelMode>("driving");
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
-  const [showTokenInput, setShowTokenInput] = useState(true);
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
+  const [showRoute, setShowRoute] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,7 +55,7 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation([position.coords.longitude, position.coords.latitude]);
+          setUserLocation([position.coords.latitude, position.coords.longitude]);
         },
         (error) => {
           console.log("Geolocation error:", error);
@@ -53,119 +69,60 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
     }
   }, [toast]);
 
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken || !userLocation) return;
-
-    mapboxgl.accessToken = mapboxToken;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: userLocation,
-      zoom: 12,
-    });
-
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-    // Add markers
-    new mapboxgl.Marker({ color: "#3b82f6" })
-      .setLngLat(userLocation)
-      .setPopup(new mapboxgl.Popup().setHTML("<p>Uw locatie</p>"))
-      .addTo(map.current);
-
-    new mapboxgl.Marker({ color: "#ef4444" })
-      .setLngLat([destinationLon, destinationLat])
-      .setPopup(new mapboxgl.Popup().setHTML(`<p>${destinationName}</p>`))
-      .addTo(map.current);
-
-    setShowTokenInput(false);
-  };
-
   const fetchRoute = async () => {
-    if (!userLocation || !mapboxToken) return;
+    if (!userLocation) {
+      toast({
+        title: "Locatie vereist",
+        description: "We hebben je locatie nodig om een route te berekenen.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoadingRoute(true);
     try {
-      const response = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/${travelMode}/${userLocation[0]},${userLocation[1]};${destinationLon},${destinationLat}?geometries=geojson&access_token=${mapboxToken}`
-      );
+      // OSRM API - completely free, no API key required
+      const profile = travelMode === "driving" ? "car" : "foot";
+      const url = `https://router.project-osrm.org/route/v1/${profile}/${userLocation[1]},${userLocation[0]};${destinationLon},${destinationLat}?overview=full&geometries=geojson`;
 
+      const response = await fetch(url);
       const data = await response.json();
 
-      if (data.routes && data.routes.length > 0) {
+      if (data.code === "Ok" && data.routes && data.routes.length > 0) {
         const route = data.routes[0];
+        const coordinates: [number, number][] = route.geometry.coordinates.map(
+          (coord: [number, number]) => [coord[1], coord[0]] // Convert [lon, lat] to [lat, lon]
+        );
+
         setRouteData({
           distance: route.distance,
           duration: route.duration,
-          geometry: route.geometry,
+          coordinates,
         });
+        setShowRoute(true);
 
-        // Draw route on map
-        if (map.current) {
-          if (map.current.getSource("route")) {
-            (map.current.getSource("route") as mapboxgl.GeoJSONSource).setData({
-              type: "Feature",
-              properties: {},
-              geometry: route.geometry,
-            });
-          } else {
-            map.current.addLayer({
-              id: "route",
-              type: "line",
-              source: {
-                type: "geojson",
-                data: {
-                  type: "Feature",
-                  properties: {},
-                  geometry: route.geometry,
-                },
-              },
-              layout: {
-                "line-join": "round",
-                "line-cap": "round",
-              },
-              paint: {
-                "line-color": "#3b82f6",
-                "line-width": 5,
-                "line-opacity": 0.75,
-              },
-            });
-          }
-
-          // Fit map to route bounds
-          const coordinates = route.geometry.coordinates;
-          const bounds = coordinates.reduce(
-            (bounds: mapboxgl.LngLatBounds, coord: [number, number]) => {
-              return bounds.extend(coord as [number, number]);
-            },
-            new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
-          );
-          map.current.fitBounds(bounds, { padding: 50 });
-        }
+        toast({
+          title: "Route berekend",
+          description: `${formatDistance(route.distance)} - ${formatDuration(route.duration)}`,
+        });
+      } else {
+        toast({
+          title: "Route niet gevonden",
+          description: "Kan geen route berekenen naar deze locatie.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error fetching route:", error);
       toast({
         title: "Fout bij routeberekening",
-        description: "Kan route niet berekenen. Controleer je Mapbox token.",
+        description: "Er is een probleem opgetreden bij het berekenen van de route.",
         variant: "destructive",
       });
     } finally {
       setIsLoadingRoute(false);
     }
   };
-
-  useEffect(() => {
-    if (mapboxToken && userLocation && !map.current) {
-      initializeMap();
-    }
-  }, [mapboxToken, userLocation]);
-
-  useEffect(() => {
-    if (map.current && userLocation) {
-      fetchRoute();
-    }
-  }, [travelMode, userLocation, mapboxToken]);
 
   const formatDistance = (meters: number) => {
     if (meters < 1000) {
@@ -184,84 +141,68 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
     return `${hours} u ${remainingMinutes} min`;
   };
 
-  if (showTokenInput) {
+  if (!userLocation) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Navigation className="h-5 w-5" />
-            Navigatie instellen
+            Navigatie
           </CardTitle>
           <CardDescription>
-            Voer je Mapbox token in om navigatie te activeren
+            Route naar {destinationName}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Je hebt een gratis Mapbox account nodig. Maak er een aan op{" "}
-              <a
-                href="https://mapbox.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                mapbox.com
-              </a>{" "}
-              en kopieer je Public Token.
-            </AlertDescription>
-          </Alert>
-
-          <div className="space-y-2">
-            <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
-            <Input
-              id="mapbox-token"
-              type="text"
-              placeholder="pk.eyJ1..."
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-            />
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">Locatie ophalen...</p>
           </div>
-
-          <Button
-            onClick={initializeMap}
-            disabled={!mapboxToken || !userLocation}
-            className="w-full"
-          >
-            {!userLocation ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Locatie ophalen...
-              </>
-            ) : (
-              <>
-                <Navigation className="h-4 w-4 mr-2" />
-                Navigatie activeren
-              </>
-            )}
-          </Button>
         </CardContent>
       </Card>
     );
   }
+
+  const bounds: [[number, number], [number, number]] = routeData
+    ? [
+        [
+          Math.min(...routeData.coordinates.map(c => c[0])),
+          Math.min(...routeData.coordinates.map(c => c[1])),
+        ],
+        [
+          Math.max(...routeData.coordinates.map(c => c[0])),
+          Math.max(...routeData.coordinates.map(c => c[1])),
+        ],
+      ]
+    : [
+        [Math.min(userLocation[0], destinationLat), Math.min(userLocation[1], destinationLon)],
+        [Math.max(userLocation[0], destinationLat), Math.max(userLocation[1], destinationLon)],
+      ];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Navigation className="h-5 w-5" />
-          Navigatie naar {destinationName}
+          Navigatie
         </CardTitle>
-        <CardDescription>Kies je vervoersmiddel</CardDescription>
+        <CardDescription>
+          Route naar {destinationName}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            100% gratis routeberekening via OpenStreetMap - geen API key nodig!
+          </AlertDescription>
+        </Alert>
+
         <div className="flex gap-2">
           <Button
             variant={travelMode === "driving" ? "default" : "outline"}
             onClick={() => setTravelMode("driving")}
             className="flex-1"
-            disabled={isLoadingRoute}
           >
             <Car className="h-4 w-4 mr-2" />
             Auto
@@ -270,34 +211,77 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
             variant={travelMode === "walking" ? "default" : "outline"}
             onClick={() => setTravelMode("walking")}
             className="flex-1"
-            disabled={isLoadingRoute}
           >
             <Footprints className="h-4 w-4 mr-2" />
-            Te voet
+            Lopen
           </Button>
         </div>
 
+        <Button
+          onClick={fetchRoute}
+          disabled={isLoadingRoute}
+          className="w-full"
+          size="lg"
+        >
+          {isLoadingRoute ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Route berekenen...
+            </>
+          ) : (
+            <>
+              <Navigation className="h-4 w-4 mr-2" />
+              Toon route
+            </>
+          )}
+        </Button>
+
         {routeData && (
-          <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-            <div>
-              <p className="text-sm text-muted-foreground">Afstand</p>
-              <p className="text-lg font-semibold">{formatDistance(routeData.distance)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Reistijd</p>
-              <p className="text-lg font-semibold">{formatDuration(routeData.duration)}</p>
-            </div>
+          <div className="flex gap-4 justify-center">
+            <Badge variant="secondary" className="text-lg py-2 px-4">
+              {formatDistance(routeData.distance)}
+            </Badge>
+            <Badge variant="secondary" className="text-lg py-2 px-4">
+              {formatDuration(routeData.duration)}
+            </Badge>
           </div>
         )}
 
-        <div
-          ref={mapContainer}
-          className="w-full h-[400px] rounded-lg overflow-hidden"
-        />
+        {showRoute && (
+          <div className="h-[400px] rounded-lg overflow-hidden border">
+            <MapContainer
+              center={userLocation}
+              zoom={13}
+              style={{ height: "100%", width: "100%" }}
+              scrollWheelZoom={false}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              
+              {/* User location marker */}
+              <Marker position={userLocation}>
+                <Popup>Uw locatie</Popup>
+              </Marker>
 
-        {isLoadingRoute && (
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              {/* Destination marker */}
+              <Marker position={[destinationLat, destinationLon]}>
+                <Popup>{destinationName}</Popup>
+              </Marker>
+
+              {/* Route line */}
+              {routeData && (
+                <Polyline
+                  positions={routeData.coordinates}
+                  color="#3b82f6"
+                  weight={5}
+                  opacity={0.7}
+                />
+              )}
+
+              <FitBounds bounds={bounds} />
+            </MapContainer>
           </div>
         )}
       </CardContent>

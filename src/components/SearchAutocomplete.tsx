@@ -22,6 +22,8 @@ interface LocationSuggestion {
   lat: number;
   lon: number;
   type: string;
+  country: string;
+  region?: string;
 }
 
 const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
@@ -41,13 +43,22 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
     try {
       // Search for locations only (cities, towns, countries)
       const locationResults = await searchLocations(query);
-      const locationSuggestions: LocationSuggestion[] = locationResults.map((r) => ({
-        name: r.name,
-        displayName: r.display_name,
-        lat: parseFloat(r.lat),
-        lon: parseFloat(r.lon),
-        type: r.type,
-      }));
+      const locationSuggestions: LocationSuggestion[] = locationResults.map((r) => {
+        // Parse display_name to extract country (last part after last comma)
+        const parts = r.display_name.split(',').map(p => p.trim());
+        const country = parts[parts.length - 1] || '';
+        const region = parts.length > 2 ? parts[parts.length - 2] : '';
+        
+        return {
+          name: r.name,
+          displayName: r.display_name,
+          lat: parseFloat(r.lat),
+          lon: parseFloat(r.lon),
+          type: r.type,
+          country: country,
+          region: region,
+        };
+      });
 
       setSuggestions(locationSuggestions);
     } catch (error) {
@@ -106,23 +117,26 @@ const SearchAutocomplete = ({ onSearch }: SearchAutocompleteProps) => {
                   <CommandEmpty>
                     {isLoadingSuggestions ? "Laden..." : "Geen suggesties"}
                   </CommandEmpty>
-                  <CommandGroup heading="Locaties / Locations">
+                  <CommandGroup heading="Locaties">
                     {suggestions.map((suggestion, index) => (
                       <CommandItem
-                        key={`${suggestion.name}-${index}`}
+                        key={`${suggestion.name}-${suggestion.country}-${index}`}
                         onSelect={() => handleSelectSuggestion(suggestion)}
                         className="cursor-pointer"
                       >
-                        <div className="flex flex-col w-full">
-                          <span className="font-medium">{suggestion.name}</span>
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs text-muted-foreground truncate">
-                              {suggestion.displayName}
+                        <div className="flex items-center justify-between w-full gap-3">
+                          <div className="flex flex-col flex-1 min-w-0">
+                            <span className="font-semibold text-base">
+                              {suggestion.name}
+                              {suggestion.region && `, ${suggestion.region}`}
                             </span>
-                            <span className="text-xs bg-secondary px-2 py-1 rounded whitespace-nowrap">
-                              {suggestion.type}
+                            <span className="text-sm text-muted-foreground">
+                              {suggestion.country}
                             </span>
                           </div>
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full whitespace-nowrap capitalize">
+                            {suggestion.type}
+                          </span>
                         </div>
                       </CommandItem>
                     ))}

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { usePageTracking } from "./hooks/usePageTracking";
 import Index from "./pages/Index";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import CityPage from "./pages/CityPage";
@@ -25,6 +26,7 @@ const queryClient = new QueryClient();
 const LanguageWrapper = ({ children }: { children: React.ReactNode }) => {
   const { lang } = useParams();
   const { i18n } = useTranslation();
+  usePageTracking();
 
   useEffect(() => {
     if (lang && ["nl", "en", "de", "fr", "es", "it", "hr", "pt", "pl"].includes(lang)) {

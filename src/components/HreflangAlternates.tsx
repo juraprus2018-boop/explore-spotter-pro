@@ -8,7 +8,7 @@ interface HreflangAlternatesProps {
 
 const HreflangAlternates = ({ 
   languages = ["nl", "en", "de", "fr", "es", "it", "hr", "pt", "pl"],
-  baseUrl = "https://restaurantfinder.com" // Replace with actual domain
+  baseUrl = "https://www.eatnavigator.com"
 }: HreflangAlternatesProps) => {
   const location = useLocation();
   

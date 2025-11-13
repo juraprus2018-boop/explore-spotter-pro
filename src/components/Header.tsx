@@ -97,7 +97,7 @@ const Header = () => {
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(`/${lang || 'nl'}`)}>
           <Utensils className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-foreground">RestaurantFinder</span>
+          <span className="text-xl font-bold text-foreground">EatNavigator</span>
         </div>
         
         <nav className="flex items-center gap-2 md:gap-4">

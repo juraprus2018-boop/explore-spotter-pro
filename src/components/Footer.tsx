@@ -11,10 +11,10 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Utensils className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold text-foreground">RestaurantFinder</span>
-            </div>
+          <div className="flex items-center gap-2 mb-4">
+            <Utensils className="h-6 w-6 text-primary" />
+            <span className="text-lg font-bold text-foreground">EatNavigator</span>
+          </div>
             <p className="text-sm text-muted-foreground">
               {t("footer.description")}
             </p>
@@ -40,7 +40,7 @@ const Footer = () => {
         </div>
         
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          © {currentYear} RestaurantFinder. {t("footer.rights")}
+          © {currentYear} EatNavigator. {t("footer.rights")}
         </div>
       </div>
     </footer>

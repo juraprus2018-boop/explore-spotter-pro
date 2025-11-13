@@ -1,9 +1,7 @@
-import { useState } from "react";
-import { Search, MapPin } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
+import SearchAutocomplete from "./SearchAutocomplete";
 
 interface HeroProps {
   onSearch: (query: string) => void;
@@ -11,14 +9,6 @@ interface HeroProps {
 
 const Hero = ({ onSearch }: HeroProps) => {
   const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      onSearch(searchQuery);
-    }
-  };
 
   return (
     <section className="relative min-h-[500px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80">
@@ -40,27 +30,7 @@ const Hero = ({ onSearch }: HeroProps) => {
             {t("hero.subtitle")}
           </p>
           
-          <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-            <div className="relative flex gap-2 bg-background rounded-full p-2 shadow-lg">
-              <div className="flex-1 flex items-center">
-                <Search className="absolute left-6 h-5 w-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder={t("hero.searchPlaceholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
-                />
-              </div>
-              <Button 
-                type="submit" 
-                size="lg" 
-                className="rounded-full px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                {t("hero.searchButton")}
-              </Button>
-            </div>
-          </form>
+          <SearchAutocomplete onSearch={onSearch} />
         </div>
       </div>
     </section>

@@ -42,6 +42,12 @@ export interface DatabaseRestaurant {
   search_count: number;
   created_at: string;
   updated_at: string;
+  owner_id?: string | null;
+  claimed_at?: string | null;
+  user_submitted?: boolean;
+  phone?: string | null;
+  website?: string | null;
+  description?: string | null;
   city?: City;
 }
 

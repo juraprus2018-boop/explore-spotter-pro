@@ -71,6 +71,11 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate(`/${lang}/add-restaurant`)}>
+                  <Utensils className="h-4 w-4 mr-2" />
+                  Restaurant toevoegen
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Uitloggen

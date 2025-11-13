@@ -32,6 +32,16 @@ const RestaurantDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
   const [averageRating, setAverageRating] = useState(0);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    checkUser();
+  }, []);
 
   useEffect(() => {
     const loadRestaurant = async () => {
@@ -82,6 +92,41 @@ const RestaurantDetail = () => {
 
     loadRestaurant();
   }, [placeId, t, toast]);
+
+  const handleClaimRestaurant = async () => {
+    if (!currentUser || !restaurant) return;
+
+    setIsClaiming(true);
+    try {
+      const { error } = await supabase
+        .from('restaurants')
+        .update({
+          owner_id: currentUser.id,
+          claimed_at: new Date().toISOString(),
+        })
+        .eq('id', restaurant.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Restaurant geclaimd!",
+        description: "Je bent nu de eigenaar van dit restaurant.",
+      });
+
+      // Reload restaurant data
+      const data = await getRestaurantByPlaceId(Number(placeId));
+      setRestaurant(data);
+    } catch (error: any) {
+      console.error("Error claiming restaurant:", error);
+      toast({
+        title: "Fout bij claimen",
+        description: error.message || "Er is iets misgegaan. Probeer het opnieuw.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsClaiming(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -204,6 +249,31 @@ const RestaurantDetail = () => {
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Provincie</p>
                     <p className="font-medium">{provinceName}</p>
+                  </div>
+                )}
+                
+                {/* Ownership and Claim Section */}
+                {(restaurant as any).owner_id ? (
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground mb-1">Eigenaar</p>
+                    <p className="font-medium text-primary">Geclaimd door eigenaar</p>
+                  </div>
+                ) : currentUser && (
+                  <div className="pt-4 border-t">
+                    <Button 
+                      onClick={handleClaimRestaurant} 
+                      disabled={isClaiming}
+                      className="w-full"
+                    >
+                      {isClaiming ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Claimen...
+                        </>
+                      ) : (
+                        "Claim dit restaurant"
+                      )}
+                    </Button>
                   </div>
                 )}
               </CardContent>

@@ -8,6 +8,7 @@ import ProvincesOverview from "@/components/ProvincesOverview";
 import NearbyRestaurants from "@/components/NearbyRestaurants";
 import HreflangAlternates from "@/components/HreflangAlternates";
 import LanguageDetectionPopup from "@/components/LanguageDetectionPopup";
+import InteractiveWorldMap from "@/components/InteractiveWorldMap";
 import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
@@ -219,6 +220,16 @@ const Index = () => {
         ) : (
           <div className="space-y-12">
             <ProvincesOverview />
+            
+            <div>
+              <h2 className="text-3xl font-bold mb-4 text-center text-foreground">
+                Of ontdek restaurants via de wereldkaart
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Klik op een locatie op de kaart om restaurants binnen 2 km te vinden en op te slaan.
+              </p>
+              <InteractiveWorldMap />
+            </div>
             
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Utensils className="h-20 w-20 text-muted-foreground mb-4" />

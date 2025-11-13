@@ -60,7 +60,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
   const fetchReviews = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('reviews')
         .select('*')
         .eq('restaurant_id', restaurantId)
@@ -141,7 +141,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
 
       if (editingReview) {
         // Update existing review
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('reviews')
           .update({
             rating,
@@ -159,7 +159,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
         });
       } else {
         // Create new review (anonymous or authenticated)
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('reviews')
           .insert({
             user_id: user?.id || null,
@@ -207,7 +207,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
     if (!confirm("Weet je zeker dat je deze review wilt verwijderen?")) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('reviews')
         .delete()
         .eq('id', reviewId);

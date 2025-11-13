@@ -53,7 +53,7 @@ const RestaurantDetail = () => {
         
         // Fetch reviews
         if (data) {
-          const { data: reviewsData } = await supabase
+          const { data: reviewsData } = await (supabase as any)
             .from('reviews')
             .select('*')
             .eq('restaurant_id', data.id)
@@ -62,7 +62,7 @@ const RestaurantDetail = () => {
           if (reviewsData) {
             setReviews(reviewsData);
             const avg = reviewsData.length > 0 
-              ? reviewsData.reduce((sum, r) => sum + r.rating, 0) / reviewsData.length 
+              ? reviewsData.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewsData.length 
               : 0;
             setAverageRating(avg);
           }

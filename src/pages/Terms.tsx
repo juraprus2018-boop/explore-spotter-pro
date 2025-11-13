@@ -1,19 +1,22 @@
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const Terms = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto prose prose-lg">
-          <h1 className="text-4xl font-bold text-foreground mb-8">Terms & Conditions</h1>
-          <p className="text-muted-foreground mb-8">Last updated: {new Date().toLocaleDateString()}</p>
+          <h1 className="text-4xl font-bold text-foreground mb-8">{t('terms.title')}</h1>
+          <p className="text-muted-foreground mb-8">
+            {t('terms.lastUpdated')} {new Date().toLocaleDateString()}
+          </p>
 
           <h2>1. Acceptance of Terms</h2>
-          <p>
-            By accessing and using EatNavigator ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms & Conditions, please do not use the Service.
-          </p>
+          <p>{t('terms.acceptance')}</p>
 
           <h2>2. Use of Service</h2>
           <h3>2.1 Eligibility</h3>
@@ -73,47 +76,29 @@ const Terms = () => {
           <ul>
             <li>Use the Service for any illegal purpose or in violation of any laws</li>
             <li>Attempt to gain unauthorized access to any portion of the Service</li>
-            <li>Interfere with or disrupt the Service or servers or networks connected to the Service</li>
-            <li>Use any automated means to access the Service or collect data</li>
-            <li>Reproduce, duplicate, copy, sell, or exploit any portion of the Service without permission</li>
+            <li>Interfere with or disrupt the Service or servers</li>
+            <li>Use any automated system to access the Service</li>
+            <li>Collect information about other users without their consent</li>
           </ul>
 
           <h2>7. Disclaimer of Warranties</h2>
           <p>
-            THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+            The Service is provided "as is" and "as available" without warranties of any kind, either express or implied. We do not warrant that the Service will be uninterrupted, secure, or error-free.
           </p>
 
           <h2>8. Limitation of Liability</h2>
           <p>
-            IN NO EVENT SHALL EATNAVIGATOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, OR OTHER INTANGIBLE LOSSES, RESULTING FROM YOUR ACCESS TO OR USE OF THE SERVICE.
+            To the maximum extent permitted by law, EatNavigator shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues.
           </p>
 
-          <h2>9. Indemnification</h2>
+          <h2>9. Changes to Terms</h2>
           <p>
-            You agree to indemnify and hold harmless EatNavigator and its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including legal fees) arising out of your use of the Service or violation of these Terms.
+            We reserve the right to modify these Terms at any time. We will notify users of any material changes by posting the new Terms on this page and updating the "Last updated" date.
           </p>
 
-          <h2>10. Termination</h2>
-          <p>
-            We may terminate or suspend your account and access to the Service immediately, without prior notice or liability, for any reason, including if you breach these Terms & Conditions.
-          </p>
-
-          <h2>11. Changes to Terms</h2>
-          <p>
-            We reserve the right to modify these Terms at any time. We will notify users of any material changes by posting the new Terms on this page and updating the "Last updated" date. Your continued use of the Service after such modifications constitutes your acceptance of the updated Terms.
-          </p>
-
-          <h2>12. Governing Law</h2>
-          <p>
-            These Terms shall be governed by and construed in accordance with the laws of the Netherlands, without regard to its conflict of law provisions.
-          </p>
-
-          <h2>13. Contact Information</h2>
-          <p>
-            If you have any questions about these Terms & Conditions, please contact us at:
-            <br />
-            Email: info@eatnavigator.com
-          </p>
+          <h2>10. Contact Information</h2>
+          <p>For questions about these Terms, please contact us at:</p>
+          <p>Email: info@eatnavigator.com</p>
         </div>
       </main>
       <Footer />

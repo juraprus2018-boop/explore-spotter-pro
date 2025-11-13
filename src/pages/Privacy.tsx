@@ -1,19 +1,22 @@
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const Privacy = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto prose prose-lg">
-          <h1 className="text-4xl font-bold text-foreground mb-8">Privacy Policy</h1>
-          <p className="text-muted-foreground mb-8">Last updated: {new Date().toLocaleDateString()}</p>
+          <h1 className="text-4xl font-bold text-foreground mb-8">{t('privacy.title')}</h1>
+          <p className="text-muted-foreground mb-8">
+            {t('privacy.lastUpdated')} {new Date().toLocaleDateString()}
+          </p>
 
           <h2>Introduction</h2>
-          <p>
-            EatNavigator ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
-          </p>
+          <p>{t('privacy.intro')}</p>
 
           <h2>Information We Collect</h2>
           <h3>Personal Information</h3>
@@ -78,7 +81,7 @@ const Privacy = () => {
 
           <h2>Children's Privacy</h2>
           <p>
-            Our services are not directed to children under the age of 13. We do not knowingly collect personal information from children under 13. If you become aware that a child has provided us with personal information, please contact us.
+            Our service is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.
           </p>
 
           <h2>Changes to This Privacy Policy</h2>
@@ -87,11 +90,8 @@ const Privacy = () => {
           </p>
 
           <h2>Contact Us</h2>
-          <p>
-            If you have any questions about this Privacy Policy, please contact us at:
-            <br />
-            Email: info@eatnavigator.com
-          </p>
+          <p>If you have any questions about this Privacy Policy, please contact us at:</p>
+          <p>Email: info@eatnavigator.com</p>
         </div>
       </main>
       <Footer />

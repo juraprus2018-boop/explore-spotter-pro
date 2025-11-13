@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 const Contact = () => {
+  const { t } = useTranslation();
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -41,8 +43,8 @@ const Contact = () => {
   const onSubmit = async (data: ContactFormData) => {
     if (!recaptchaToken) {
       toast({
-        title: "Verification Required",
-        description: "Please complete the reCAPTCHA verification",
+        title: t('contact.verificationRequired'),
+        description: t('contact.verificationRequiredDesc'),
         variant: "destructive",
       });
       return;
@@ -60,8 +62,8 @@ const Contact = () => {
       if (error) throw error;
 
       toast({
-        title: "Message Sent!",
-        description: "Thank you for contacting us. We'll get back to you soon.",
+        title: t('contact.messageSent'),
+        description: t('contact.messageSentDesc'),
       });
 
       form.reset();
@@ -69,8 +71,8 @@ const Contact = () => {
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: t('contact.error'),
+        description: t('contact.errorDesc'),
         variant: "destructive",
       });
     } finally {
@@ -83,16 +85,16 @@ const Contact = () => {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Contact Us</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-4">{t('contact.title')}</h1>
           <p className="text-lg text-muted-foreground mb-8">
-            Have a question or feedback? We'd love to hear from you.
+            {t('contact.subtitle')}
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             <Card>
               <CardHeader>
                 <Mail className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>Email</CardTitle>
+                <CardTitle>{t('contact.email')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">info@eatnavigator.com</p>
@@ -102,28 +104,28 @@ const Contact = () => {
             <Card>
               <CardHeader>
                 <MapPin className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>Location</CardTitle>
+                <CardTitle>{t('contact.location')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Netherlands</p>
+                <p className="text-muted-foreground">{t('contact.locationText')}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
                 <Phone className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>Support</CardTitle>
+                <CardTitle>{t('contact.support')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">24/7 Online Support</p>
+                <p className="text-muted-foreground">{t('contact.supportText')}</p>
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Send us a Message</CardTitle>
-              <CardDescription>Fill out the form below and we'll get back to you as soon as possible.</CardDescription>
+              <CardTitle>{t('contact.sendMessage')}</CardTitle>
+              <CardDescription>{t('contact.sendMessageDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -134,9 +136,9 @@ const Contact = () => {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Name</FormLabel>
+                          <FormLabel>{t('contact.name')}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Your name" {...field} />
+                            <Input placeholder={t('contact.namePlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -148,9 +150,9 @@ const Contact = () => {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email</FormLabel>
+                          <FormLabel>{t('contact.emailLabel')}</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="your@email.com" {...field} />
+                            <Input type="email" placeholder={t('contact.emailPlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -163,9 +165,9 @@ const Contact = () => {
                     name="subject"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Subject</FormLabel>
+                        <FormLabel>{t('contact.subject')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="What is this about?" {...field} />
+                          <Input placeholder={t('contact.subjectPlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -177,10 +179,10 @@ const Contact = () => {
                     name="message"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Message</FormLabel>
+                        <FormLabel>{t('contact.message')}</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Your message..."
+                            placeholder={t('contact.messagePlaceholder')}
                             className="min-h-[150px]"
                             {...field}
                           />
@@ -198,7 +200,7 @@ const Contact = () => {
                   </div>
 
                   <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? "Sending..." : "Send Message"}
+                    {isSubmitting ? t('contact.sending') : t('contact.sendButton')}
                   </Button>
                 </form>
               </Form>

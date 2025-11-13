@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { NavLink } from "@/components/NavLink";
 import ClaimRestaurantDialog from "@/components/ClaimRestaurantDialog";
+import SuggestChangeDialog from "@/components/SuggestChangeDialog";
 
 const RestaurantDetail = () => {
   const { placeId, city, province, lang } = useParams();
@@ -241,6 +242,15 @@ const RestaurantDetail = () => {
                     />
                   </div>
                 )}
+                
+                {/* Suggest Changes Section */}
+                <div className="pt-4 border-t">
+                  <p className="text-sm text-muted-foreground mb-2">Klopt er iets niet?</p>
+                  <SuggestChangeDialog
+                    restaurantId={restaurant.id}
+                    restaurantName={restaurant.name}
+                  />
+                </div>
               </CardContent>
             </Card>
 

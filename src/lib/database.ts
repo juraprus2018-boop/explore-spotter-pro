@@ -292,7 +292,13 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
       return null;
     }
 
-    return restaurantsToSave.length;
+    // Return the saved restaurants with their IDs
+    const { data: savedRestaurants } = await supabase
+      .from('restaurants')
+      .select('*')
+      .in('place_id', restaurantsToSave.map(r => r.place_id));
+
+    return savedRestaurants || restaurantsToSave;
   } catch (error) {
     console.error("Error in saveRestaurants:", error);
     return null;

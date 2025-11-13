@@ -100,7 +100,7 @@ const Index = () => {
     setIsLoading(true);
     try {
       // First, try to search in database
-      let results = await getNearbyRestaurants(userLocation[0], userLocation[1], 10);
+      let results = await getNearbyRestaurants(userLocation[0], userLocation[1], 25);
       
       if (results.length > 0) {
         toast({
@@ -109,7 +109,7 @@ const Index = () => {
         });
       } else {
         // If not in database, search via Nominatim API
-        const apiResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 10);
+        const apiResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 25);
         
         // Save to database
         if (apiResults.length > 0) {

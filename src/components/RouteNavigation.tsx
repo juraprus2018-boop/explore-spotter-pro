@@ -96,18 +96,47 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
     }
 
     setIsLoadingRoute(true);
+
+    // Helper to add a timeout to fetch (prevents hanging requests)
+    const fetchWithTimeout = async (url: string, timeoutMs = 8000) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } finally {
+        clearTimeout(id);
+      }
+    };
+
     try {
-      // OSRM API - completely free, no API key required
-      const profile = travelMode === "driving" ? "car" : "foot";
-      const url = `https://router.project-osrm.org/route/v1/${profile}/${userLocation[1]},${userLocation[0]};${destinationLon},${destinationLat}?overview=full&geometries=geojson`;
+      const userLonLat = `${userLocation[1]},${userLocation[0]}`;
+      const destLonLat = `${destinationLon},${destinationLat}`;
 
-      const response = await fetch(url);
-      const data = await response.json();
+      // Primary (official) OSRM endpoint expects profiles: driving | walking | cycling
+      const primaryProfile = travelMode === "driving" ? "driving" : "walking";
+      const primaryUrl = `https://router.project-osrm.org/route/v1/${primaryProfile}/${userLonLat};${destLonLat}?overview=full&geometries=geojson`;
 
-      if (data.code === "Ok" && data.routes && data.routes.length > 0) {
+      // Fallback OSRM mirror (FOSSGIS): base path depends on mode and path profile differs slightly
+      const fallbackBase = travelMode === "driving" ? "routed-car" : "routed-foot";
+      const fallbackProfile = travelMode === "driving" ? "driving" : "foot";
+      const fallbackUrl = `https://routing.openstreetmap.de/${fallbackBase}/route/v1/${fallbackProfile}/${userLonLat};${destLonLat}?overview=full&geometries=geojson`;
+
+      let data: any | null = null;
+
+      // Try primary, then fallback if it fails (network/CORS/rate limit)
+      try {
+        data = await fetchWithTimeout(primaryUrl, 8000);
+      } catch (e) {
+        console.warn("Primary OSRM failed, trying fallback:", e);
+        data = await fetchWithTimeout(fallbackUrl, 10000);
+      }
+
+      if (data && data.code === "Ok" && data.routes && data.routes.length > 0) {
         const route = data.routes[0];
         const coordinates: [number, number][] = route.geometry.coordinates.map(
-          (coord: [number, number]) => [coord[1], coord[0]] // Convert [lon, lat] to [lat, lon]
+          (coord: [number, number]) => [coord[1], coord[0]] // [lon, lat] -> [lat, lon]
         );
 
         setRouteData({
@@ -122,17 +151,13 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
           description: `${formatDistance(route.distance)} - ${formatDuration(route.duration)}`,
         });
       } else {
-        toast({
-          title: "Route niet gevonden",
-          description: "Kan geen route berekenen naar deze locatie.",
-          variant: "destructive",
-        });
+        throw new Error("Geen route gevonden");
       }
     } catch (error) {
       console.error("Error fetching route:", error);
       toast({
         title: "Fout bij routeberekening",
-        description: "Er is een probleem opgetreden bij het berekenen van de route.",
+        description: "Probeer later opnieuw of open de route in Google Maps.",
         variant: "destructive",
       });
     } finally {

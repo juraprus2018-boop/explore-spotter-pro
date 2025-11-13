@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, FileCheck, AlertCircle, Loader2, BarChart3 } from "lucide-react";
+import { Shield, FileCheck, AlertCircle, Loader2, BarChart3, Edit } from "lucide-react";
 import ReviewModeration from "@/components/admin/ReviewModeration";
 import RestaurantVerification from "@/components/admin/RestaurantVerification";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
+import SuggestionModeration from "@/components/admin/SuggestionModeration";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -58,13 +59,17 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-4 max-w-3xl">
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
               Statistieken
             </TabsTrigger>
             <TabsTrigger value="reviews">
               Review Moderatie
+            </TabsTrigger>
+            <TabsTrigger value="suggestions">
+              <Edit className="h-4 w-4 mr-2" />
+              Suggesties
             </TabsTrigger>
             <TabsTrigger value="verification" disabled={!isAdmin}>
               Restaurant Verificatie
@@ -77,6 +82,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="reviews" className="space-y-4">
             <ReviewModeration />
+          </TabsContent>
+
+          <TabsContent value="suggestions" className="space-y-4">
+            <SuggestionModeration />
           </TabsContent>
 
           <TabsContent value="verification" className="space-y-4">

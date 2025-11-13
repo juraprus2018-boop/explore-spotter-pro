@@ -66,6 +66,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
         .from('reviews')
         .select('*')
         .eq('restaurant_id', restaurantId)
+        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

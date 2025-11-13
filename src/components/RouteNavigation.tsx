@@ -48,26 +48,42 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [showRoute, setShowRoute] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<"loading" | "ready" | "error">("loading");
   const { toast } = useToast();
 
   useEffect(() => {
-    // Get user's location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation([position.coords.latitude, position.coords.longitude]);
-        },
-        (error) => {
-          console.log("Geolocation error:", error);
-          toast({
-            title: "Locatie niet beschikbaar",
-            description: "Geef toestemming voor locatietoegang om navigatie te gebruiken.",
-            variant: "destructive",
-          });
-        }
-      );
+    requestLocation();
+  }, []);
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationStatus("error");
+      toast({
+        title: "Locatie niet beschikbaar",
+        description: "Je browser ondersteunt geen locatiedeling.",
+        variant: "destructive",
+      });
+      return;
     }
-  }, [toast]);
+
+    setLocationStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation([position.coords.latitude, position.coords.longitude]);
+        setLocationStatus("ready");
+      },
+      (error) => {
+        console.log("Geolocation error:", error);
+        setLocationStatus("error");
+        toast({
+          title: "Locatie niet beschikbaar",
+          description: "Geef toestemming voor locatietoegang om navigatie te gebruiken.",
+          variant: "destructive",
+        });
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+    );
+  };
 
   const fetchRoute = async () => {
     if (!userLocation) {
@@ -141,7 +157,7 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
     return `${hours} u ${remainingMinutes} min`;
   };
 
-  if (!userLocation) {
+  if (locationStatus !== "ready") {
     return (
       <Card>
         <CardHeader>
@@ -154,10 +170,34 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">Locatie ophalen...</p>
-          </div>
+          {locationStatus === "loading" ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Locatie ophalen...</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Locatie kan niet worden opgehaald. Sta locatietoegang toe in je browser of gebruik een van de opties hieronder.
+                </AlertDescription>
+              </Alert>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button onClick={requestLocation} variant="outline" className="flex-1">
+                  Opnieuw proberen
+                </Button>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${destinationLat},${destinationLon}&travelmode=${travelMode}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1"
+                >
+                  <Button className="w-full">Open in Google Maps</Button>
+                </a>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     );

@@ -3,12 +3,21 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getRestaurantsByCity, DatabaseRestaurant } from "@/lib/database";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, MapPin } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Home } from "lucide-react";
 import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { NavLink } from "@/components/NavLink";
 
 const CityPage = () => {
   const { city, lang } = useParams();
@@ -69,14 +78,21 @@ const CityPage = () => {
 
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          <Button
-            onClick={() => navigate(`/${lang}`)}
-            variant="ghost"
-            className="mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {t("detail.backToSearch")}
-          </Button>
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <NavLink to={`/${lang}`}>
+                    <Home className="h-4 w-4" />
+                  </NavLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{cityName}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">

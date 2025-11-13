@@ -57,17 +57,30 @@ export const createSlug = (text: string): string => {
 
 // Extract location data from Nominatim address
 const extractLocationData = (result: NominatimResult) => {
-  const address = result.address;
+  const address: any = result.address || {};
   
-  // Province is typically in the "state" field for Netherlands
-  let provinceName = address?.state || null;
+  // Province/region detection for international coverage
+  const provinceName =
+    address.state ||
+    address.county ||
+    address.region ||
+    address.state_district ||
+    address.province ||
+    null;
   
-  // City can be in multiple fields, prioritize in this order
-  let cityName = address?.city || address?.town || address?.village || address?.municipality || null;
+  // City detection (settlement-level)
+  const cityName =
+    address.city ||
+    address.town ||
+    address.village ||
+    address.municipality ||
+    address.hamlet ||
+    address.suburb ||
+    null;
   
   // Country
-  let countryName = address?.country || "Nederland";
-  const countryCode = (address?.country_code || (countryName === "Nederland" ? "nl" : "xx")).toLowerCase();
+  const countryName = address.country || "Unknown";
+  const countryCode = (address.country_code || "xx").toLowerCase();
   
   return { cityName, provinceName, countryName, countryCode };
 };

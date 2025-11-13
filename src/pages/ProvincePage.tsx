@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getCitiesByProvince, getProvinceBySlug, City, Province } from "@/lib/database";
+import { getCitiesByProvince, getProvinceBySlug, City } from "@/lib/database";
+import { DUTCH_PROVINCES } from "@/lib/constants";
 import { Loader2, MapPin, Home } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
@@ -23,8 +24,10 @@ const ProvincePage = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [cities, setCities] = useState<City[]>([]);
-  const [provinceData, setProvinceData] = useState<Province | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Get province name from hardcoded list
+  const provinceData = DUTCH_PROVINCES.find(p => p.slug === province);
 
   useEffect(() => {
     const loadData = async () => {
@@ -32,19 +35,13 @@ const ProvincePage = () => {
 
       setIsLoading(true);
       try {
-        const [provinceResult, citiesResult] = await Promise.all([
-          getProvinceBySlug(province),
-          getCitiesByProvince(province)
-        ]);
-        
-        setProvinceData(provinceResult);
+        const citiesResult = await getCitiesByProvince(province);
         setCities(citiesResult);
 
         if (citiesResult.length === 0) {
           toast({
             title: "Geen steden gevonden",
-            description: `Er zijn nog geen steden gevonden in ${province}`,
-            variant: "destructive",
+            description: `Er zijn nog geen steden met restaurants in ${provinceData?.name || province}. Probeer een restaurant te zoeken om data toe te voegen.`,
           });
         }
       } catch (error) {
@@ -60,7 +57,7 @@ const ProvincePage = () => {
     };
 
     loadData();
-  }, [province, toast]);
+  }, [province, toast, provinceData?.name]);
 
   const handleCityClick = (citySlug: string) => {
     navigate(`/${lang}/${province}/${citySlug}`);
@@ -131,8 +128,11 @@ const ProvincePage = () => {
               <h3 className="text-2xl font-semibold mb-2 text-foreground">
                 Geen steden gevonden
               </h3>
-              <p className="text-muted-foreground max-w-md">
-                Er zijn nog geen steden gevonden in {provinceData?.name || province}.
+              <p className="text-muted-foreground max-w-md mb-4">
+                Er zijn nog geen steden met restaurants in {provinceData?.name || province}.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Gebruik de zoekfunctie op de homepage om restaurants toe te voegen aan de database.
               </p>
             </div>
           )}

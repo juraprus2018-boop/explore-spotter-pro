@@ -33,10 +33,12 @@ const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, onViewOnMa
   };
 
   // Extract city name from display_name
+  // Format is usually: "Restaurant name, City, Province, Country"
   const getCityName = () => {
     const parts = displayName.split(',').map(p => p.trim());
+    // City is typically the second part (index 1)
     if (parts.length >= 2) {
-      return parts[parts.length - 3] || parts[parts.length - 2] || "";
+      return parts[1];
     }
     return "";
   };

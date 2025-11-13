@@ -164,20 +164,17 @@ export const searchLocations = async (query: string): Promise<NominatimResult[]>
         q: query,
         format: "json",
         addressdetails: 1,
+        namedetails: 1,
         limit: 10,
-        // Only search for administrative places (cities, towns, countries, etc.)
-        featuretype: "settlement",
-      },
-      headers: {
-        "User-Agent": "EatNavigator/1.0",
+        dedupe: 1,
       },
     });
 
     // Filter to only include cities, towns, villages, countries, states
-    const locationResults = response.data.filter((result: NominatimResult) => {
-      const acceptedTypes = ['city', 'town', 'village', 'county', 'state', 'country', 'municipality'];
-      return acceptedTypes.includes(result.type) || acceptedTypes.includes(result.class);
-    });
+    const acceptedTypes = ['city', 'town', 'village', 'county', 'state', 'country', 'municipality'];
+    const locationResults = (response.data as NominatimResult[]).filter((result) =>
+      acceptedTypes.includes(result.type)
+    );
 
     return locationResults;
   } catch (error) {

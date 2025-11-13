@@ -7,6 +7,7 @@ import { Loader2, MapPin, Home } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HreflangAlternates from "@/components/HreflangAlternates";
 import { useToast } from "@/hooks/use-toast";
 import {
   Breadcrumb,
@@ -65,6 +66,7 @@ const ProvincePage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <HreflangAlternates />
       <Header />
 
       <main className="flex-1">

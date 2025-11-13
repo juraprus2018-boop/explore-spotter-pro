@@ -9,6 +9,7 @@ import MapView from "@/components/MapView";
 import RouteNavigation from "@/components/RouteNavigation";
 import ReviewSection from "@/components/ReviewSection";
 import StructuredData from "@/components/StructuredData";
+import HreflangAlternates from "@/components/HreflangAlternates";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -150,6 +151,8 @@ const RestaurantDetail = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <HreflangAlternates />
+      <StructuredData restaurant={restaurant} reviews={reviews} averageRating={averageRating} />
       <Header />
       
       <main className="flex-1">

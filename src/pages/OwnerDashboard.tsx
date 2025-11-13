@@ -11,6 +11,7 @@ import { Loader2, Store, CheckCircle, Clock, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HreflangAlternates from "@/components/HreflangAlternates";
 
 interface Restaurant {
   id: string;
@@ -183,6 +184,7 @@ const OwnerDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <HreflangAlternates />
       <Header />
       <main className="flex-1">
         <div className="container mx-auto py-8 px-4 max-w-4xl">

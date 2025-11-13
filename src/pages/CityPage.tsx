@@ -8,6 +8,7 @@ import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HreflangAlternates from "@/components/HreflangAlternates";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -174,6 +175,7 @@ const CityPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <HreflangAlternates />
       <Header />
 
       <main className="flex-1">

@@ -13,8 +13,7 @@ import { createSlug } from "@/lib/database";
 
 const restaurantSchema = z.object({
   name: z.string().min(2, "Naam moet minimaal 2 karakters zijn").max(100),
-  address: z.string().min(5, "Adres moet minimaal 5 karakters zijn").max(255),
-  city: z.string().min(2, "Stad moet minimaal 2 karakters zijn").max(100),
+  email: z.string().email("Ongeldig e-mailadres"),
   phone: z.string().optional(),
   website: z.string().url("Ongeldig website adres").optional().or(z.literal("")),
   description: z.string().max(1000, "Beschrijving mag maximaal 1000 karakters zijn").optional(),
@@ -31,15 +30,63 @@ const AddRestaurantForm = ({ onSuccess }: AddRestaurantFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    address: "",
-    city: "",
+    email: "",
     phone: "",
     website: "",
     description: "",
   });
+  const [locationQuery, setLocationQuery] = useState("");
+  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    display_name: string;
+    lat: number;
+    lon: number;
+  } | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const handleLocationSearch = async (query: string) => {
+    setLocationQuery(query);
+    if (query.length < 3) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?` +
+        `format=json&q=${encodeURIComponent(query)}&` +
+        `addressdetails=1&limit=5`
+      );
+      const data = await response.json();
+      setLocationSuggestions(data);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error("Error fetching location suggestions:", error);
+    }
+  };
+
+  const handleSelectLocation = (location: any) => {
+    setSelectedLocation({
+      display_name: location.display_name,
+      lat: parseFloat(location.lat),
+      lon: parseFloat(location.lon),
+    });
+    setLocationQuery(location.display_name);
+    setShowSuggestions(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate location selection
+    if (!selectedLocation) {
+      toast({
+        title: "Locatie vereist",
+        description: "Selecteer een locatie uit de suggesties.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Validate inputs
     try {
@@ -70,20 +117,21 @@ const AddRestaurantForm = ({ onSuccess }: AddRestaurantFormProps) => {
         return;
       }
 
-      // For user-submitted restaurants, we create a simplified entry
-      // We use a negative place_id to distinguish from Nominatim results
+      // For user-submitted restaurants, we create an entry with proper location data
       const newRestaurant = {
         name: formData.name,
-        display_name: `${formData.name}, ${formData.address}, ${formData.city}`,
+        display_name: selectedLocation.display_name,
         place_id: Date.now() * -1, // Negative ID for user-submitted
-        lat: 0, // Will be geocoded later or manually set
-        lon: 0,
+        lat: selectedLocation.lat,
+        lon: selectedLocation.lon,
         type: "restaurant",
         user_submitted: true,
         owner_id: user.id,
+        owner_email: formData.email,
         phone: formData.phone || null,
         website: formData.website || null,
         description: formData.description || null,
+        status: 'pending',
       };
 
       const { data, error } = await supabase
@@ -94,16 +142,37 @@ const AddRestaurantForm = ({ onSuccess }: AddRestaurantFormProps) => {
 
       if (error) throw error;
 
+      // Send notification email
+      try {
+        await supabase.functions.invoke('notify-restaurant-added', {
+          body: {
+            email: formData.email,
+            restaurantName: formData.name,
+            address: selectedLocation.display_name,
+          },
+        });
+      } catch (emailError) {
+        console.error("Error sending notification email:", emailError);
+        // Don't fail the whole operation if email fails
+      }
+
       toast({
         title: "Restaurant toegevoegd!",
-        description: "Je restaurant is succesvol toegevoegd.",
+        description: "Je ontvangt een e-mail met verdere instructies. Het restaurant wordt zichtbaar na goedkeuring.",
       });
 
-      // Navigate to restaurant detail page
-      if (data) {
-        const citySlug = createSlug(formData.city);
-        navigate(`/${lang}/${citySlug}/${Math.abs(data.place_id)}`);
-      }
+      // Clear form and navigate
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        website: "",
+        description: "",
+      });
+      setSelectedLocation(null);
+      setLocationQuery("");
+      
+      navigate(`/${lang}`);
 
       if (onSuccess) onSuccess();
     } catch (error: any) {
@@ -129,36 +198,59 @@ const AddRestaurantForm = ({ onSuccess }: AddRestaurantFormProps) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Restaurant Naam *</Label>
+            <Label htmlFor="name">Restaurant naam *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Bijvoorbeeld: Café De Vriendschap"
+              placeholder="Bijv. De Gouden Leeuw"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">Adres *</Label>
+          <div className="space-y-2 relative">
+            <Label htmlFor="location">Adres en stad *</Label>
             <Input
-              id="address"
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              placeholder="Bijvoorbeeld: Hoofdstraat 123"
+              id="location"
+              value={locationQuery}
+              onChange={(e) => handleLocationSearch(e.target.value)}
+              onFocus={() => locationSuggestions.length > 0 && setShowSuggestions(true)}
+              placeholder="Zoek adres of stad..."
               required
+              className={selectedLocation ? "border-green-500" : ""}
             />
+            {showSuggestions && locationSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
+                {locationSuggestions.map((location, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleSelectLocation(location)}
+                    className="w-full text-left px-4 py-2 hover:bg-accent text-sm"
+                  >
+                    {location.display_name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {selectedLocation && (
+              <p className="text-xs text-green-600">✓ Locatie geselecteerd</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="city">Stad *</Label>
+            <Label htmlFor="email">E-mailadres *</Label>
             <Input
-              id="city"
-              value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              placeholder="Bijvoorbeeld: Amsterdam"
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="jouw@email.nl"
               required
             />
+            <p className="text-xs text-muted-foreground">
+              Je ontvangt een bevestiging op dit adres
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -168,7 +260,7 @@ const AddRestaurantForm = ({ onSuccess }: AddRestaurantFormProps) => {
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="Bijvoorbeeld: +31 20 1234567"
+              placeholder="Bijv. +31 20 1234567"
             />
           </div>
 
@@ -179,7 +271,7 @@ const AddRestaurantForm = ({ onSuccess }: AddRestaurantFormProps) => {
               type="url"
               value={formData.website}
               onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-              placeholder="Bijvoorbeeld: https://www.restaurant.nl"
+              placeholder="Bijv. https://www.restaurant.nl"
             />
           </div>
 

@@ -37,11 +37,20 @@ const RestaurantVerification = () => {
   const fetchRestaurants = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      let query = (supabase as any)
         .from('restaurants')
-        .select('*')
-        .eq('claim_status', activeTab)
-        .order('claimed_at', { ascending: false });
+        .select('*');
+      
+      // Filter based on active tab
+      if (activeTab === 'pending') {
+        query = query.or('claim_status.eq.pending,status.eq.pending');
+      } else if (activeTab === 'approved') {
+        query = query.or('claim_status.eq.approved,status.eq.approved');
+      } else if (activeTab === 'rejected') {
+        query = query.or('claim_status.eq.rejected,status.eq.rejected');
+      }
+      
+      const { data, error } = await query.order('claimed_at', { ascending: false });
 
       if (error) throw error;
       setRestaurants(data || []);
@@ -66,6 +75,7 @@ const RestaurantVerification = () => {
         .from('restaurants')
         .update({
           claim_status: newStatus,
+          status: newStatus, // Update both fields
           verified_by: user?.id,
           verified_at: new Date().toISOString(),
           verification_note: verificationNote || null,
@@ -75,7 +85,7 @@ const RestaurantVerification = () => {
       if (error) throw error;
 
       toast({
-        title: newStatus === 'approved' ? "Claim goedgekeurd" : "Claim afgewezen",
+        title: newStatus === 'approved' ? "Restaurant goedgekeurd" : "Restaurant afgewezen",
         description: "De status is bijgewerkt",
       });
 

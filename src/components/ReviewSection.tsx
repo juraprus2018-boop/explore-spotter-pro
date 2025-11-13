@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import ReCAPTCHA from "react-google-recaptcha";
 
 interface Review {
   id: string;
@@ -39,6 +40,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
   const [editingReview, setEditingReview] = useState<string | null>(null);
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   useEffect(() => {
     // Check auth state
@@ -117,6 +119,19 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
       return;
     }
 
+    // Get reCAPTCHA token
+    const recaptchaToken = await recaptchaRef.current?.executeAsync();
+    recaptchaRef.current?.reset();
+
+    if (!recaptchaToken) {
+      toast({
+        title: "Verificatie vereist",
+        description: "reCAPTCHA verificatie mislukt. Probeer het opnieuw.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Upload photos first
@@ -140,36 +155,47 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
       }
 
       if (editingReview) {
-        // Update existing review
-        const { error } = await (supabase as any)
-          .from('reviews')
-          .update({
+        // Update existing review via edge function
+        const { error: functionError } = await supabase.functions.invoke('submit-review', {
+          body: {
+            restaurantId,
             rating,
-            comment: comment.trim() || null,
-            photos: photoUrls.length > 0 ? photoUrls : null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', editingReview);
+            comment: comment.trim(),
+            photos: photoUrls,
+            recaptchaToken,
+            editingReviewId: editingReview,
+          },
+        });
 
-        if (error) throw error;
+        if (functionError) throw functionError;
 
         toast({
           title: "Review bijgewerkt",
           description: "Je review is succesvol aangepast.",
         });
       } else {
-        // Create new review (anonymous or authenticated)
-        const { error } = await (supabase as any)
-          .from('reviews')
-          .insert({
-            user_id: user?.id || null,
-            restaurant_id: restaurantId,
+        // Create new review via edge function
+        const { data, error: functionError } = await supabase.functions.invoke('submit-review', {
+          body: {
+            restaurantId,
             rating,
-            comment: comment.trim() || null,
-            photos: photoUrls.length > 0 ? photoUrls : null,
-          });
+            comment: comment.trim(),
+            photos: photoUrls,
+            recaptchaToken,
+          },
+        });
 
-        if (error) throw error;
+        if (functionError) throw functionError;
+
+        // Check for rate limit error
+        if (data?.error) {
+          toast({
+            title: "Limiet bereikt",
+            description: data.error,
+            variant: "destructive",
+          });
+          return;
+        }
 
         toast({
           title: "Review geplaatst!",
@@ -345,6 +371,14 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
                   )}
                 </div>
               </div>
+            </div>
+
+            <div className="pt-2">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                size="invisible"
+                sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              />
             </div>
 
             <div className="flex gap-2">

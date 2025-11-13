@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -7,6 +8,14 @@ const Terms = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{t('terms.seoTitle')}</title>
+        <meta name="description" content={t('terms.seoDescription')} />
+        <meta property="og:title" content={t('terms.seoTitle')} />
+        <meta property="og:description" content={t('terms.seoDescription')} />
+        <meta name="twitter:title" content={t('terms.seoTitle')} />
+        <meta name="twitter:description" content={t('terms.seoDescription')} />
+      </Helmet>
       <Header />
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto prose prose-lg">

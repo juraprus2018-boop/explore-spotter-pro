@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -82,6 +83,14 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{t('contact.seoTitle')}</title>
+        <meta name="description" content={t('contact.seoDescription')} />
+        <meta property="og:title" content={t('contact.seoTitle')} />
+        <meta property="og:description" content={t('contact.seoDescription')} />
+        <meta name="twitter:title" content={t('contact.seoTitle')} />
+        <meta name="twitter:description" content={t('contact.seoDescription')} />
+      </Helmet>
       <Header />
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">

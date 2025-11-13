@@ -117,6 +117,8 @@ const createTranslations = (lang: string) => {
       contact: {
         title: "Neem contact op",
         subtitle: "Heb je een vraag of feedback? We horen graag van je.",
+        seoTitle: "Contact - EatNavigator | Neem contact met ons op",
+        seoDescription: "Heb je vragen over EatNavigator? Neem contact met ons op via ons contactformulier. We staan 24/7 voor je klaar.",
         email: "Email",
         location: "Locatie",
         support: "Ondersteuning",
@@ -144,6 +146,8 @@ const createTranslations = (lang: string) => {
       about: {
         title: "Over EatNavigator",
         subtitle: "Jouw vertrouwde gids om de beste restaurants wereldwijd te ontdekken",
+        seoTitle: "Over Ons - EatNavigator | Jouw Restaurant Gids",
+        seoDescription: "Ontdek het verhaal achter EatNavigator. We helpen fijnproevers wereldwijd de perfecte eetervaring te vinden met uitgebreide restaurantinformatie.",
         intro: "EatNavigator is een uitgebreid platform voor het ontdekken van restaurants dat fijnproevers helpt om overal de perfecte eetervaring te vinden. Onze missie is om mensen te verbinden met lekker eten en onvergetelijke eetervaringen over de hele wereld.",
         storyTitle: "Ons Verhaal",
         story: "Opgericht met een passie voor eten en technologie, werd EatNavigator gecreëerd om een eenvoudig probleem op te lossen: het vinden van het juiste restaurant hoeft niet ingewikkeld te zijn. We maken gebruik van geavanceerde kaarttechnologie en uitgebreide restaurantgegevens om je nauwkeurige, actuele informatie te bieden over eetgelegenheden bij jou in de buurt.",
@@ -162,11 +166,15 @@ const createTranslations = (lang: string) => {
       },
       privacy: {
         title: "Privacybeleid",
+        seoTitle: "Privacybeleid - EatNavigator | Jouw Privacy Beschermd",
+        seoDescription: "Lees ons privacybeleid en ontdek hoe EatNavigator jouw persoonlijke gegevens beschermt en gebruikt. Transparante informatie over gegevensbescherming.",
         lastUpdated: "Laatst bijgewerkt:",
         intro: "EatNavigator ('wij', 'ons' of 'onze') zet zich in voor de bescherming van uw privacy. Dit Privacybeleid legt uit hoe wij uw informatie verzamelen, gebruiken, openbaar maken en beschermen wanneer u onze website bezoekt en onze diensten gebruikt.",
       },
       terms: {
         title: "Algemene Voorwaarden",
+        seoTitle: "Algemene Voorwaarden - EatNavigator | Gebruiksvoorwaarden",
+        seoDescription: "Lees de algemene voorwaarden van EatNavigator. Informatie over het gebruik van ons platform, reviews plaatsen en restaurant claims.",
         lastUpdated: "Laatst bijgewerkt:",
         acceptance: "Door EatNavigator ('de Dienst') te openen en te gebruiken, accepteert u en gaat u akkoord gebonden te zijn aan de voorwaarden en bepalingen van deze overeenkomst. Als u niet akkoord gaat met deze Algemene Voorwaarden, gebruik dan de Dienst niet.",
       },
@@ -295,6 +303,8 @@ const createTranslations = (lang: string) => {
       contact: {
         title: "Contact Us",
         subtitle: "Have a question or feedback? We'd love to hear from you.",
+        seoTitle: "Contact - EatNavigator | Get in Touch with Us",
+        seoDescription: "Have questions about EatNavigator? Contact us through our contact form. We're available 24/7 to help you.",
         email: "Email",
         location: "Location",
         support: "Support",
@@ -322,6 +332,8 @@ const createTranslations = (lang: string) => {
       about: {
         title: "About EatNavigator",
         subtitle: "Your trusted guide to discovering the best restaurants worldwide",
+        seoTitle: "About Us - EatNavigator | Your Restaurant Guide",
+        seoDescription: "Discover the story behind EatNavigator. We help food lovers worldwide find the perfect dining experience with comprehensive restaurant information.",
         intro: "EatNavigator is a comprehensive restaurant discovery platform that helps food lovers find the perfect dining experience wherever they are. Our mission is to connect people with great food and memorable dining experiences around the world.",
         storyTitle: "Our Story",
         story: "Founded with a passion for food and technology, EatNavigator was created to solve a simple problem: finding the right restaurant shouldn't be complicated. We leverage advanced mapping technology and comprehensive restaurant data to provide you with accurate, up-to-date information about dining options near you.",
@@ -340,11 +352,15 @@ const createTranslations = (lang: string) => {
       },
       privacy: {
         title: "Privacy Policy",
+        seoTitle: "Privacy Policy - EatNavigator | Your Privacy Protected",
+        seoDescription: "Read our privacy policy and discover how EatNavigator protects and uses your personal data. Transparent information about data protection.",
         lastUpdated: "Last updated:",
         intro: "EatNavigator ('we', 'our', or 'us') is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.",
       },
       terms: {
         title: "Terms & Conditions",
+        seoTitle: "Terms & Conditions - EatNavigator | Terms of Use",
+        seoDescription: "Read EatNavigator's terms and conditions. Information about using our platform, posting reviews, and restaurant claims.",
         lastUpdated: "Last updated:",
         acceptance: "By accessing and using EatNavigator ('the Service'), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms & Conditions, please do not use the Service.",
       },

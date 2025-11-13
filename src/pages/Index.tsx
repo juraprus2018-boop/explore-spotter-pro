@@ -115,45 +115,35 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      // First, try to search in database
-      let results = await getNearbyRestaurants(userLocation[0], userLocation[1], 25);
+      // ALWAYS search via Nominatim API first to get real nearby restaurants
+      const apiResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 25);
       
-      if (results.length > 0) {
+      if (apiResults.length > 0) {
+        // Save new results to database
+        await saveRestaurants(apiResults);
+        
+        // Now fetch from database to get full data with relations (city, province, country)
+        const results = await getNearbyRestaurants(userLocation[0], userLocation[1], 25);
+        
+        setDbResults(results);
+        setMapCenter(userLocation);
+        setMapZoom(13);
+        
         toast({
-          title: "Restaurants in de buurt",
-          description: `${results.length} restaurants gevonden in database`,
+          title: t("nearby.title"),
+          description: `${results.length} ${t("search.nearby").toLowerCase()}`,
         });
       } else {
-        // If not in database, search via Nominatim API
-        const apiResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 25);
-        
-        // Save to database
-        if (apiResults.length > 0) {
-          await saveRestaurants(apiResults);
-          // Fetch again from database to get full data with relations
-          results = await getNearbyRestaurants(userLocation[0], userLocation[1], 10);
-        }
-        
         toast({
-          title: "Restaurants in de buurt",
-          description: `${results.length} restaurants gevonden`,
-        });
-      }
-      
-      setDbResults(results);
-      setMapCenter(userLocation);
-      setMapZoom(13);
-      
-      if (results.length === 0) {
-        toast({
-          title: "Geen restaurants gevonden",
-          description: "Probeer het opnieuw of zoek handmatig naar restaurants.",
+          title: t("toast.noResults"),
+          description: "Er zijn geen restaurants in de buurt gevonden.",
           variant: "destructive",
         });
       }
     } catch (error) {
+      console.error("Nearby search error:", error);
       toast({
-        title: "Fout bij zoeken",
+        title: t("toast.searchError"),
         description: "Er is een fout opgetreden bij het zoeken naar restaurants in de buurt.",
         variant: "destructive",
       });

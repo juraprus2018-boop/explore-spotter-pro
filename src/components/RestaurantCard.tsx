@@ -38,6 +38,7 @@ const RestaurantCard = ({
   const navigate = useNavigate();
 
   const handleCardClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/${lang}/${provinceSlug}/${citySlug}/${placeId}`);
   };
 

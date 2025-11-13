@@ -23,6 +23,7 @@ const Index = () => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([52.3676, 4.9041]);
   const [mapZoom, setMapZoom] = useState(6);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [showMap, setShowMap] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -251,20 +252,33 @@ const Index = () => {
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">{t("results.loading")}</p>
+            <div className="relative">
+              <Utensils className="h-16 w-16 text-primary animate-spin" />
+              <Utensils className="h-16 w-16 text-primary/40 absolute top-0 left-0 animate-pulse" />
+            </div>
+            <p className="text-muted-foreground mt-6 text-lg">{t("results.loading")}</p>
           </div>
         ) : dbResults.length > 0 ? (
           <div className="space-y-12">
             <div>
-              <h2 className="text-3xl font-bold mb-6 text-foreground">
-                {t("map.title")}
-              </h2>
-              <MapView
-                locations={locations}
-                center={mapCenter}
-                zoom={mapZoom}
-              />
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-foreground">
+                  {t("map.title")}
+                </h2>
+                <button
+                  onClick={() => setShowMap(!showMap)}
+                  className="md:hidden px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  {showMap ? "Verberg kaart" : "Toon kaart"}
+                </button>
+              </div>
+              <div className={`${showMap ? 'block' : 'hidden'} md:block`}>
+                <MapView
+                  locations={locations}
+                  center={mapCenter}
+                  zoom={mapZoom}
+                />
+              </div>
             </div>
             
             <div>

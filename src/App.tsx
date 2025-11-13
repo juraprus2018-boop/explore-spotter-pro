@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import Index from "./pages/Index";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import CityPage from "./pages/CityPage";
+import ProvincePage from "./pages/ProvincePage";
 import NotFound from "./pages/NotFound";
 import LanguageRedirect from "./pages/LanguageRedirect";
 
@@ -43,7 +44,15 @@ const App = () => (
             }
           />
           <Route
-            path="/:lang/city/:city"
+            path="/:lang/:province"
+            element={
+              <LanguageWrapper>
+                <ProvincePage />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/:province/:city"
             element={
               <LanguageWrapper>
                 <CityPage />
@@ -51,7 +60,7 @@ const App = () => (
             }
           />
           <Route
-            path="/:lang/restaurant/:placeId"
+            path="/:lang/:province/:city/:placeId"
             element={
               <LanguageWrapper>
                 <RestaurantDetail />

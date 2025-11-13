@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAllCities } from "@/lib/database";
+import { getAllProvinces, Province } from "@/lib/database";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Building2, Loader2 } from "lucide-react";
+import { MapPin, Loader2 } from "lucide-react";
 
-const CitiesOverview = () => {
-  const [cities, setCities] = useState<string[]>([]);
+const ProvincesOverview = () => {
+  const [provinces, setProvinces] = useState<Province[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { lang } = useParams();
 
   useEffect(() => {
-    const loadCities = async () => {
+    const loadProvinces = async () => {
       setIsLoading(true);
-      const data = await getAllCities();
-      setCities(data.slice(0, 12)); // Show top 12 cities
+      const data = await getAllProvinces();
+      setProvinces(data);
       setIsLoading(false);
     };
 
-    loadCities();
+    loadProvinces();
   }, []);
 
   if (isLoading) {
@@ -27,10 +27,10 @@ const CitiesOverview = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Populaire steden
+            <MapPin className="h-5 w-5" />
+            Populaire provincies
           </CardTitle>
-          <CardDescription>Ontdek restaurants per stad</CardDescription>
+          <CardDescription>Ontdek restaurants per provincie</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex justify-center py-8">
@@ -41,7 +41,7 @@ const CitiesOverview = () => {
     );
   }
 
-  if (cities.length === 0) {
+  if (provinces.length === 0) {
     return null;
   }
 
@@ -49,22 +49,22 @@ const CitiesOverview = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Building2 className="h-5 w-5" />
-          Populaire steden
+          <MapPin className="h-5 w-5" />
+          Populaire provincies
         </CardTitle>
-        <CardDescription>Ontdek restaurants per stad</CardDescription>
+        <CardDescription>Ontdek restaurants per provincie</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {cities.map((city) => (
+          {provinces.map((province) => (
             <Button
-              key={city}
+              key={province.id}
               variant="outline"
               className="h-auto py-3 px-4 justify-start"
-              onClick={() => navigate(`/${lang}/city/${encodeURIComponent(city)}`)}
+              onClick={() => navigate(`/${lang}/${province.slug}`)}
             >
-              <Building2 className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate">{city}</span>
+              <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+              <span className="truncate">{province.name}</span>
             </Button>
           ))}
         </div>
@@ -73,4 +73,4 @@ const CitiesOverview = () => {
   );
 };
 
-export default CitiesOverview;
+export default ProvincesOverview;

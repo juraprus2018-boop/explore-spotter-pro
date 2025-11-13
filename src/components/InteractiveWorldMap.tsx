@@ -19,15 +19,21 @@ L.Icon.Default.mergeOptions({
 
 interface MapEventsProps {
   onLocationClick: (lat: number, lon: number) => void;
+  clickedPosition: [number, number] | null;
 }
 
-function MapEvents({ onLocationClick }: MapEventsProps) {
+function MapEvents({ onLocationClick, clickedPosition }: MapEventsProps) {
   useMapEvents({
     click: (e) => {
       onLocationClick(e.latlng.lat, e.latlng.lng);
     },
   });
-  return null;
+  
+  return clickedPosition ? (
+    <Marker position={clickedPosition}>
+      <Popup>Restaurants laden...</Popup>
+    </Marker>
+  ) : null;
 }
 
 const InteractiveWorldMap = () => {
@@ -132,12 +138,10 @@ const InteractiveWorldMap = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <MapEvents onLocationClick={handleLocationClick} />
-        {clickedPosition && (
-          <Marker position={clickedPosition}>
-            <Popup>Restaurants laden...</Popup>
-          </Marker>
-        )}
+        <MapEvents 
+          onLocationClick={handleLocationClick}
+          clickedPosition={clickedPosition}
+        />
       </MapContainer>
 
       {isProcessing && (

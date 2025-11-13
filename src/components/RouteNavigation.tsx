@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -51,11 +51,7 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
   const [locationStatus, setLocationStatus] = useState<"loading" | "ready" | "error">("loading");
   const { toast } = useToast();
 
-  useEffect(() => {
-    requestLocation();
-  }, []);
-
-  const requestLocation = () => {
+  const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocationStatus("error");
       toast({
@@ -83,7 +79,11 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
     );
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
 
   const fetchRoute = async () => {
     if (!userLocation) {
@@ -214,10 +214,17 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
           Math.max(...routeData.coordinates.map(c => c[1])),
         ],
       ]
-    : [
+    : userLocation
+    ? [
         [Math.min(userLocation[0], destinationLat), Math.min(userLocation[1], destinationLon)],
         [Math.max(userLocation[0], destinationLat), Math.max(userLocation[1], destinationLon)],
-      ];
+      ]
+    : [[destinationLat, destinationLon], [destinationLat, destinationLon]];
+
+  // Safety check - should never happen due to early return above
+  if (!userLocation) {
+    return null;
+  }
 
   return (
     <Card>

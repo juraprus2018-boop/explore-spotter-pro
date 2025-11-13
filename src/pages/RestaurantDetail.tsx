@@ -236,6 +236,18 @@ const RestaurantDetail = () => {
                     <p className="font-medium capitalize">{restaurant.type}</p>
                   </div>
                 )}
+                {(restaurant as any).cuisine && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Keuken type</p>
+                    <p className="font-medium capitalize">{(restaurant as any).cuisine.replace(/_/g, ' ')}</p>
+                  </div>
+                )}
+                {(restaurant as any).brand && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Merk</p>
+                    <p className="font-medium">{(restaurant as any).brand}</p>
+                  </div>
+                )}
                 {(restaurant as any).phone && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Telefoonnummer</p>
@@ -260,15 +272,79 @@ const RestaurantDetail = () => {
                 {(restaurant as any).opening_hours && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Openingstijden</p>
-                    <p className="font-medium">
+                    <p className="font-medium whitespace-pre-line">
                       {typeof (restaurant as any).opening_hours === 'object' 
                         ? (restaurant as any).opening_hours.hours || JSON.stringify((restaurant as any).opening_hours)
                         : (restaurant as any).opening_hours}
                     </p>
                   </div>
                 )}
+                
+                {/* Facilities */}
+                {((restaurant as any).wheelchair || (restaurant as any).outdoor_seating || (restaurant as any).takeaway || (restaurant as any).delivery) && (
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground mb-2">Faciliteiten</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(restaurant as any).wheelchair === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                          ♿ Rolstoeltoegankelijk
+                        </span>
+                      )}
+                      {(restaurant as any).outdoor_seating === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                          🌤️ Terras
+                        </span>
+                      )}
+                      {(restaurant as any).takeaway === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                          🥡 Afhalen
+                        </span>
+                      )}
+                      {(restaurant as any).delivery === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                          🚚 Bezorgen
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Diet Options */}
+                {(restaurant as any).diet_options && Object.keys((restaurant as any).diet_options).length > 0 && (
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground mb-2">Dieetopties</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(restaurant as any).diet_options.vegetarian === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-500/10 text-green-700 dark:text-green-400">
+                          🥗 Vegetarisch
+                        </span>
+                      )}
+                      {(restaurant as any).diet_options.vegan === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-500/10 text-green-700 dark:text-green-400">
+                          🌱 Veganistisch
+                        </span>
+                      )}
+                      {(restaurant as any).diet_options.gluten_free === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-500/10 text-green-700 dark:text-green-400">
+                          🌾 Glutenvrij
+                        </span>
+                      )}
+                      {(restaurant as any).diet_options.halal === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-500/10 text-green-700 dark:text-green-400">
+                          ☪️ Halal
+                        </span>
+                      )}
+                      {(restaurant as any).diet_options.kosher === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-500/10 text-green-700 dark:text-green-400">
+                          ✡️ Koosjer
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
                 {cityName && (
-                  <div>
+                  <div className="pt-4 border-t">
                     <p className="text-sm text-muted-foreground mb-1">Stad</p>
                     <p className="font-medium">{cityName}</p>
                   </div>
@@ -279,6 +355,7 @@ const RestaurantDetail = () => {
                     <p className="font-medium">{provinceName}</p>
                   </div>
                 )}
+                
                 
                 {/* Ownership and Claim Section */}
                 {(restaurant as any).claim_status === 'approved' && (restaurant as any).owner_id ? (

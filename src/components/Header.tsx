@@ -1,11 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { Globe, Utensils, LogIn, LogOut, Shield, Store, Navigation } from "lucide-react";
+import { Utensils, LogIn, LogOut, Shield, Store, Navigation } from "lucide-react";
 import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
+import LanguageSwitcher from "./LanguageSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,23 +60,6 @@ const Header = () => {
     await supabase.auth.signOut();
     setUser(null);
     navigate(`/${lang || 'nl'}`);
-  };
-
-  const languages = [
-    { code: "nl", name: "Nederlands" },
-    { code: "en", name: "English" },
-    { code: "de", name: "Deutsch" },
-    { code: "fr", name: "Français" },
-    { code: "es", name: "Español" },
-    { code: "it", name: "Italiano" },
-    { code: "hr", name: "Hrvatski" },
-    { code: "pt", name: "Português" },
-    { code: "pl", name: "Polski" },
-  ];
-
-  const changeLanguage = (newLang: string) => {
-    i18n.changeLanguage(newLang);
-    navigate(`/${newLang}`);
   };
 
   const handleNearbyClick = () => {
@@ -176,25 +160,7 @@ const Header = () => {
             </Button>
           )}
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Globe className="h-4 w-4" />
-                {languages.find(l => l.code === lang)?.name || "Nederlands"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {languages.map((language) => (
-                <DropdownMenuItem
-                  key={language.code}
-                  onClick={() => changeLanguage(language.code)}
-                  className={lang === language.code ? "bg-accent" : ""}
-                >
-                  {language.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <LanguageSwitcher />
         </nav>
       </div>
     </header>

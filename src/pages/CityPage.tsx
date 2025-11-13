@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getRestaurantsByCity, getCityBySlug, DatabaseRestaurant, City } from "@/lib/database";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, MapPin, Home, Filter as FilterIcon } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Home, Filter as FilterIcon, Map } from "lucide-react";
 import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
@@ -40,6 +40,7 @@ const CityPage = () => {
   const [selectedCuisine, setSelectedCuisine] = useState<string>("all");
   const [selectedFacility, setSelectedFacility] = useState<string>("all");
   const [selectedDiet, setSelectedDiet] = useState<string>("all");
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -326,14 +327,27 @@ const CityPage = () => {
               </Card>
 
               <div>
-                <h2 className="text-3xl font-bold mb-6 text-foreground">
-                  {t("map.title")}
-                </h2>
-                <MapView
-                  locations={locations}
-                  center={mapCenter}
-                  zoom={12}
-                />
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-3xl font-bold text-foreground">
+                    {t("map.title")}
+                  </h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowMap(!showMap)}
+                    className="gap-2"
+                  >
+                    <Map className="h-4 w-4" />
+                    {showMap ? "Verberg kaart" : "Toon kaart"}
+                  </Button>
+                </div>
+                {showMap && (
+                  <MapView
+                    locations={locations}
+                    center={mapCenter}
+                    zoom={12}
+                  />
+                )}
               </div>
 
               <div>

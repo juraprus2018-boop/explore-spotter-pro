@@ -32,6 +32,12 @@ const resources = {
       },
       map: {
         title: "Kaart Weergave",
+        showMap: "Toon kaart",
+        hideMap: "Verberg kaart",
+      },
+      provinces: {
+        title: "Populaire provincies",
+        description: "Ontdek restaurants per provincie",
       },
       results: {
         title: "Gevonden Restaurants",
@@ -79,6 +85,8 @@ const resources = {
         noResultsDesc: "Probeer een andere zoekterm",
         searchError: "Fout bij zoeken",
         searchErrorDesc: "Er ging iets mis bij het zoeken. Probeer het later opnieuw.",
+        nearbyTitle: "Restaurants in de buurt",
+        nearbyFound: "{{count}} restaurants gevonden",
       },
     },
   },
@@ -112,6 +120,12 @@ const resources = {
       },
       map: {
         title: "Map View",
+        showMap: "Show map",
+        hideMap: "Hide map",
+      },
+      provinces: {
+        title: "Popular provinces",
+        description: "Discover restaurants by province",
       },
       results: {
         title: "Found Restaurants",
@@ -159,6 +173,8 @@ const resources = {
         noResultsDesc: "Try a different search term",
         searchError: "Search error",
         searchErrorDesc: "Something went wrong while searching. Please try again later.",
+        nearbyTitle: "Restaurants nearby",
+        nearbyFound: "{{count}} restaurants found",
       },
     },
   },
@@ -192,6 +208,12 @@ const resources = {
       },
       map: {
         title: "Kartenansicht",
+        showMap: "Karte anzeigen",
+        hideMap: "Karte ausblenden",
+      },
+      provinces: {
+        title: "Beliebte Provinzen",
+        description: "Entdecken Sie Restaurants nach Provinz",
       },
       results: {
         title: "Gefundene Restaurants",
@@ -235,6 +257,8 @@ const resources = {
         noResultsDesc: "Versuchen Sie einen anderen Suchbegriff",
         searchError: "Suchfehler",
         searchErrorDesc: "Beim Suchen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+        nearbyTitle: "Restaurants in der Nähe",
+        nearbyFound: "{{count}} Restaurants gefunden",
       },
     },
   },
@@ -268,6 +292,12 @@ const resources = {
       },
       map: {
         title: "Vue de la carte",
+        showMap: "Afficher la carte",
+        hideMap: "Masquer la carte",
+      },
+      provinces: {
+        title: "Provinces populaires",
+        description: "Découvrez les restaurants par province",
       },
       results: {
         title: "Restaurants trouvés",
@@ -311,6 +341,8 @@ const resources = {
         noResultsDesc: "Essayez un autre terme de recherche",
         searchError: "Erreur de recherche",
         searchErrorDesc: "Une erreur s'est produite lors de la recherche. Veuillez réessayer plus tard.",
+        nearbyTitle: "Restaurants à proximité",
+        nearbyFound: "{{count}} restaurants trouvés",
       },
     },
   },
@@ -344,6 +376,12 @@ const resources = {
       },
       map: {
         title: "Vista del Mapa",
+        showMap: "Mostrar mapa",
+        hideMap: "Ocultar mapa",
+      },
+      provinces: {
+        title: "Provincias populares",
+        description: "Descubre restaurantes por provincia",
       },
       results: {
         title: "Restaurantes Encontrados",
@@ -387,6 +425,8 @@ const resources = {
         noResultsDesc: "Prueba con otro término de búsqueda",
         searchError: "Error de búsqueda",
         searchErrorDesc: "Algo salió mal al buscar. Inténtalo más tarde.",
+        nearbyTitle: "Restaurantes cercanos",
+        nearbyFound: "{{count}} restaurantes encontrados",
       },
     },
   },
@@ -420,6 +460,12 @@ const resources = {
       },
       map: {
         title: "Vista Mappa",
+        showMap: "Mostra mappa",
+        hideMap: "Nascondi mappa",
+      },
+      provinces: {
+        title: "Province popolari",
+        description: "Scopri i ristoranti per provincia",
       },
       results: {
         title: "Ristoranti Trovati",
@@ -463,6 +509,8 @@ const resources = {
         noResultsDesc: "Prova un altro termine di ricerca",
         searchError: "Errore di ricerca",
         searchErrorDesc: "Qualcosa è andato storto durante la ricerca. Riprova più tardi.",
+        nearbyTitle: "Ristoranti nelle vicinanze",
+        nearbyFound: "{{count}} ristoranti trovati",
       },
     },
   },
@@ -496,6 +544,12 @@ const resources = {
       },
       map: {
         title: "Prikaz Karte",
+        showMap: "Prikaži kartu",
+        hideMap: "Sakrij kartu",
+      },
+      provinces: {
+        title: "Popularne pokrajine",
+        description: "Otkrij restorane po pokrajini",
       },
       results: {
         title: "Pronađeni Restorani",
@@ -539,6 +593,8 @@ const resources = {
         noResultsDesc: "Pokušaj s drugim pojmom pretraživanja",
         searchError: "Greška pretraživanja",
         searchErrorDesc: "Nešto je pošlo po zlu pri pretraživanju. Pokušaj kasnije.",
+        nearbyTitle: "Restorani u blizini",
+        nearbyFound: "{{count}} restorana pronađeno",
       },
     },
   },
@@ -572,6 +628,12 @@ const resources = {
       },
       map: {
         title: "Vista do Mapa",
+        showMap: "Mostrar mapa",
+        hideMap: "Ocultar mapa",
+      },
+      provinces: {
+        title: "Províncias populares",
+        description: "Descubra restaurantes por província",
       },
       results: {
         title: "Restaurantes Encontrados",
@@ -615,6 +677,8 @@ const resources = {
         noResultsDesc: "Tente outro termo de pesquisa",
         searchError: "Erro de pesquisa",
         searchErrorDesc: "Algo deu errado ao pesquisar. Tente mais tarde.",
+        nearbyTitle: "Restaurantes próximos",
+        nearbyFound: "{{count}} restaurantes encontrados",
       },
     },
   },
@@ -648,6 +712,12 @@ const resources = {
       },
       map: {
         title: "Widok Mapy",
+        showMap: "Pokaż mapę",
+        hideMap: "Ukryj mapę",
+      },
+      provinces: {
+        title: "Popularne prowincje",
+        description: "Odkryj restauracje według prowincji",
       },
       results: {
         title: "Znalezione Restauracje",
@@ -691,6 +761,8 @@ const resources = {
         noResultsDesc: "Spróbuj innego wyszukiwanego hasła",
         searchError: "Błąd wyszukiwania",
         searchErrorDesc: "Coś poszło nie tak podczas wyszukiwania. Spróbuj później.",
+        nearbyTitle: "Restauracje w pobliżu",
+        nearbyFound: "{{count}} restauracji znalezionych",
       },
     },
   },

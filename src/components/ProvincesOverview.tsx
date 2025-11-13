@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { DUTCH_PROVINCES } from "@/lib/constants";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,15 +8,16 @@ import { MapPin } from "lucide-react";
 const ProvincesOverview = () => {
   const navigate = useNavigate();
   const { lang } = useParams();
+  const { t } = useTranslation();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="h-5 w-5" />
-          Populaire provincies
+          {t("provinces.title")}
         </CardTitle>
-        <CardDescription>Ontdek restaurants per provincie</CardDescription>
+        <CardDescription>{t("provinces.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

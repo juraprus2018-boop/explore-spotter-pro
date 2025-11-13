@@ -63,8 +63,8 @@ const Index = () => {
         setMapCenter([lat, lon]);
         setMapZoom(13);
         toast({
-          title: "Restaurants in de buurt",
-          description: `${dbRestaurants.length} restaurants gevonden`,
+          title: t("toast.nearbyTitle"),
+          description: t("toast.nearbyFound", { count: dbRestaurants.length }),
         });
       }
 
@@ -188,8 +188,8 @@ const Index = () => {
         setMapCenter(userLocation);
         setMapZoom(13);
         toast({
-          title: "Restaurants in de buurt",
-          description: `${dbRestaurants.length} restaurants gevonden`,
+          title: t("toast.nearbyTitle"),
+          description: t("toast.nearbyFound", { count: dbRestaurants.length }),
         });
       }
 
@@ -269,7 +269,7 @@ const Index = () => {
                   onClick={() => setShowMap(!showMap)}
                   className="md:hidden px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                 >
-                  {showMap ? "Verberg kaart" : "Toon kaart"}
+                  {showMap ? t("map.hideMap") : t("map.showMap")}
                 </button>
               </div>
               <div className={`${showMap ? 'block' : 'hidden'} md:block`}>

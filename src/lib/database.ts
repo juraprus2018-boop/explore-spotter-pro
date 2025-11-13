@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { NominatimResult } from "./nominatim";
+const db = supabase as any;
 
 export interface Country {
   id: string;
@@ -74,7 +75,7 @@ const extractLocationData = (result: NominatimResult) => {
 export const getOrCreateCountry = async (name: string, code: string): Promise<string | null> => {
   try {
     // Try to find existing
-    const { data: existing, error: findError } = await supabase
+    const { data: existing, error: findError } = await db
       .from('countries')
       .select('id')
       .eq('name', name)
@@ -83,7 +84,7 @@ export const getOrCreateCountry = async (name: string, code: string): Promise<st
     if (existing) return existing.id;
 
     // Create new
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('countries')
       .insert({ name, code })
       .select('id')
@@ -107,7 +108,7 @@ export const getOrCreateProvince = async (name: string, countryId: string): Prom
     const slug = createSlug(name);
     
     // Try to find existing
-    const { data: existing, error: findError } = await supabase
+    const { data: existing, error: findError } = await db
       .from('provinces')
       .select('id')
       .eq('name', name)
@@ -117,7 +118,7 @@ export const getOrCreateProvince = async (name: string, countryId: string): Prom
     if (existing) return existing.id;
 
     // Create new
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('provinces')
       .insert({ name, slug, country_id: countryId })
       .select('id')
@@ -141,7 +142,7 @@ export const getOrCreateCity = async (name: string, provinceId: string): Promise
     const slug = createSlug(name);
     
     // Try to find existing
-    const { data: existing, error: findError } = await supabase
+    const { data: existing, error: findError } = await db
       .from('cities')
       .select('id')
       .eq('name', name)
@@ -151,7 +152,7 @@ export const getOrCreateCity = async (name: string, provinceId: string): Promise
     if (existing) return existing.id;
 
     // Create new
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('cities')
       .insert({ name, slug, province_id: provinceId })
       .select('id')
@@ -226,7 +227,7 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
 
 export const getRestaurantByPlaceId = async (placeId: number): Promise<DatabaseRestaurant | null> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('restaurants')
       .select(`
         *,
@@ -255,7 +256,7 @@ export const getRestaurantByPlaceId = async (placeId: number): Promise<DatabaseR
 
 export const getAllRestaurants = async (): Promise<DatabaseRestaurant[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('restaurants')
       .select(`
         *,
@@ -283,7 +284,7 @@ export const getAllRestaurants = async (): Promise<DatabaseRestaurant[]> => {
 
 export const searchRestaurantsInDatabase = async (query: string): Promise<DatabaseRestaurant[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('restaurants')
       .select(`
         *,
@@ -316,7 +317,7 @@ export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: n
     const latDiff = radiusKm / 111;
     const lonDiff = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('restaurants')
       .select(`
         *,
@@ -358,7 +359,7 @@ export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: n
 
 export const getRestaurantsByCity = async (citySlug: string): Promise<DatabaseRestaurant[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('restaurants')
       .select(`
         *,
@@ -387,7 +388,7 @@ export const getRestaurantsByCity = async (citySlug: string): Promise<DatabaseRe
 
 export const getCitiesByProvince = async (provinceSlug: string): Promise<City[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('cities')
       .select(`
         *,
@@ -413,7 +414,7 @@ export const getCitiesByProvince = async (provinceSlug: string): Promise<City[]>
 
 export const getAllProvinces = async (): Promise<Province[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('provinces')
       .select(`
         *,
@@ -435,7 +436,7 @@ export const getAllProvinces = async (): Promise<Province[]> => {
 
 export const getProvinceBySlug = async (slug: string): Promise<Province | null> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('provinces')
       .select(`
         *,
@@ -458,7 +459,7 @@ export const getProvinceBySlug = async (slug: string): Promise<Province | null> 
 
 export const getCityBySlug = async (slug: string): Promise<City | null> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('cities')
       .select(`
         *,

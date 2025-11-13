@@ -37,7 +37,7 @@ const RestaurantVerification = () => {
   const fetchRestaurants = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('restaurants')
         .select('*')
         .eq('claim_status', activeTab)
@@ -62,7 +62,7 @@ const RestaurantVerification = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('restaurants')
         .update({
           claim_status: newStatus,

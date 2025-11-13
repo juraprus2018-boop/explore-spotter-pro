@@ -79,8 +79,7 @@ const ClaimRestaurantDialog = ({ restaurantId, restaurantName, onClaimed }: Clai
         documentUrls.push(publicUrl);
       }
 
-      // Update restaurant with claim
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('restaurants')
         .update({
           owner_id: user.id,

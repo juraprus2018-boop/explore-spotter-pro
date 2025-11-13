@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import { useNavigate, useParams } from "react-router-dom";
 import { reverseGeocode, searchNearbyRestaurants } from "@/lib/nominatim";
@@ -17,11 +17,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-interface ClickHandlerProps {
+interface MapEventsProps {
   onLocationClick: (lat: number, lon: number) => void;
 }
 
-function ClickHandler({ onLocationClick }: ClickHandlerProps) {
+function MapEvents({ onLocationClick }: MapEventsProps) {
   useMapEvents({
     click: (e) => {
       onLocationClick(e.latlng.lat, e.latlng.lng);
@@ -125,15 +125,14 @@ const InteractiveWorldMap = () => {
       <MapContainer
         center={[20, 0]}
         zoom={2}
-        className="h-full w-full"
+        style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <ClickHandler onLocationClick={handleLocationClick} />
-        
+        <MapEvents onLocationClick={handleLocationClick} />
         {clickedPosition && (
           <Marker position={clickedPosition}>
             <Popup>Restaurants laden...</Popup>

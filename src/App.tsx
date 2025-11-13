@@ -12,6 +12,7 @@ import ProvincePage from "./pages/ProvincePage";
 import NotFound from "./pages/NotFound";
 import LanguageRedirect from "./pages/LanguageRedirect";
 import Auth from "./pages/Auth";
+import AddRestaurant from "./pages/AddRestaurant";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <Auth />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/add-restaurant"
+            element={
+              <LanguageWrapper>
+                <AddRestaurant />
               </LanguageWrapper>
             }
           />

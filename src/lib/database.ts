@@ -44,6 +44,11 @@ export interface DatabaseRestaurant {
   updated_at: string;
   owner_id?: string | null;
   claimed_at?: string | null;
+  claim_status?: string;
+  verification_documents?: string[] | null;
+  verification_note?: string | null;
+  verified_by?: string | null;
+  verified_at?: string | null;
   user_submitted?: boolean;
   phone?: string | null;
   website?: string | null;

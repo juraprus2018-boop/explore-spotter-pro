@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import LanguageRedirect from "./pages/LanguageRedirect";
 import Auth from "./pages/Auth";
 import AddRestaurant from "./pages/AddRestaurant";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <AddRestaurant />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/admin"
+            element={
+              <LanguageWrapper>
+                <AdminDashboard />
               </LanguageWrapper>
             }
           />

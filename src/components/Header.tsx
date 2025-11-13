@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { Globe, Utensils, LogIn, LogOut } from "lucide-react";
+import { Globe, Utensils, LogIn, LogOut, Shield } from "lucide-react";
 import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ const Header = () => {
   const { lang } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const { isModerator } = useUserRole();
 
   useEffect(() => {
     // Check auth state
@@ -71,6 +73,15 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {isModerator && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate(`/${lang}/admin`)}>
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={() => navigate(`/${lang}/add-restaurant`)}>
                   <Utensils className="h-4 w-4 mr-2" />
                   Restaurant toevoegen

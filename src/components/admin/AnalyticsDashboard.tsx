@@ -66,13 +66,14 @@ const AnalyticsDashboard = () => {
             .gte('created_at', start)
             .lte('created_at', end);
 
-          // Claims count
-          const { count: claimsCount } = await supabase
+          // Claims count (only actual claims, not system-created)
+          const { count: claimsCount } = await (supabase as any)
             .from('restaurants')
             .select('*', { count: 'exact', head: true })
             .gte('claimed_at', start)
             .lte('claimed_at', end)
-            .not('claimed_at', 'is', null);
+            .not('claimed_at', 'is', null)
+            .neq('claim_status', 'unclaimed');
 
           // New restaurants count
           const { count: restaurantsCount } = await supabase
@@ -107,11 +108,11 @@ const AnalyticsDashboard = () => {
         setReviewStats(stats);
       }
 
-      // Fetch claim statistics
+      // Fetch claim statistics (only actual claims, not system-created)
       const { data: claimsData } = await (supabase as any)
         .from('restaurants')
         .select('claim_status')
-        .not('claim_status', 'is', null);
+        .neq('claim_status', 'unclaimed');
 
       if (claimsData) {
         const stats = {

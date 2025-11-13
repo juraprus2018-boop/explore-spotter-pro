@@ -41,7 +41,7 @@ const ReviewModeration = () => {
   const fetchReviews = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('reviews')
         .select(`
           *,
@@ -71,7 +71,7 @@ const ReviewModeration = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('reviews')
         .update({
           status: newStatus,

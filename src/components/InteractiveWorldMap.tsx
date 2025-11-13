@@ -16,6 +16,30 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
+// Country coordinates based on language
+const COUNTRY_COORDS: Record<string, { lat: number; lon: number; zoom: number }> = {
+  nl: { lat: 52.1326, lon: 5.2913, zoom: 7 },      // Netherlands
+  en: { lat: 54.7023, lon: -3.2765, zoom: 5 },     // United Kingdom
+  de: { lat: 51.1657, lon: 10.4515, zoom: 6 },     // Germany
+  fr: { lat: 46.2276, lon: 2.2137, zoom: 6 },      // France
+  es: { lat: 40.4637, lon: -3.7492, zoom: 6 },     // Spain
+  it: { lat: 41.8719, lon: 12.5674, zoom: 6 },     // Italy
+  pt: { lat: 39.3999, lon: -8.2245, zoom: 7 },     // Portugal
+  pl: { lat: 51.9194, lon: 19.1451, zoom: 6 },     // Poland
+  hr: { lat: 45.1, lon: 15.2, zoom: 7 },           // Croatia
+  ru: { lat: 61.5240, lon: 105.3188, zoom: 3 },    // Russia
+  ja: { lat: 36.2048, lon: 138.2529, zoom: 5 },    // Japan
+  zh: { lat: 35.8617, lon: 104.1954, zoom: 4 },    // China
+  ar: { lat: 23.8859, lon: 45.0792, zoom: 5 },     // Saudi Arabia
+  tr: { lat: 38.9637, lon: 35.2433, zoom: 6 },     // Turkey
+  sv: { lat: 60.1282, lon: 18.6435, zoom: 5 },     // Sweden
+  da: { lat: 56.2639, lon: 9.5018, zoom: 7 },      // Denmark
+  no: { lat: 60.4720, lon: 8.4689, zoom: 5 },      // Norway
+  fi: { lat: 61.9241, lon: 25.7482, zoom: 5 },     // Finland
+  cs: { lat: 49.8175, lon: 15.4730, zoom: 7 },     // Czech Republic
+  ro: { lat: 45.9432, lon: 24.9668, zoom: 7 },     // Romania
+};
+
 const InteractiveWorldMap = () => {
   const navigate = useNavigate();
   const { lang = "nl" } = useParams();
@@ -28,8 +52,14 @@ const InteractiveWorldMap = () => {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    // Initialize map
-    const map = L.map(mapContainerRef.current).setView([20, 0], 2);
+    // Get country coordinates based on current language
+    const countryCoords = COUNTRY_COORDS[lang] || COUNTRY_COORDS.nl;
+
+    // Initialize map centered on the country of the current language
+    const map = L.map(mapContainerRef.current).setView(
+      [countryCoords.lat, countryCoords.lon], 
+      countryCoords.zoom
+    );
     
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',

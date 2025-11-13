@@ -358,6 +358,7 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
 
     if (restaurantsToSave.length === 0) return null;
 
+    // First attempt direct upsert; if RLS blocks (401/42501), fallback to edge function with service role
     const { error } = await supabase
       .from('restaurants')
       .upsert(restaurantsToSave, {
@@ -366,8 +367,22 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
       });
 
     if (error) {
-      console.error("Error saving restaurants:", error);
-      return null;
+      console.error("Error saving restaurants via REST:", error);
+      try {
+        const functionsUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ingest-restaurants`;
+        const resp = await fetch(functionsUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ restaurants: restaurantsToSave }),
+        });
+        if (!resp.ok) {
+          console.error('Edge function ingest failed:', await resp.text());
+          return null;
+        }
+      } catch (efErr) {
+        console.error('Edge function call error:', efErr);
+        return null;
+      }
     }
 
     // Return the saved restaurants with their IDs

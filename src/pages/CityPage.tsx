@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getRestaurantsByCity, DatabaseRestaurant } from "@/lib/database";
+import { getRestaurantsByCity, getCityBySlug, DatabaseRestaurant, City } from "@/lib/database";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, MapPin, Home } from "lucide-react";
 import RestaurantCard from "@/components/RestaurantCard";
@@ -20,32 +20,37 @@ import {
 import { NavLink } from "@/components/NavLink";
 
 const CityPage = () => {
-  const { city, lang } = useParams();
+  const { city, province, lang } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { toast } = useToast();
   const [restaurants, setRestaurants] = useState<DatabaseRestaurant[]>([]);
+  const [cityData, setCityData] = useState<City | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadRestaurants = async () => {
+    const loadData = async () => {
       if (!city) return;
 
       setIsLoading(true);
       try {
-        const cityDecoded = decodeURIComponent(city);
-        const data = await getRestaurantsByCity(cityDecoded);
-        setRestaurants(data);
+        const [cityResult, restaurantsResult] = await Promise.all([
+          getCityBySlug(city),
+          getRestaurantsByCity(city)
+        ]);
+        
+        setCityData(cityResult);
+        setRestaurants(restaurantsResult);
 
-        if (data.length === 0) {
+        if (restaurantsResult.length === 0) {
           toast({
             title: "Geen restaurants gevonden",
-            description: `Er zijn nog geen restaurants gevonden in ${cityDecoded}`,
+            description: `Er zijn nog geen restaurants gevonden in ${cityResult?.name || city}`,
             variant: "destructive",
           });
         }
       } catch (error) {
-        console.error("Error loading restaurants:", error);
+        console.error("Error loading data:", error);
         toast({
           title: "Fout bij laden",
           description: "Er is een fout opgetreden bij het laden van restaurants.",
@@ -56,10 +61,12 @@ const CityPage = () => {
       }
     };
 
-    loadRestaurants();
+    loadData();
   }, [city, toast]);
 
-  const cityName = city ? decodeURIComponent(city) : "";
+  const cityName = cityData?.name || city || "";
+  const provinceName = cityData?.province?.name || province || "";
+  const provinceSlug = cityData?.province?.slug || province || "";
 
   const locations = restaurants.map(r => ({
     name: r.name,
@@ -84,6 +91,14 @@ const CityPage = () => {
                 <BreadcrumbLink asChild>
                   <NavLink to={`/${lang}`}>
                     <Home className="h-4 w-4" />
+                  </NavLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <NavLink to={`/${lang}/${provinceSlug}`}>
+                    {provinceName}
                   </NavLink>
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -136,7 +151,8 @@ const CityPage = () => {
                       lat={restaurant.lat}
                       lon={restaurant.lon}
                       type={restaurant.type || "restaurant"}
-                      city={restaurant.city}
+                      citySlug={cityData?.slug || city || ""}
+                      provinceSlug={provinceSlug}
                       onViewOnMap={() => {
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }}

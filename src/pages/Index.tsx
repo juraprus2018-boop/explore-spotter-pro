@@ -4,8 +4,8 @@ import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import CitiesOverview from "@/components/CitiesOverview";
-import { searchRestaurants, searchNearbyRestaurants, NominatimResult } from "@/lib/nominatim";
+import ProvincesOverview from "@/components/ProvincesOverview";
+import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Utensils, Navigation } from "lucide-react";
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { t } = useTranslation();
-  const [results, setResults] = useState<NominatimResult[]>([]);
+  const [dbResults, setDbResults] = useState<DatabaseRestaurant[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>([52.3676, 4.9041]);
   const [mapZoom, setMapZoom] = useState(6);
@@ -39,54 +39,35 @@ const Index = () => {
     setIsLoading(true);
     try {
       // First, try to search in database
-      const dbResults = await searchRestaurantsInDatabase(query);
+      let results = await searchRestaurantsInDatabase(query);
       
-      let searchResults: NominatimResult[] = [];
-      
-      if (dbResults.length > 0) {
-        // Convert database results to Nominatim format
-        searchResults = dbResults.map(r => ({
-          place_id: r.place_id,
-          name: r.name,
-          display_name: r.display_name,
-          lat: r.lat.toString(),
-          lon: r.lon.toString(),
-          type: r.type || "restaurant",
-          class: "amenity",
-          osm_type: r.osm_type || "node",
-          osm_id: r.osm_id || 0,
-          licence: "",
-          place_rank: 0,
-          importance: 0,
-          addresstype: r.address_type || "amenity",
-          boundingbox: ["0", "0", "0", "0"],
-          city: r.city,
-        }));
-        
+      if (results.length > 0) {
         toast({
           title: t("toast.resultsFound"),
-          description: `${dbResults.length} restaurants gevonden in database`,
+          description: `${results.length} restaurants gevonden in database`,
         });
       } else {
         // If not in database, search via Nominatim API
-        searchResults = await searchRestaurants(query);
+        const apiResults = await searchRestaurants(query);
         
         // Save to database
-        if (searchResults.length > 0) {
-          await saveRestaurants(searchResults);
+        if (apiResults.length > 0) {
+          await saveRestaurants(apiResults);
+          // Fetch again from database to get full data with relations
+          results = await searchRestaurantsInDatabase(query);
         }
         
         toast({
           title: t("toast.resultsFound"),
-          description: t("toast.resultsFoundDesc", { count: searchResults.length, query }),
+          description: t("toast.resultsFoundDesc", { count: results.length, query }),
         });
       }
       
-      setResults(searchResults);
+      setDbResults(results);
       
-      if (searchResults.length > 0) {
-        const firstResult = searchResults[0];
-        setMapCenter([parseFloat(firstResult.lat), parseFloat(firstResult.lon)]);
+      if (results.length > 0) {
+        const firstResult = results[0];
+        setMapCenter([firstResult.lat, firstResult.lon]);
         setMapZoom(12);
       } else {
         toast({
@@ -119,57 +100,38 @@ const Index = () => {
     setIsLoading(true);
     try {
       // First, try to search in database
-      const dbResults = await getNearbyRestaurants(userLocation[0], userLocation[1], 10);
+      let results = await getNearbyRestaurants(userLocation[0], userLocation[1], 10);
       
-      let searchResults: NominatimResult[] = [];
-      
-      if (dbResults.length > 0) {
-        // Convert database results to Nominatim format
-        searchResults = dbResults.map(r => ({
-          place_id: r.place_id,
-          name: r.name,
-          display_name: r.display_name,
-          lat: r.lat.toString(),
-          lon: r.lon.toString(),
-          type: r.type || "restaurant",
-          class: "amenity",
-          osm_type: r.osm_type || "node",
-          osm_id: r.osm_id || 0,
-          licence: "",
-          place_rank: 0,
-          importance: 0,
-          addresstype: r.address_type || "amenity",
-          boundingbox: ["0", "0", "0", "0"],
-          city: r.city,
-        }));
-        
+      if (results.length > 0) {
         toast({
           title: "Restaurants in de buurt",
-          description: `${dbResults.length} restaurants gevonden in database`,
+          description: `${results.length} restaurants gevonden in database`,
         });
       } else {
         // If not in database, search via Nominatim API
-        searchResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 10);
+        const apiResults = await searchNearbyRestaurants(userLocation[0], userLocation[1], 10);
         
         // Save to database
-        if (searchResults.length > 0) {
-          await saveRestaurants(searchResults);
+        if (apiResults.length > 0) {
+          await saveRestaurants(apiResults);
+          // Fetch again from database to get full data with relations
+          results = await getNearbyRestaurants(userLocation[0], userLocation[1], 10);
         }
         
         toast({
           title: "Restaurants in de buurt",
-          description: `${searchResults.length} restaurants gevonden via API en opgeslagen`,
+          description: `${results.length} restaurants gevonden`,
         });
       }
       
-      if (searchResults.length > 0) {
-        setResults(searchResults);
-        setMapCenter(userLocation);
-        setMapZoom(12);
-      } else {
+      setDbResults(results);
+      setMapCenter(userLocation);
+      setMapZoom(13);
+      
+      if (results.length === 0) {
         toast({
           title: "Geen restaurants gevonden",
-          description: "Probeer een andere locatie of vergroot de zoekradius.",
+          description: "Probeer het opnieuw of zoek handmatig naar restaurants.",
           variant: "destructive",
         });
       }
@@ -186,49 +148,52 @@ const Index = () => {
 
   const handleViewOnMap = (lat: number, lon: number) => {
     setMapCenter([lat, lon]);
-    setMapZoom(14);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setMapZoom(15);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const locations = results.map(result => ({
-    name: result.name || result.display_name.split(',')[0],
-    lat: parseFloat(result.lat),
-    lon: parseFloat(result.lon),
-    display_name: result.display_name,
+  const locations = dbResults.map(r => ({
+    name: r.name,
+    lat: r.lat,
+    lon: r.lon,
+    display_name: r.display_name,
   }));
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <Hero onSearch={handleSearch} />
-      
-      {userLocation && (
-        <div className="container mx-auto px-4 pt-8">
-          <Button 
-            onClick={handleNearbySearch} 
-            variant="outline" 
-            size="lg"
-            disabled={isLoading}
-          >
-            <Navigation className="h-5 w-5 mr-2" />
-            {t("search.nearby")}
-          </Button>
-        </div>
-      )}
-      
       <div className="container mx-auto px-4 py-12">
+        {userLocation && dbResults.length === 0 && (
+          <div className="mb-8 text-center">
+            <Button
+              onClick={handleNearbySearch}
+              size="lg"
+              className="gap-2"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Navigation className="h-5 w-5" />
+              )}
+              Restaurants in de buurt
+            </Button>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">{t("results.searching")}</p>
+            <p className="text-muted-foreground">{t("results.loading")}</p>
           </div>
-        ) : results.length > 0 ? (
+        ) : dbResults.length > 0 ? (
           <div className="space-y-12">
             <div>
               <h2 className="text-3xl font-bold mb-6 text-foreground">
                 {t("map.title")}
               </h2>
-              <MapView 
+              <MapView
                 locations={locations}
                 center={mapCenter}
                 zoom={mapZoom}
@@ -237,20 +202,21 @@ const Index = () => {
             
             <div>
               <h2 className="text-3xl font-bold mb-6 text-foreground">
-                {t("results.title")} ({results.length})
+                {t("results.title")} ({dbResults.length})
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {results.map((result) => (
+                {dbResults.map((restaurant) => (
                   <RestaurantCard
-                    key={result.place_id}
-                    placeId={result.place_id}
-                    name={result.name || result.display_name.split(',')[0]}
-                    displayName={result.display_name}
-                    lat={parseFloat(result.lat)}
-                    lon={parseFloat(result.lon)}
-                    type={result.type}
-                    city={(result as any).city}
-                    onViewOnMap={() => handleViewOnMap(parseFloat(result.lat), parseFloat(result.lon))}
+                    key={restaurant.place_id}
+                    placeId={restaurant.place_id}
+                    name={restaurant.name}
+                    displayName={restaurant.display_name}
+                    lat={restaurant.lat}
+                    lon={restaurant.lon}
+                    type={restaurant.type || "restaurant"}
+                    citySlug={restaurant.city?.slug || "unknown"}
+                    provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                    onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon)}
                   />
                 ))}
               </div>
@@ -258,7 +224,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-12">
-            <CitiesOverview />
+            <ProvincesOverview />
             
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Utensils className="h-20 w-20 text-muted-foreground mb-4" />

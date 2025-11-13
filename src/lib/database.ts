@@ -1,6 +1,31 @@
 import { supabase } from "@/integrations/supabase/client";
 import { NominatimResult } from "./nominatim";
 
+export interface Country {
+  id: string;
+  name: string;
+  code: string;
+  created_at: string;
+}
+
+export interface Province {
+  id: string;
+  name: string;
+  slug: string;
+  country_id: string;
+  created_at: string;
+  country?: Country;
+}
+
+export interface City {
+  id: string;
+  name: string;
+  slug: string;
+  province_id: string;
+  created_at: string;
+  province?: Province;
+}
+
 export interface DatabaseRestaurant {
   id: string;
   place_id: number;
@@ -12,20 +37,154 @@ export interface DatabaseRestaurant {
   osm_type: string | null;
   osm_id: number | null;
   address_type: string | null;
-  city: string | null;
+  city_id: string | null;
   search_count: number;
   created_at: string;
   updated_at: string;
+  city?: City;
 }
+
+// Helper function to create slug
+export const createSlug = (text: string): string => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
+// Extract location data from display_name
+const extractLocationData = (displayName: string) => {
+  const parts = displayName.split(',').map(p => p.trim());
+  
+  // Typical format: "Restaurant Name, City, Province, Country"
+  let cityName = parts.length >= 2 ? parts[1] : null;
+  let provinceName = parts.length >= 3 ? parts[2] : null;
+  let countryName = parts.length >= 4 ? parts[parts.length - 1] : "Nederland";
+  
+  return { cityName, provinceName, countryName };
+};
+
+// Get or create country
+export const getOrCreateCountry = async (name: string, code: string): Promise<string | null> => {
+  try {
+    // Try to find existing
+    const { data: existing, error: findError } = await supabase
+      .from('countries')
+      .select('id')
+      .eq('name', name)
+      .maybeSingle();
+
+    if (existing) return existing.id;
+
+    // Create new
+    const { data, error } = await supabase
+      .from('countries')
+      .insert({ name, code })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error("Error creating country:", error);
+      return null;
+    }
+
+    return data.id;
+  } catch (error) {
+    console.error("Error in getOrCreateCountry:", error);
+    return null;
+  }
+};
+
+// Get or create province
+export const getOrCreateProvince = async (name: string, countryId: string): Promise<string | null> => {
+  try {
+    const slug = createSlug(name);
+    
+    // Try to find existing
+    const { data: existing, error: findError } = await supabase
+      .from('provinces')
+      .select('id')
+      .eq('name', name)
+      .eq('country_id', countryId)
+      .maybeSingle();
+
+    if (existing) return existing.id;
+
+    // Create new
+    const { data, error } = await supabase
+      .from('provinces')
+      .insert({ name, slug, country_id: countryId })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error("Error creating province:", error);
+      return null;
+    }
+
+    return data.id;
+  } catch (error) {
+    console.error("Error in getOrCreateProvince:", error);
+    return null;
+  }
+};
+
+// Get or create city
+export const getOrCreateCity = async (name: string, provinceId: string): Promise<string | null> => {
+  try {
+    const slug = createSlug(name);
+    
+    // Try to find existing
+    const { data: existing, error: findError } = await supabase
+      .from('cities')
+      .select('id')
+      .eq('name', name)
+      .eq('province_id', provinceId)
+      .maybeSingle();
+
+    if (existing) return existing.id;
+
+    // Create new
+    const { data, error } = await supabase
+      .from('cities')
+      .insert({ name, slug, province_id: provinceId })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error("Error creating city:", error);
+      return null;
+    }
+
+    return data.id;
+  } catch (error) {
+    console.error("Error in getOrCreateCity:", error);
+    return null;
+  }
+};
 
 export const saveRestaurants = async (restaurants: NominatimResult[]) => {
   try {
-    const restaurantsToSave = restaurants.map(r => {
-      // Extract city from display_name (typically second part)
-      const parts = r.display_name.split(',').map(p => p.trim());
-      const city = parts.length >= 2 ? parts[1] : null;
+    const restaurantsToSave = [];
+    
+    for (const r of restaurants) {
+      const { cityName, provinceName, countryName } = extractLocationData(r.display_name);
       
-      return {
+      if (!cityName || !provinceName) continue;
+
+      // Get or create location hierarchy
+      const countryId = await getOrCreateCountry(countryName, countryName === "Nederland" ? "nl" : "xx");
+      if (!countryId) continue;
+
+      const provinceId = await getOrCreateProvince(provinceName, countryId);
+      if (!provinceId) continue;
+
+      const cityId = await getOrCreateCity(cityName, provinceId);
+      if (!cityId) continue;
+
+      restaurantsToSave.push({
         place_id: r.place_id,
         name: r.name || r.display_name.split(',')[0],
         display_name: r.display_name,
@@ -35,9 +194,11 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
         osm_type: r.osm_type,
         osm_id: r.osm_id,
         address_type: r.addresstype,
-        city: city,
-      };
-    });
+        city_id: cityId,
+      });
+    }
+
+    if (restaurantsToSave.length === 0) return null;
 
     const { data, error } = await supabase
       .from('restaurants')
@@ -63,7 +224,16 @@ export const getRestaurantByPlaceId = async (placeId: number): Promise<DatabaseR
   try {
     const { data, error } = await supabase
       .from('restaurants')
-      .select('*')
+      .select(`
+        *,
+        city:cities (
+          *,
+          province:provinces (
+            *,
+            country:countries (*)
+          )
+        )
+      `)
       .eq('place_id', placeId)
       .single();
 
@@ -83,7 +253,16 @@ export const getAllRestaurants = async (): Promise<DatabaseRestaurant[]> => {
   try {
     const { data, error } = await supabase
       .from('restaurants')
-      .select('*')
+      .select(`
+        *,
+        city:cities (
+          *,
+          province:provinces (
+            *,
+            country:countries (*)
+          )
+        )
+      `)
       .order('search_count', { ascending: false });
 
     if (error) {
@@ -102,7 +281,16 @@ export const searchRestaurantsInDatabase = async (query: string): Promise<Databa
   try {
     const { data, error } = await supabase
       .from('restaurants')
-      .select('*')
+      .select(`
+        *,
+        city:cities (
+          *,
+          province:provinces (
+            *,
+            country:countries (*)
+          )
+        )
+      `)
       .or(`name.ilike.%${query}%,display_name.ilike.%${query}%`)
       .order('search_count', { ascending: false })
       .limit(20);
@@ -121,14 +309,21 @@ export const searchRestaurantsInDatabase = async (query: string): Promise<Databa
 
 export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: number = 10): Promise<DatabaseRestaurant[]> => {
   try {
-    // Simple distance calculation using lat/lon differences
-    // 1 degree ≈ 111 km
     const latDiff = radiusKm / 111;
     const lonDiff = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
 
     const { data, error } = await supabase
       .from('restaurants')
-      .select('*')
+      .select(`
+        *,
+        city:cities (
+          *,
+          province:provinces (
+            *,
+            country:countries (*)
+          )
+        )
+      `)
       .gte('lat', lat - latDiff)
       .lte('lat', lat + latDiff)
       .gte('lon', lon - lonDiff)
@@ -140,7 +335,6 @@ export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: n
       return [];
     }
 
-    // Calculate actual distance and sort
     const restaurantsWithDistance = (data || []).map(r => ({
       ...r,
       distance: Math.sqrt(
@@ -158,12 +352,21 @@ export const getNearbyRestaurants = async (lat: number, lon: number, radiusKm: n
   }
 };
 
-export const getRestaurantsByCity = async (cityName: string): Promise<DatabaseRestaurant[]> => {
+export const getRestaurantsByCity = async (citySlug: string): Promise<DatabaseRestaurant[]> => {
   try {
     const { data, error } = await supabase
       .from('restaurants')
-      .select('*')
-      .ilike('city', cityName)
+      .select(`
+        *,
+        city:cities!inner (
+          *,
+          province:provinces (
+            *,
+            country:countries (*)
+          )
+        )
+      `)
+      .eq('city.slug', citySlug)
       .order('search_count', { ascending: false });
 
     if (error) {
@@ -178,30 +381,99 @@ export const getRestaurantsByCity = async (cityName: string): Promise<DatabaseRe
   }
 };
 
-export const getAllCities = async (): Promise<string[]> => {
+export const getCitiesByProvince = async (provinceSlug: string): Promise<City[]> => {
   try {
     const { data, error } = await supabase
-      .from('restaurants')
-      .select('city')
-      .not('city', 'is', null)
-      .order('city');
+      .from('cities')
+      .select(`
+        *,
+        province:provinces!inner (
+          *,
+          country:countries (*)
+        )
+      `)
+      .eq('province.slug', provinceSlug)
+      .order('name');
 
     if (error) {
-      console.error("Error fetching cities:", error);
+      console.error("Error fetching cities by province:", error);
       return [];
     }
 
-    // Get unique city names
-    const cities = new Set<string>();
-    data?.forEach(restaurant => {
-      if (restaurant.city && restaurant.city.length > 0) {
-        cities.add(restaurant.city);
-      }
-    });
-
-    return Array.from(cities).sort();
+    return data || [];
   } catch (error) {
-    console.error("Error in getAllCities:", error);
+    console.error("Error in getCitiesByProvince:", error);
     return [];
+  }
+};
+
+export const getAllProvinces = async (): Promise<Province[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('provinces')
+      .select(`
+        *,
+        country:countries (*)
+      `)
+      .order('name');
+
+    if (error) {
+      console.error("Error fetching provinces:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getAllProvinces:", error);
+    return [];
+  }
+};
+
+export const getProvinceBySlug = async (slug: string): Promise<Province | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('provinces')
+      .select(`
+        *,
+        country:countries (*)
+      `)
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching province:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getProvinceBySlug:", error);
+    return null;
+  }
+};
+
+export const getCityBySlug = async (slug: string): Promise<City | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('cities')
+      .select(`
+        *,
+        province:provinces (
+          *,
+          country:countries (*)
+        )
+      `)
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching city:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getCityBySlug:", error);
+    return null;
   }
 };

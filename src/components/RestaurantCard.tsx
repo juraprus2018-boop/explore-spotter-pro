@@ -1,8 +1,9 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Eye, Building2 } from "lucide-react";
+import { MapPin, Eye } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 interface RestaurantCardProps {
   placeId: number;
@@ -11,33 +12,27 @@ interface RestaurantCardProps {
   lat: number;
   lon: number;
   type: string;
-  city?: string | null;
-  onViewOnMap: () => void;
+  citySlug: string;
+  provinceSlug: string;
+  onViewOnMap?: () => void;
 }
 
-const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, city, onViewOnMap }: RestaurantCardProps) => {
+const RestaurantCard = ({
+  placeId,
+  name,
+  displayName,
+  lat,
+  lon,
+  citySlug,
+  provinceSlug,
+  onViewOnMap,
+}: RestaurantCardProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { lang } = useParams();
 
   const handleViewDetails = () => {
-    navigate(`/${lang}/restaurant/${placeId}`, {
-      state: {
-        placeId,
-        name,
-        displayName,
-        lat,
-        lon,
-        type,
-        city,
-      }
-    });
-  };
-
-  const handleViewCity = () => {
-    if (city) {
-      navigate(`/${lang}/city/${encodeURIComponent(city)}`);
-    }
+    navigate(`/${lang}/${provinceSlug}/${citySlug}/${placeId}`);
   };
 
   return (
@@ -57,23 +52,15 @@ const RestaurantCard = ({ placeId, name, displayName, lat, lon, type, city, onVi
             <span className="font-medium">{t("card.coordinates")}:</span>
             <span>{lat.toFixed(4)}, {lon.toFixed(4)}</span>
           </div>
-          {city && (
-            <Button
-              onClick={handleViewCity}
-              variant="link"
-              className="h-auto p-0 text-sm text-primary"
-            >
-              <Building2 className="h-3 w-3 mr-1" />
-              Meer restaurants in {city}
-            </Button>
-          )}
         </div>
       </CardContent>
       <CardFooter className="flex gap-2">
-        <Button onClick={onViewOnMap} variant="outline" className="flex-1">
-          <MapPin className="h-4 w-4 mr-2" />
-          {t("card.viewOnMap")}
-        </Button>
+        {onViewOnMap && (
+          <Button onClick={onViewOnMap} variant="outline" className="flex-1">
+            <MapPin className="h-4 w-4 mr-2" />
+            {t("card.viewOnMap")}
+          </Button>
+        )}
         <Button onClick={handleViewDetails} className="flex-1">
           <Eye className="h-4 w-4 mr-2" />
           {t("card.viewDetails")}

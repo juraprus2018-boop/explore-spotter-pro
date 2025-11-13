@@ -1,9 +1,11 @@
 import { useTranslation } from "react-i18next";
+import { useParams, Link } from "react-router-dom";
 import { Utensils } from "lucide-react";
 import SitemapGenerator from "./SitemapGenerator";
 
 const Footer = () => {
   const { t } = useTranslation();
+  const { lang = 'en' } = useParams();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -23,17 +25,17 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4 text-foreground">{t("footer.quickLinks")}</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.home")}</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.about")}</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.contact")}</a></li>
+              <li><Link to={`/${lang}`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.home")}</Link></li>
+              <li><Link to={`/${lang}/about`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.about")}</Link></li>
+              <li><Link to={`/${lang}/contact`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.contact")}</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-semibold mb-4 text-foreground">{t("footer.info")}</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.privacy")}</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.terms")}</a></li>
+              <li><Link to={`/${lang}/privacy`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.privacy")}</Link></li>
+              <li><Link to={`/${lang}/terms`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.terms")}</Link></li>
               <li className="pt-2"><SitemapGenerator /></li>
             </ul>
           </div>

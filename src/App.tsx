@@ -15,6 +15,10 @@ import Auth from "./pages/Auth";
 import AddRestaurant from "./pages/AddRestaurant";
 import AdminDashboard from "./pages/AdminDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
+import Contact from "./pages/Contact";
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +96,38 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <OwnerDashboard />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/contact"
+            element={
+              <LanguageWrapper>
+                <Contact />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/about"
+            element={
+              <LanguageWrapper>
+                <About />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/privacy"
+            element={
+              <LanguageWrapper>
+                <Privacy />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/terms"
+            element={
+              <LanguageWrapper>
+                <Terms />
               </LanguageWrapper>
             }
           />

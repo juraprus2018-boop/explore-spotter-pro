@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MapPin } from "lucide-react";
-import L from "leaflet";
 
-// Leaflet CSS is loaded via CDN in index.html
-// Import markercluster JS after leaflet
-import "leaflet.markercluster";
+// Leaflet is loaded via CDN in index.html
+declare const L: any;
 
 interface Location {
   name: string;
@@ -63,73 +61,86 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
 
   // Initialize map once
   useEffect(() => {
-    if (containerRef.current && !mapRef.current) {
-      // Clear any existing Leaflet instance on the container
-      const container = containerRef.current;
-      if ((container as any)._leaflet_id) {
-        delete (container as any)._leaflet_id;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const initializeMap = () => {
+      if (typeof L === 'undefined' || !L.markerClusterGroup) {
+        console.log('Waiting for Leaflet libraries to load...');
+        timeoutId = setTimeout(initializeMap, 100);
+        return;
       }
 
-      const map = L.map(container, {
-        center: center,
-        zoom,
-        scrollWheelZoom: true,
-        zoomControl: true,
-      });
+      if (containerRef.current && !mapRef.current) {
+        // Clear any existing Leaflet instance on the container
+        const container = containerRef.current;
+        if ((container as any)._leaflet_id) {
+          delete (container as any)._leaflet_id;
+        }
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19,
-      }).addTo(map);
+        const map = L.map(container, {
+          center: center,
+          zoom,
+          scrollWheelZoom: true,
+          zoomControl: true,
+        });
 
-      // Create marker cluster group with custom options
-      const clusterGroup = L.markerClusterGroup({
-        maxClusterRadius: 60,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
-        iconCreateFunction: (cluster: any) => {
-          const count = cluster.getChildCount();
-          let size = 'small';
-          let colorClass = 'bg-primary';
-          
-          if (count > 10) {
-            size = 'large';
-            colorClass = 'bg-accent';
-          } else if (count > 5) {
-            size = 'medium';
-            colorClass = 'bg-primary';
-          }
-          
-          return new L.DivIcon({
-            html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
-            className: `marker-cluster ${colorClass}`,
-            iconSize: [40, 40],
-          });
-        },
-      });
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+          maxZoom: 19,
+        }).addTo(map);
 
-      markersLayerRef.current = clusterGroup;
-      map.addLayer(clusterGroup);
-      mapRef.current = map;
-
-      // Update map info on move/zoom
-      map.on('moveend zoomend', () => {
-        const center = map.getCenter();
-        const bounds = map.getBounds();
-        setMapInfo({
-          center: { lat: center.lat, lng: center.lng },
-          zoom: map.getZoom(),
-          bounds: {
-            north: bounds.getNorth(),
-            south: bounds.getSouth(),
-            east: bounds.getEast(),
-            west: bounds.getWest(),
+        // Create marker cluster group with custom options
+        const clusterGroup = L.markerClusterGroup({
+          maxClusterRadius: 60,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+          iconCreateFunction: (cluster: any) => {
+            const count = cluster.getChildCount();
+            let size = 'small';
+            let colorClass = 'bg-primary';
+            
+            if (count > 10) {
+              size = 'large';
+              colorClass = 'bg-accent';
+            } else if (count > 5) {
+              size = 'medium';
+              colorClass = 'bg-primary';
+            }
+            
+            return new L.DivIcon({
+              html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
+              className: `marker-cluster ${colorClass}`,
+              iconSize: [40, 40],
+            });
           },
         });
-      });
-    }
+
+        markersLayerRef.current = clusterGroup;
+        map.addLayer(clusterGroup);
+        mapRef.current = map;
+
+        // Update map info on move/zoom
+        map.on('moveend zoomend', () => {
+          const center = map.getCenter();
+          const bounds = map.getBounds();
+          setMapInfo({
+            center: { lat: center.lat, lng: center.lng },
+            zoom: map.getZoom(),
+            bounds: {
+              north: bounds.getNorth(),
+              south: bounds.getSouth(),
+              east: bounds.getEast(),
+              west: bounds.getWest(),
+            },
+          });
+        });
+      }
+    };
+
+    initializeMap();
 
     return () => {
+      if (timeoutId) clearTimeout(timeoutId);
       // Properly cleanup map on unmount
       if (mapRef.current) {
         mapRef.current.remove();

@@ -59,12 +59,28 @@ serve(async (req) => {
     console.log('Client IP:', clientIP);
 
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (!supabaseUrl) {
+      throw new Error('Supabase URL not configured');
+    }
+
+    const supabaseKey = serviceRoleKey || anonKey;
+
+    if (!supabaseKey) {
+      throw new Error('Supabase key not configured');
+    }
+
+    const authHeader = req.headers.get('Authorization') || '';
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      },
+    });
 
     // Get user ID if authenticated
-    const authHeader = req.headers.get('Authorization');
     let userId: string | null = null;
     let userEmail: string | null = null;
 

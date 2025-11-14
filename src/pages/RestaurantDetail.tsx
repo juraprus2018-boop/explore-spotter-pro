@@ -408,6 +408,17 @@ const RestaurantDetail = () => {
               </CardContent>
             </Card>
 
+          </div>
+
+          <div>
+            <RouteNavigation
+              destinationLat={restaurant.lat}
+              destinationLon={restaurant.lon}
+              destinationName={restaurant.name}
+            />
+          </div>
+
+          <div className="mt-8">
             <Card>
               <CardHeader>
                 <CardTitle>{t("detail.location")}</CardTitle>
@@ -423,15 +434,6 @@ const RestaurantDetail = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-foreground">{t("detail.directions")}</h2>
-            <RouteNavigation
-              destinationLat={restaurant.lat}
-              destinationLon={restaurant.lon}
-              destinationName={restaurant.name}
-            />
           </div>
 
           {/* Reviews Section */}

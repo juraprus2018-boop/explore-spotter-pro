@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import L, { Icon, LatLngExpression, Map as LeafletMap, LayerGroup, DivIcon, LatLngBounds } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
 import { MapPin } from "lucide-react";
 

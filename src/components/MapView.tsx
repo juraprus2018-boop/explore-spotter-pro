@@ -172,11 +172,11 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
         <div class="p-3 min-w-[200px]">
           <h3 class="font-semibold text-base mb-1 text-foreground">${loc.name}</h3>
           <p class="text-sm text-muted-foreground mb-3 line-clamp-2">${loc.display_name}</p>
-          <button 
+          <button
             class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium text-sm flex items-center justify-center gap-2"
-            data-place-id="${loc.placeId}"
-            data-city-slug="${loc.citySlug}"
-            data-province-slug="${loc.provinceSlug}"
+            data-place-id="${loc.placeId ?? ''}"
+            data-city-slug="${loc.citySlug ?? ''}"
+            data-province-slug="${loc.provinceSlug ?? ''}"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>

@@ -173,6 +173,9 @@ const CityPage = () => {
     lat: r.lat,
     lon: r.lon,
     display_name: r.display_name,
+    placeId: r.place_id,
+    citySlug: r.city?.slug || city || '',
+    provinceSlug: r.city?.province?.slug || provinceSlug,
   }));
 
   const mapCenter: [number, number] = displayRestaurants.length > 0

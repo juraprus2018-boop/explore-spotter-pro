@@ -138,17 +138,20 @@ const RestaurantDetail = () => {
     );
   }
 
+  const cityName = restaurant.city?.name || city || '';
+  const citySlug = restaurant.city?.slug || city || '';
+  const provinceName = restaurant.city?.province?.name || province || '';
+  const provinceSlug = restaurant.city?.province?.slug || province || '';
+
   const location = {
     name: restaurant.name,
     lat: restaurant.lat,
     lon: restaurant.lon,
     display_name: restaurant.display_name,
+    placeId: restaurant.place_id,
+    citySlug,
+    provinceSlug,
   };
-
-  const cityName = restaurant.city?.name || city || '';
-  const citySlug = restaurant.city?.slug || city || '';
-  const provinceName = restaurant.city?.province?.name || province || '';
-  const provinceSlug = restaurant.city?.province?.slug || province || '';
   
   // SEO meta tags
   const seoTitle = `${restaurant.name} - ${cityName} | EatNavigator`;

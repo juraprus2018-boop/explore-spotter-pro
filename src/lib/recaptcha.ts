@@ -7,8 +7,8 @@ declare global {
   }
 }
 
-// Replace this with your actual reCAPTCHA v3 site key
-export const RECAPTCHA_SITE_KEY = '6LdASgwsAAAAAOchNw06D6sJZq3hdRsbBbgr0DQ1';
+// reCAPTCHA v3 site key
+export const RECAPTCHA_SITE_KEY = '6Lc-SwwsAAAAAHqlfKF5tEIui5TwYwkTQX6-6Skn';
 
 export const executeRecaptcha = async (action: string): Promise<string> => {
   try {

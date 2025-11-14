@@ -64,8 +64,8 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const initializeMap = () => {
-      if (typeof L === 'undefined' || !L.markerClusterGroup) {
-        console.log('Waiting for Leaflet libraries to load...');
+      if (typeof L === 'undefined') {
+        console.log('Waiting for Leaflet to load...');
         timeoutId = setTimeout(initializeMap, 100);
         return;
       }
@@ -119,6 +119,15 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
         map.addLayer(clusterGroup);
         mapRef.current = map;
 
+        // Ensure proper sizing once map is visible
+        setTimeout(() => {
+          try { map.invalidateSize(true); } catch {}
+        }, 0);
+        const handleResize = () => {
+          try { map.invalidateSize(); } catch {}
+        };
+        window.addEventListener('resize', handleResize);
+
         // Update map info on move/zoom
         map.on('moveend zoomend', () => {
           const center = map.getCenter();
@@ -143,6 +152,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
       if (timeoutId) clearTimeout(timeoutId);
       // Properly cleanup map on unmount
       if (mapRef.current) {
+        try { window.removeEventListener('resize', () => mapRef.current?.invalidateSize()); } catch {}
         mapRef.current.remove();
         mapRef.current = null;
       }
@@ -163,6 +173,9 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
   // Render markers when locations change
   useEffect(() => {
     if (!markersLayerRef.current || !mapRef.current) return;
+
+    // Ensure correct size before rendering markers
+    try { mapRef.current.invalidateSize(); } catch {}
 
     // Clear previous markers
     markersLayerRef.current.clearLayers();

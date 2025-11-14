@@ -410,7 +410,7 @@ const RestaurantDetail = () => {
             </Card>
 
             {/* Right column: Navigation and Location */}
-            <div className="space-y-8">
+            <div className="space-y-8 sticky top-4 self-start">
               <RouteNavigation
                 destinationLat={restaurant.lat}
                 destinationLon={restaurant.lon}

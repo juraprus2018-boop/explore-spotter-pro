@@ -115,6 +115,51 @@ All colors MUST be HSL.
   border: none !important;
 }
 
+/* Marker Cluster Styles */
+.marker-cluster {
+  background: transparent !important;
+  border: none !important;
+}
+
+.cluster-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transition: all 0.2s;
+  border: 3px solid white;
+}
+
+.cluster-marker.small {
+  width: 40px;
+  height: 40px;
+  background: hsl(var(--primary));
+}
+
+.cluster-marker.medium {
+  width: 50px;
+  height: 50px;
+  background: hsl(var(--primary));
+}
+
+.cluster-marker.large {
+  width: 60px;
+  height: 60px;
+  background: hsl(var(--accent));
+}
+
+.cluster-count {
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.marker-cluster:hover .cluster-marker {
+  transform: scale(1.1);
+}
+
 .modern-leaflet-popup .leaflet-popup-content-wrapper {
   background: hsl(var(--card));
   border-radius: 0.75rem;

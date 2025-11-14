@@ -62,12 +62,20 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
   // Initialize map once
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let attempts = 0;
 
     const initializeMap = () => {
-      if (typeof L === 'undefined') {
-        console.log('Waiting for Leaflet to load...');
-        timeoutId = setTimeout(initializeMap, 100);
-        return;
+      const leafletReady = typeof L !== 'undefined' && !!L;
+      const clusterReady = leafletReady && typeof L.markerClusterGroup === 'function';
+
+      if (!leafletReady || !clusterReady) {
+        attempts += 1;
+        if (attempts < 60) { // wait up to ~6s
+          console.info('Waiting for Leaflet/MarkerCluster to load...');
+          timeoutId = setTimeout(initializeMap, 100);
+          return;
+        }
+        console.warn('MarkerCluster not available, continuing without clustering.');
       }
 
       if (containerRef.current && !mapRef.current) {
@@ -88,35 +96,30 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
           maxZoom: 19,
         }).addTo(map);
 
-        // Create marker cluster group with custom options
-        const clusterGroup = L.markerClusterGroup({
-          maxClusterRadius: 60,
-          spiderfyOnMaxZoom: true,
-          showCoverageOnHover: false,
-          zoomToBoundsOnClick: true,
-          iconCreateFunction: (cluster: any) => {
-            const count = cluster.getChildCount();
-            let size = 'small';
-            let colorClass = 'bg-primary';
-            
-            if (count > 10) {
-              size = 'large';
-              colorClass = 'bg-accent';
-            } else if (count > 5) {
-              size = 'medium';
-              colorClass = 'bg-primary';
-            }
-            
-            return new L.DivIcon({
-              html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
-              className: `marker-cluster ${colorClass}`,
-              iconSize: [40, 40],
-            });
-          },
-        });
+        // Create marker container (cluster if available)
+        const clusterGroup = (typeof L.markerClusterGroup === 'function')
+          ? L.markerClusterGroup({
+              maxClusterRadius: 60,
+              spiderfyOnMaxZoom: true,
+              showCoverageOnHover: false,
+              zoomToBoundsOnClick: true,
+              iconCreateFunction: (cluster: any) => {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                let colorClass = 'bg-primary';
+                if (count > 10) { size = 'large'; colorClass = 'bg-accent'; }
+                else if (count > 5) { size = 'medium'; colorClass = 'bg-primary'; }
+                return new L.DivIcon({
+                  html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
+                  className: `marker-cluster ${colorClass}`,
+                  iconSize: [40, 40],
+                });
+              },
+            })
+          : null;
 
-        markersLayerRef.current = clusterGroup;
-        map.addLayer(clusterGroup);
+        markersLayerRef.current = clusterGroup ?? L.layerGroup();
+        map.addLayer(markersLayerRef.current);
         mapRef.current = map;
 
         // Ensure proper sizing once map is visible
@@ -257,7 +260,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
 
   return (
     <div className="w-full h-full min-h-[420px] md:min-h-[520px] rounded-lg overflow-hidden shadow-lg border border-border bg-card relative">
-      <div ref={containerRef} className="h-full w-full" />
+      <div ref={containerRef} className="absolute inset-0" />
       
       {/* Map Info Panel */}
       <div className="absolute top-4 left-4 bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3 z-[1000] max-w-xs">

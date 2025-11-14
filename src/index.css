@@ -115,6 +115,10 @@ All colors MUST be HSL.
   border: none !important;
 }
 
+.highlighted-marker {
+  z-index: 1000 !important;
+}
+
 /* Marker Cluster Styles */
 .marker-cluster {
   background: transparent !important;

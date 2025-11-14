@@ -78,7 +78,7 @@ const RecentReviews = () => {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <Link
-                    to={`/${lang}/${review.restaurants.city?.province?.slug || 'unknown'}/${review.restaurants.city?.slug || 'unknown'}/${encodeURIComponent(review.restaurants.name).toLowerCase()}-${review.restaurants.place_id}`}
+                    to={`/${lang}/${review.restaurants.city?.province?.slug || 'unknown'}/${review.restaurants.city?.slug || 'unknown'}/${review.restaurants.place_id}`}
                     className="hover:text-primary transition-colors"
                   >
                     <CardTitle className="text-lg line-clamp-1">

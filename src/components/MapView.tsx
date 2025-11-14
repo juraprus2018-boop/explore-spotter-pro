@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import L, { Icon, LatLngExpression, Map as LeafletMap, LayerGroup, DivIcon, LatLngBounds } from "leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet.markercluster";
 import { MapPin } from "lucide-react";
+
+// Leaflet is loaded via CDN in index.html
+declare const L: any;
 
 interface Location {
   name: string;
@@ -25,8 +25,8 @@ interface MapViewProps {
 const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedPlaceId = null }: MapViewProps) => {
   const navigate = useNavigate();
   const { lang } = useParams();
-  const mapRef = useRef<LeafletMap | null>(null);
-  const markersLayerRef = useRef<LayerGroup | null>(null);
+  const mapRef = useRef<any>(null);
+  const markersLayerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [mapInfo, setMapInfo] = useState<{
     center: { lat: number; lng: number };
@@ -40,7 +40,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
 
   // Create custom marker icon
   const createCustomIcon = (isHighlighted: boolean = false) => {
-    return new DivIcon({
+    return new L.DivIcon({
       className: 'custom-marker-icon',
       html: `
         <div class="relative ${isHighlighted ? 'highlighted-marker' : ''}">
@@ -63,7 +63,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
   useEffect(() => {
     if (containerRef.current && !mapRef.current) {
       const map = L.map(containerRef.current, {
-        center: center as LatLngExpression,
+        center: center,
         zoom,
         scrollWheelZoom: true,
         zoomControl: true,
@@ -92,7 +92,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
             colorClass = 'bg-primary';
           }
           
-          return new DivIcon({
+          return new L.DivIcon({
             html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
             className: `marker-cluster ${colorClass}`,
             iconSize: [40, 40],
@@ -131,7 +131,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
   // Update view when center/zoom change (only if no locations to fit)
   useEffect(() => {
     if (mapRef.current && locations.length === 0) {
-      mapRef.current.setView(center as LatLngExpression, zoom);
+      mapRef.current.setView(center, zoom);
     }
   }, [center, zoom, locations.length]);
 
@@ -146,7 +146,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
     locations.forEach((loc) => {
       const isHighlighted = loc.placeId === highlightedPlaceId;
       const customIcon = createCustomIcon(isHighlighted);
-      const marker = L.marker([loc.lat, loc.lon] as LatLngExpression, {
+      const marker = L.marker([loc.lat, loc.lon], {
         icon: customIcon,
       });
 
@@ -203,8 +203,8 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
     if (locations.length > 0 && !highlightedPlaceId) {
       setTimeout(() => {
         if (mapRef.current) {
-          const bounds = new LatLngBounds(
-            locations.map(loc => [loc.lat, loc.lon] as LatLngExpression)
+          const bounds = L.latLngBounds(
+            locations.map(loc => [loc.lat, loc.lon])
           );
           mapRef.current.fitBounds(bounds, {
             padding: [50, 50],

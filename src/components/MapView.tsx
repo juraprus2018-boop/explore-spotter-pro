@@ -40,6 +40,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
 
   // Create custom marker icon
   const createCustomIcon = (isHighlighted: boolean = false) => {
+    if (typeof L === 'undefined') return null;
     return new L.DivIcon({
       className: 'custom-marker-icon',
       html: `
@@ -63,28 +64,35 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     let attempts = 0;
+    const maxAttempts = 50;
 
     const initializeMap = () => {
-      const leafletReady = typeof L !== 'undefined' && !!L;
-      const clusterReady = leafletReady && typeof L.markerClusterGroup === 'function';
-
-      if (!leafletReady || !clusterReady) {
-        attempts += 1;
-        if (attempts < 60) { // wait up to ~6s
-          console.info('Waiting for Leaflet/MarkerCluster to load...');
+      // Check if Leaflet is loaded
+      if (typeof L === 'undefined') {
+        if (attempts < maxAttempts) {
+          attempts++;
           timeoutId = setTimeout(initializeMap, 100);
-          return;
         }
-        console.warn('MarkerCluster not available, continuing without clustering.');
+        return;
+      }
+
+      // Check if MarkerCluster is loaded
+      if (typeof L.markerClusterGroup !== 'function') {
+        if (attempts < maxAttempts) {
+          attempts++;
+          timeoutId = setTimeout(initializeMap, 100);
+        }
+        return;
       }
 
       if (containerRef.current && !mapRef.current) {
-        // Clear any existing Leaflet instance on the container
+        // Clear any existing Leaflet instance
         const container = containerRef.current;
         if ((container as any)._leaflet_id) {
           delete (container as any)._leaflet_id;
         }
 
+        // Create map
         const map = L.map(container, {
           center: center,
           zoom,
@@ -92,44 +100,49 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
           zoomControl: true,
         });
 
+        // Add tile layer
         L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+          attribution: '&copy; OpenStreetMap contributors',
           maxZoom: 19,
         }).addTo(map);
 
-        // Create marker container (cluster if available)
-        const clusterGroup = (typeof L.markerClusterGroup === 'function')
-          ? L.markerClusterGroup({
-              maxClusterRadius: 60,
-              spiderfyOnMaxZoom: true,
-              showCoverageOnHover: false,
-              zoomToBoundsOnClick: true,
-              iconCreateFunction: (cluster: any) => {
-                const count = cluster.getChildCount();
-                let size = 'small';
-                let colorClass = 'bg-primary';
-                if (count > 10) { size = 'large'; colorClass = 'bg-accent'; }
-                else if (count > 5) { size = 'medium'; colorClass = 'bg-primary'; }
-                return new L.DivIcon({
-                  html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
-                  className: `marker-cluster ${colorClass}`,
-                  iconSize: [40, 40],
-                });
-              },
-            })
-          : null;
+        // Create marker cluster group
+        const clusterGroup = L.markerClusterGroup({
+          maxClusterRadius: 60,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+          iconCreateFunction: (cluster: any) => {
+            const count = cluster.getChildCount();
+            let size = 'small';
+            let colorClass = 'bg-primary';
+            
+            if (count > 10) {
+              size = 'large';
+              colorClass = 'bg-accent';
+            } else if (count > 5) {
+              size = 'medium';
+              colorClass = 'bg-primary';
+            }
+            
+            return new L.DivIcon({
+              html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
+              className: `marker-cluster ${colorClass}`,
+              iconSize: [40, 40],
+            });
+          },
+        });
 
-        markersLayerRef.current = clusterGroup ?? L.layerGroup();
-        map.addLayer(markersLayerRef.current);
+        markersLayerRef.current = clusterGroup;
+        map.addLayer(clusterGroup);
         mapRef.current = map;
 
-        // Ensure proper sizing once map is visible
+        // Fix sizing issues
         setTimeout(() => {
-          try { map.invalidateSize(true); } catch {}
-        }, 0);
-        const handleResize = () => {
-          try { map.invalidateSize(); } catch {}
-        };
-        window.addEventListener('resize', handleResize);
+          if (map) {
+            map.invalidateSize();
+          }
+        }, 100);
 
         // Update map info on move/zoom
         map.on('moveend zoomend', () => {
@@ -153,9 +166,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
-      // Properly cleanup map on unmount
       if (mapRef.current) {
-        try { window.removeEventListener('resize', () => mapRef.current?.invalidateSize()); } catch {}
         mapRef.current.remove();
         mapRef.current = null;
       }
@@ -177,9 +188,6 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
   useEffect(() => {
     if (!markersLayerRef.current || !mapRef.current) return;
 
-    // Ensure correct size before rendering markers
-    try { mapRef.current.invalidateSize(); } catch {}
-
     // Clear previous markers
     markersLayerRef.current.clearLayers();
 
@@ -187,11 +195,13 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
     locations.forEach((loc) => {
       const isHighlighted = loc.placeId === highlightedPlaceId;
       const customIcon = createCustomIcon(isHighlighted);
+      if (!customIcon) return;
+
       const marker = L.marker([loc.lat, loc.lon], {
         icon: customIcon,
       });
 
-      // Create popup content with detail button
+      // Create popup content
       const popupContent = document.createElement('div');
       popupContent.className = 'modern-popup';
       popupContent.innerHTML = `
@@ -214,7 +224,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
         </div>
       `;
 
-      // Add click handler to the button
+      // Add click handler
       const button = popupContent.querySelector('button');
       if (button) {
         button.addEventListener('click', () => {
@@ -237,24 +247,23 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
         marker.openPopup();
       }
 
-      markersLayerRef.current!.addLayer(marker);
+      markersLayerRef.current.addLayer(marker);
     });
 
-    // Auto-fit bounds to show all markers with a slight delay to ensure markers are rendered
-    if (locations.length > 0 && !highlightedPlaceId) {
+    // Auto-fit bounds to show all markers
+    if (locations.length > 0 && mapRef.current) {
       setTimeout(() => {
-        if (mapRef.current) {
+        if (mapRef.current && locations.length > 0) {
           const bounds = L.latLngBounds(
             locations.map(loc => [loc.lat, loc.lon])
           );
           mapRef.current.fitBounds(bounds, {
             padding: [50, 50],
-            maxZoom: 15,
+            maxZoom: highlightedPlaceId ? 15 : 13,
             animate: true,
-            duration: 0.5,
           });
         }
-      }, 100);
+      }, 200);
     }
   }, [locations, navigate, lang, highlightedPlaceId]);
 

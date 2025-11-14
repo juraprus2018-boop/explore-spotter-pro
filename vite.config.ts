@@ -20,9 +20,6 @@ export default defineConfig(({ mode }) => ({
       }
     }
   },
-  optimizeDeps: {
-    include: ['leaflet', 'leaflet.markercluster']
-  },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {

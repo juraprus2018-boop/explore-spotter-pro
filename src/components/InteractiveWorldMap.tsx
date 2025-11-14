@@ -5,9 +5,9 @@ import { saveRestaurants } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import L from "leaflet";
 
-// Leaflet CSS is loaded via CDN in index.html
+// Leaflet is loaded via CDN in index.html
+declare const L: any;
 
 // Fix for default marker icons in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -51,35 +51,68 @@ const InteractiveWorldMap = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let attempts = 0;
+    const maxAttempts = 50;
 
-    // Get country coordinates based on current language
-    const countryCoords = COUNTRY_COORDS[lang] || COUNTRY_COORDS.nl;
+    const initializeMap = () => {
+      // Wait for Leaflet to load
+      if (typeof L === 'undefined') {
+        if (attempts < maxAttempts) {
+          attempts++;
+          timeoutId = setTimeout(initializeMap, 100);
+        }
+        return;
+      }
 
-    // Initialize map centered on the country of the current language
-    const map = L.map(mapContainerRef.current).setView(
-      [countryCoords.lat, countryCoords.lon], 
-      countryCoords.zoom
-    );
-    
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+      if (mapContainerRef.current && !mapRef.current) {
+        // Fix default marker icons
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+          iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+          shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+        });
 
-    mapRef.current = map;
+        const coords = COUNTRY_COORDS[lang] || COUNTRY_COORDS.nl;
+        
+        const map = L.map(mapContainerRef.current, {
+          center: [coords.lat, coords.lon],
+          zoom: coords.zoom,
+          scrollWheelZoom: true,
+        });
 
-    // Add click handler
-    map.on("click", async (e) => {
-      await handleLocationClick(e.latlng.lat, e.latlng.lng);
-    });
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+          attribution: '&copy; OpenStreetMap contributors',
+          maxZoom: 19,
+        }).addTo(map);
+
+        mapRef.current = map;
+
+        // Handle map clicks
+        map.on("click", async (e: any) => {
+          await handleLocationClick(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Fix sizing
+        setTimeout(() => {
+          if (map) {
+            map.invalidateSize();
+          }
+        }, 100);
+      }
+    };
+
+    initializeMap();
 
     return () => {
+      if (timeoutId) clearTimeout(timeoutId);
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [lang]);
 
   const handleLocationClick = async (lat: number, lon: number) => {
     if (!mapRef.current) return;

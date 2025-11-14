@@ -238,6 +238,7 @@ const RestaurantDetail = () => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            {/* Left column: Restaurant Information */}
             <Card>
               <CardHeader>
                 <CardTitle>{t("detail.info")}</CardTitle>
@@ -408,32 +409,30 @@ const RestaurantDetail = () => {
               </CardContent>
             </Card>
 
-          </div>
+            {/* Right column: Navigation and Location */}
+            <div className="space-y-8">
+              <RouteNavigation
+                destinationLat={restaurant.lat}
+                destinationLon={restaurant.lon}
+                destinationName={restaurant.name}
+              />
 
-          <div>
-            <RouteNavigation
-              destinationLat={restaurant.lat}
-              destinationLon={restaurant.lon}
-              destinationName={restaurant.name}
-            />
-          </div>
-
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("detail.location")}</CardTitle>
-                <CardDescription>{t("detail.locationDesc")}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px] rounded-lg overflow-hidden">
-                  <MapView 
-                    locations={[location]} 
-                    center={[restaurant.lat, restaurant.lon]} 
-                    zoom={15} 
-                  />
-                </div>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("detail.location")}</CardTitle>
+                  <CardDescription>{t("detail.locationDesc")}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px] rounded-lg overflow-hidden">
+                    <MapView 
+                      locations={[location]} 
+                      center={[restaurant.lat, restaurant.lon]} 
+                      zoom={15} 
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Reviews Section */}

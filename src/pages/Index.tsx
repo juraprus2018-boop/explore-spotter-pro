@@ -12,6 +12,7 @@ import HreflangAlternates from "@/components/HreflangAlternates";
 import WebSiteStructuredData from "@/components/WebSiteStructuredData";
 import LanguageDetectionPopup from "@/components/LanguageDetectionPopup";
 import InteractiveWorldMap from "@/components/InteractiveWorldMap";
+import RecentReviews from "@/components/RecentReviews";
 import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
@@ -380,6 +381,8 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-12">
+            <RecentReviews />
+            
             <div>
               <h2 className="text-3xl font-bold mb-4 text-center text-foreground">
                 Of ontdek restaurants via de wereldkaart

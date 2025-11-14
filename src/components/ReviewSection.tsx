@@ -380,7 +380,7 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
               <ReCAPTCHA
                 ref={recaptchaRef}
                 size="invisible"
-                sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+                sitekey="6LdASgwsAAAAAOchNw06D6sJZq3hdRsbBbgr0DQ1"
               />
             </div>
 

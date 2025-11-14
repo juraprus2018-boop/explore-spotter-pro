@@ -5,7 +5,9 @@ import { saveRestaurants } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import L from "leaflet";
+
+// Leaflet loaded via CDN in index.html
+declare const L: any;
 
 
 // Country coordinates based on language

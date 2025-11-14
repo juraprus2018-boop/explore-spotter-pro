@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MapPin } from "lucide-react";
-import L from "leaflet";
-import "leaflet.markercluster";
+
+// Leaflet loaded via CDN in index.html
+declare const L: any;
 
 interface Location {
   name: string;
@@ -59,68 +60,84 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
     });
   };
 
-  // Initialize map once
+  // Initialize map once  
   useEffect(() => {
     const container = containerRef.current;
     if (!container || mapRef.current) return;
-
-    // Clear any existing Leaflet instance on this container (hot reload safety)
-    if ((container as any)._leaflet_id) {
-      delete (container as any)._leaflet_id;
+    
+    // Wait for Leaflet CDN to load (with quick check)
+    if (typeof L === 'undefined' || typeof (L as any).markerClusterGroup !== 'function') {
+      const timer = setTimeout(() => {
+        // Retry once after CDN loads
+        if (typeof L !== 'undefined' && typeof (L as any).markerClusterGroup === 'function') {
+          initMap();
+        }
+      }, 50);
+      return () => clearTimeout(timer);
     }
 
-    const map = L.map(container, {
-      center,
-      zoom,
-      scrollWheelZoom: true,
-      zoomControl: true,
-    });
+    initMap();
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    }).addTo(map);
+    function initMap() {
+      if (!container || mapRef.current) return;
 
-    const clusterGroup = (L as any).markerClusterGroup({
-      maxClusterRadius: 60,
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      iconCreateFunction: (cluster: any) => {
-        const count = cluster.getChildCount();
-        let size = "small";
-        let colorClass = "bg-primary";
-        if (count > 10) {
-          size = "large";
-          colorClass = "bg-accent";
-        } else if (count > 5) {
-          size = "medium";
-          colorClass = "bg-primary";
-        }
-        return new L.DivIcon({
-          html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
-          className: `marker-cluster ${colorClass}`,
-          iconSize: [40, 40],
-        });
-      },
-    });
+      // Clear any existing Leaflet instance
+      if ((container as any)._leaflet_id) {
+        delete (container as any)._leaflet_id;
+      }
 
-    markersLayerRef.current = clusterGroup;
-    map.addLayer(clusterGroup);
-    mapRef.current = map;
-
-    // ensure correct sizing
-    setTimeout(() => map.invalidateSize(), 50);
-
-    map.on("moveend zoomend", () => {
-      const c = map.getCenter();
-      const b = map.getBounds();
-      setMapInfo({
-        center: { lat: c.lat, lng: c.lng },
-        zoom: map.getZoom(),
-        bounds: { north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() },
+      const map = L.map(container, {
+        center,
+        zoom,
+        scrollWheelZoom: true,
+        zoomControl: true,
       });
-    });
+
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19,
+      }).addTo(map);
+
+      const clusterGroup = (L as any).markerClusterGroup({
+        maxClusterRadius: 60,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        iconCreateFunction: (cluster: any) => {
+          const count = cluster.getChildCount();
+          let size = "small";
+          let colorClass = "bg-primary";
+          if (count > 10) {
+            size = "large";
+            colorClass = "bg-accent";
+          } else if (count > 5) {
+            size = "medium";
+            colorClass = "bg-primary";
+          }
+          return new L.DivIcon({
+            html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
+            className: `marker-cluster ${colorClass}`,
+            iconSize: [40, 40],
+          });
+        },
+      });
+
+      markersLayerRef.current = clusterGroup;
+      map.addLayer(clusterGroup);
+      mapRef.current = map;
+
+      setTimeout(() => map.invalidateSize(), 50);
+
+      map.on("moveend zoomend", () => {
+        const c = map.getCenter();
+        const b = map.getBounds();
+        setMapInfo({
+          center: { lat: c.lat, lng: c.lng },
+          zoom: map.getZoom(),
+          bounds: { north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() },
+        });
+      });
+    }
 
     return () => {
       if (mapRef.current) {
@@ -129,7 +146,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
       }
       markersLayerRef.current = null;
     };
-  }, []);
+  }, [center, zoom]);
 
   // Update view when center/zoom change (only if no locations to fit)
   useEffect(() => {

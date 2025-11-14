@@ -203,7 +203,7 @@ const Contact = () => {
 
                   <div className="flex justify-center">
                     <ReCAPTCHA
-                      sitekey="6LcliQssAAAAAAsxwMRSx2rRsvaG4iMLgsYh0s-K"
+                      sitekey="6LdASgwsAAAAAOchNw06D6sJZq3hdRsbBbgr0DQ1"
                       onChange={(token) => setRecaptchaToken(token)}
                     />
                   </div>

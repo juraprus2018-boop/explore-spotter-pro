@@ -129,12 +129,12 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update view when center/zoom change
+  // Update view when center/zoom change (only if no locations to fit)
   useEffect(() => {
-    if (mapRef.current) {
+    if (mapRef.current && locations.length === 0) {
       mapRef.current.setView(center as LatLngExpression, zoom);
     }
-  }, [center, zoom]);
+  }, [center, zoom, locations.length]);
 
   // Render markers when locations change
   useEffect(() => {
@@ -194,15 +194,21 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
       markersLayerRef.current!.addLayer(marker);
     });
 
-    // Auto-fit bounds to show all markers
+    // Auto-fit bounds to show all markers with a slight delay to ensure markers are rendered
     if (locations.length > 0) {
-      const bounds = new LatLngBounds(
-        locations.map(loc => [loc.lat, loc.lon] as LatLngExpression)
-      );
-      mapRef.current.fitBounds(bounds, {
-        padding: [50, 50],
-        maxZoom: 15,
-      });
+      setTimeout(() => {
+        if (mapRef.current) {
+          const bounds = new LatLngBounds(
+            locations.map(loc => [loc.lat, loc.lon] as LatLngExpression)
+          );
+          mapRef.current.fitBounds(bounds, {
+            padding: [50, 50],
+            maxZoom: 15,
+            animate: true,
+            duration: 0.5,
+          });
+        }
+      }, 100);
     }
   }, [locations, navigate, lang]);
 

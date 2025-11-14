@@ -16,6 +16,13 @@ interface Review {
   restaurants: {
     name: string;
     display_name: string;
+    place_id: number;
+    city: {
+      slug: string;
+      province: {
+        slug: string;
+      };
+    } | null;
   };
 }
 
@@ -33,7 +40,7 @@ const RecentReviews = () => {
     try {
       const { data, error } = await (supabase as any)
         .from('reviews')
-        .select('id, rating, comment, created_at, restaurant_id, restaurants!inner(name, display_name)')
+        .select('id, rating, comment, created_at, restaurant_id, restaurants!inner(name, display_name, place_id, city:cities(slug, province:provinces(slug)))')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(6);
@@ -71,7 +78,7 @@ const RecentReviews = () => {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <Link
-                    to={`/${lang}/restaurant/${review.restaurant_id}`}
+                    to={`/${lang}/${review.restaurants.city?.province?.slug || 'unknown'}/${review.restaurants.city?.slug || 'unknown'}/${encodeURIComponent(review.restaurants.name).toLowerCase()}-${review.restaurants.place_id}`}
                     className="hover:text-primary transition-colors"
                   >
                     <CardTitle className="text-lg line-clamp-1">

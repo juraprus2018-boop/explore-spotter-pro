@@ -381,8 +381,6 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-12">
-            <RecentReviews />
-            
             <div>
               <h2 className="text-3xl font-bold mb-4 text-center text-foreground">
                 Of ontdek restaurants via de wereldkaart
@@ -402,6 +400,8 @@ const Index = () => {
                 {t("results.noResultsDesc")}
               </p>
             </div>
+            
+            <RecentReviews />
           </div>
         )}
       </div>

@@ -143,7 +143,7 @@ serve(async (req) => {
 
       // Notify admin about the new review via email
       try {
-        const adminEmail = Deno.env.get('ADMIN_NOTIFICATION_EMAIL') || 'info@eatnavigator.com';
+        const adminEmail = 'info@eatnavigator.com';
         const smtpHost = Deno.env.get('SMTP_HOST');
         const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587');
         const smtpUser = Deno.env.get('SMTP_USER');

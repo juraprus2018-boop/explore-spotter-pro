@@ -15,17 +15,20 @@ import InteractiveWorldMap from "@/components/InteractiveWorldMap";
 import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Utensils } from "lucide-react";
+import { Loader2, Utensils, Map } from "lucide-react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
   const [dbResults, setDbResults] = useState<DatabaseRestaurant[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>([52.3676, 4.9041]);
   const [mapZoom, setMapZoom] = useState(6);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [showMap, setShowMap] = useState(true);
+  const [showMap, setShowMap] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -275,32 +278,80 @@ const Index = () => {
             <p className="text-muted-foreground mt-6 text-lg">{t("results.loading")}</p>
           </div>
         ) : dbResults.length > 0 ? (
-          <div className="space-y-12">
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-foreground">
-                  {t("map.title")}
-                </h2>
-                <button
-                  onClick={() => setShowMap(!showMap)}
-                  className="md:hidden px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                >
-                  {showMap ? t("map.hideMap") : t("map.showMap")}
-                </button>
-              </div>
-              <div className={`${showMap ? 'block' : 'hidden'} md:block`}>
-                <MapView
-                  locations={locations}
-                  center={mapCenter}
-                  zoom={mapZoom}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <h2 className="text-3xl font-bold mb-6 text-foreground">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-bold text-foreground">
                 {t("results.title")} ({dbResults.length})
               </h2>
+              <button
+                onClick={() => setShowMap(!showMap)}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                <Map className="h-4 w-4" />
+                {showMap ? t("map.hideMap") : t("map.showMap")}
+              </button>
+            </div>
+
+            {showMap && !isMobile ? (
+              <ResizablePanelGroup direction="horizontal" className="min-h-[600px] rounded-lg border">
+                <ResizablePanel defaultSize={33} minSize={25} maxSize={50}>
+                  <div className="h-full overflow-y-auto p-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      {dbResults.map((restaurant) => (
+                        <RestaurantCard
+                          key={restaurant.place_id}
+                          placeId={restaurant.place_id}
+                          name={restaurant.name}
+                          displayName={restaurant.display_name}
+                          lat={restaurant.lat}
+                          lon={restaurant.lon}
+                          type={restaurant.type || "restaurant"}
+                          citySlug={restaurant.city?.slug || "unknown"}
+                          provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                          onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={67} minSize={50}>
+                  <div className="h-full">
+                    <MapView
+                      locations={locations}
+                      center={mapCenter}
+                      zoom={mapZoom}
+                    />
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            ) : showMap && isMobile ? (
+              <div className="space-y-6">
+                <div className="h-[400px]">
+                  <MapView
+                    locations={locations}
+                    center={mapCenter}
+                    zoom={mapZoom}
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-6">
+                  {dbResults.map((restaurant) => (
+                    <RestaurantCard
+                      key={restaurant.place_id}
+                      placeId={restaurant.place_id}
+                      name={restaurant.name}
+                      displayName={restaurant.display_name}
+                      lat={restaurant.lat}
+                      lon={restaurant.lon}
+                      type={restaurant.type || "restaurant"}
+                      citySlug={restaurant.city?.slug || "unknown"}
+                      provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                      onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {dbResults.map((restaurant) => (
                   <RestaurantCard
@@ -317,7 +368,7 @@ const Index = () => {
                   />
                 ))}
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <div className="space-y-12">

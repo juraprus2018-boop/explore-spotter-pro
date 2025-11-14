@@ -29,6 +29,7 @@ const Index = () => {
   const [mapZoom, setMapZoom] = useState(6);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [highlightedPlaceId, setHighlightedPlaceId] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -231,9 +232,11 @@ const Index = () => {
     }
   };
 
-  const handleViewOnMap = (lat: number, lon: number) => {
+  const handleViewOnMap = (lat: number, lon: number, placeId: number) => {
+    setHighlightedPlaceId(placeId);
     setMapCenter([lat, lon]);
-    setMapZoom(15);
+    setMapZoom(16);
+    setShowMap(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -311,7 +314,7 @@ const Index = () => {
                           type={restaurant.type || "restaurant"}
                           citySlug={restaurant.city?.slug || "unknown"}
                           provinceSlug={restaurant.city?.province?.slug || "unknown"}
-                          onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon)}
+                          onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                         />
                       ))}
                     </div>
@@ -324,6 +327,7 @@ const Index = () => {
                       locations={locations}
                       center={mapCenter}
                       zoom={mapZoom}
+                      highlightedPlaceId={highlightedPlaceId}
                     />
                   </div>
                 </ResizablePanel>
@@ -335,6 +339,7 @@ const Index = () => {
                     locations={locations}
                     center={mapCenter}
                     zoom={mapZoom}
+                    highlightedPlaceId={highlightedPlaceId}
                   />
                 </div>
                 <div className="grid grid-cols-1 gap-6">
@@ -349,7 +354,7 @@ const Index = () => {
                       type={restaurant.type || "restaurant"}
                       citySlug={restaurant.city?.slug || "unknown"}
                       provinceSlug={restaurant.city?.province?.slug || "unknown"}
-                      onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon)}
+                          onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                     />
                   ))}
                 </div>
@@ -367,7 +372,7 @@ const Index = () => {
                     type={restaurant.type || "restaurant"}
                     citySlug={restaurant.city?.slug || "unknown"}
                     provinceSlug={restaurant.city?.province?.slug || "unknown"}
-                    onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon)}
+                    onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                   />
                 ))}
               </div>

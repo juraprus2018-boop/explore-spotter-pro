@@ -21,9 +21,10 @@ interface MapViewProps {
   locations: Location[];
   center?: [number, number];
   zoom?: number;
+  highlightedPlaceId?: number | null;
 }
 
-const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewProps) => {
+const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedPlaceId = null }: MapViewProps) => {
   const navigate = useNavigate();
   const { lang } = useParams();
   const mapRef = useRef<LeafletMap | null>(null);
@@ -40,18 +41,18 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
   });
 
   // Create custom marker icon
-  const createCustomIcon = () => {
+  const createCustomIcon = (isHighlighted: boolean = false) => {
     return new DivIcon({
       className: 'custom-marker-icon',
       html: `
-        <div class="relative">
-          <div class="w-10 h-10 bg-primary rounded-full shadow-lg border-4 border-white flex items-center justify-center transform transition-all duration-200 hover:scale-110">
+        <div class="relative ${isHighlighted ? 'highlighted-marker' : ''}">
+          <div class="w-10 h-10 ${isHighlighted ? 'bg-accent' : 'bg-primary'} rounded-full shadow-lg border-4 border-white flex items-center justify-center transform transition-all duration-200 hover:scale-110 ${isHighlighted ? 'scale-125 animate-pulse' : ''}">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
           </div>
-          <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-primary"></div>
+          <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] ${isHighlighted ? 'border-t-accent' : 'border-t-primary'}"></div>
         </div>
       `,
       iconSize: [40, 48],
@@ -145,7 +146,8 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
 
     // Add new markers
     locations.forEach((loc) => {
-      const customIcon = createCustomIcon();
+      const isHighlighted = loc.placeId === highlightedPlaceId;
+      const customIcon = createCustomIcon(isHighlighted);
       const marker = L.marker([loc.lat, loc.lon] as LatLngExpression, {
         icon: customIcon,
       });
@@ -191,11 +193,16 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
         className: 'modern-leaflet-popup',
       });
 
+      // Auto-open popup for highlighted marker
+      if (isHighlighted) {
+        marker.openPopup();
+      }
+
       markersLayerRef.current!.addLayer(marker);
     });
 
     // Auto-fit bounds to show all markers with a slight delay to ensure markers are rendered
-    if (locations.length > 0) {
+    if (locations.length > 0 && !highlightedPlaceId) {
       setTimeout(() => {
         if (mapRef.current) {
           const bounds = new LatLngBounds(
@@ -210,7 +217,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
         }
       }, 100);
     }
-  }, [locations, navigate, lang]);
+  }, [locations, navigate, lang, highlightedPlaceId]);
 
   return (
     <div className="w-full h-full rounded-lg overflow-hidden shadow-lg border border-border bg-card relative">

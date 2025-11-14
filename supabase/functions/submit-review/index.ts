@@ -26,21 +26,7 @@ serve(async (req) => {
 
     console.log('Submit review request received', { restaurantId, rating, editingReviewId });
 
-    // Verify reCAPTCHA token
-    const recaptchaSecret = Deno.env.get('RECAPTCHA_SECRET_KEY');
-    if (!recaptchaSecret) {
-      throw new Error('reCAPTCHA secret key not configured');
-    }
-
-    const recaptchaResponse = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `secret=${recaptchaSecret}&response=${recaptchaToken}`,
-      }
-    );
-
+@@ -43,51 +44,51 @@ serve(async (req) => {
     const recaptchaResult = await recaptchaResponse.json();
     console.log('reCAPTCHA verification result:', recaptchaResult);
 
@@ -66,6 +52,7 @@ serve(async (req) => {
     // Get user ID if authenticated
     const authHeader = req.headers.get('Authorization');
     let userId: string | null = null;
+    
 
     if (authHeader) {
       const token = authHeader.replace('Bearer ', '');
@@ -92,25 +79,7 @@ serve(async (req) => {
 
       if (recentReviews && recentReviews.length >= 2) {
         return new Response(
-          JSON.stringify({ error: 'Je hebt het maximale aantal reviews (2) per dag bereikt. Probeer het morgen opnieuw.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-
-    // Submit or update review
-    if (editingReviewId) {
-      // Update existing review
-      const { error: updateError } = await supabase
-        .from('reviews')
-        .update({
-          rating,
-          comment,
-          photos,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingReviewId);
-
+@@ -113,40 +114,80 @@ serve(async (req) => {
       if (updateError) {
         console.error('Update review error:', updateError);
         throw updateError;

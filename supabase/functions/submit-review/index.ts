@@ -143,76 +143,89 @@ serve(async (req) => {
 
       // Notify admin about the new review via email
       try {
-        const { data: restaurantData, error: restaurantError } = await supabase
-          .from('restaurants')
-          .select('name, place_id')
-          .eq('id', restaurantId)
-          .single();
+        const adminEmail = 'info@eatnavigator.com';
+        const smtpHost = Deno.env.get('SMTP_HOST');
+        const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587');
+        const smtpUser = Deno.env.get('SMTP_USER');
+        const smtpPassword = Deno.env.get('SMTP_PASSWORD');
+        const smtpFrom = Deno.env.get('SMTP_FROM_EMAIL');
 
-        if (restaurantError) {
-          console.error('Failed to fetch restaurant for review notification:', restaurantError);
-        }
+        if (adminEmail && smtpHost && smtpUser && smtpPassword && smtpFrom) {
+          const { data: restaurantData, error: restaurantError } = await supabase
+            .from('restaurants')
+            .select('name, place_id')
+            .eq('id', restaurantId)
+            .single();
 
-        const restaurantName = restaurantData?.name || 'Onbekend restaurant';
-        const restaurantPlaceId = restaurantData?.place_id || restaurantId;
+          if (restaurantError) {
+            console.error('Failed to fetch restaurant for review notification:', restaurantError);
+          }
 
-        const client = new SMTPClient({
-          connection: {
-            hostname: Deno.env.get('SMTP_HOST')!,
-            port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
-            tls: true,
-            auth: {
-              username: Deno.env.get('SMTP_USER')!,
-              password: Deno.env.get('SMTP_PASSWORD')!,
+          const restaurantName = restaurantData?.name || 'Onbekend restaurant';
+          const restaurantPlaceId = restaurantData?.place_id || restaurantId;
+
+          const client = new SMTPClient({
+            connection: {
+              hostname: smtpHost,
+              port: smtpPort,
+              tls: true,
+              auth: {
+                username: smtpUser,
+                password: smtpPassword,
+              },
             },
-          },
-        });
+          });
 
-        const submittedAt = insertedReview?.created_at
-          ? new Date(insertedReview.created_at)
-          : new Date();
+          const submittedAt = insertedReview?.created_at
+            ? new Date(insertedReview.created_at)
+            : new Date();
 
-        const reviewer = userEmail || 'Anonieme gebruiker';
-        const photosList = (photos && photos.length > 0)
-          ? photos.map((url) => `<li><a href="${url}">${url}</a></li>`).join('')
-          : '<li>Geen foto\'s toegevoegd</li>';
+          const reviewer = userEmail || 'Anonieme gebruiker';
+          const photosList = (photos && photos.length > 0)
+            ? photos.map((url) => `<li><a href="${url}">${url}</a></li>`).join('')
+            : '<li>Geen foto\'s toegevoegd</li>';
 
-        const htmlContent = `
-          <h2>Nieuwe review geplaatst</h2>
-          <p><strong>Restaurant:</strong> ${restaurantName}</p>
-          <p><strong>Rating:</strong> ${rating} / 5</p>
-          <p><strong>Gebruiker:</strong> ${reviewer}</p>
-          <p><strong>Ingediend op:</strong> ${submittedAt.toLocaleString('nl-NL')}</p>
-          <p><strong>Status:</strong> ${insertedReview?.status || 'pending'}</p>
-          <p><strong>IP-adres:</strong> ${clientIP}</p>
-          <p><strong>Opmerking:</strong></p>
-          <p>${comment ? comment.replace(/\n/g, '<br>') : 'Geen opmerkingen geplaatst.'}</p>
-          <p><strong>Foto\'s:</strong></p>
-          <ul>${photosList}</ul>
-          <p><strong>Restaurant ID:</strong> ${restaurantId}</p>
-          <p><strong>Restaurant Place ID:</strong> ${restaurantPlaceId}</p>
-        `;
+          const htmlContent = `
+            <h2>Nieuwe review geplaatst</h2>
+            <p><strong>Restaurant:</strong> ${restaurantName}</p>
+            <p><strong>Rating:</strong> ${rating} / 5</p>
+            <p><strong>Gebruiker:</strong> ${reviewer}</p>
+            <p><strong>Ingediend op:</strong> ${submittedAt.toLocaleString('nl-NL')}</p>
+            <p><strong>Status:</strong> ${insertedReview?.status || 'pending'}</p>
+            <p><strong>IP-adres:</strong> ${clientIP}</p>
+            <p><strong>Opmerking:</strong></p>
+            <p>${comment ? comment.replace(/\n/g, '<br>') : 'Geen opmerkingen geplaatst.'}</p>
+            <p><strong>Foto\'s:</strong></p>
+            <ul>${photosList}</ul>
+            <p><strong>Restaurant ID:</strong> ${restaurantId}</p>
+            <p><strong>Restaurant Place ID:</strong> ${restaurantPlaceId}</p>
+          `;
 
-        const textContent = `Nieuwe review geplaatst\n\n` +
-          `Restaurant: ${restaurantName}\n` +
-          `Rating: ${rating} / 5\n` +
-          `Gebruiker: ${reviewer}\n` +
-          `Ingediend op: ${submittedAt.toLocaleString('nl-NL')}\n` +
-          `Status: ${insertedReview?.status || 'pending'}\n` +
-          `IP-adres: ${clientIP}\n` +
-          `Opmerking: ${comment || 'Geen opmerkingen geplaatst.'}\n` +
-          (photos && photos.length > 0 ? `Foto's: ${photos.join(', ')}` : "Foto's: Geen");
+          const textContent = `Nieuwe review geplaatst\n\n` +
+            `Restaurant: ${restaurantName}\n` +
+            `Rating: ${rating} / 5\n` +
+            `Gebruiker: ${reviewer}\n` +
+            `Ingediend op: ${submittedAt.toLocaleString('nl-NL')}\n` +
+            `Status: ${insertedReview?.status || 'pending'}\n` +
+            `IP-adres: ${clientIP}\n` +
+            `Opmerking: ${comment || 'Geen opmerkingen geplaatst.'}\n` +
+            (photos && photos.length > 0 ? `Foto's: ${photos.join(', ')}` : "Foto's: Geen");
 
-        await client.send({
-          from: Deno.env.get('SMTP_FROM_EMAIL')!,
-          to: 'info@eatnavigator.com',
-          subject: `Nieuwe review geplaatst - ${restaurantName}`,
-          content: textContent,
-          html: htmlContent,
-        });
-        await client.close();
-
-        console.log('Admin notification email for new review sent');
+          try {
+            await client.send({
+              from: smtpFrom,
+              to: adminEmail,
+              subject: `Nieuwe review geplaatst - ${restaurantName}`,
+              content: textContent,
+              html: htmlContent,
+            });
+            console.log('Admin notification email for new review sent');
+          } finally {
+            await client.close();
+          }
+        } else {
+          console.warn('SMTP configuration missing - skipping admin notification email');
+        }
       } catch (emailError) {
         console.error('Failed to send admin notification email:', emailError);
       }

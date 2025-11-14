@@ -296,7 +296,7 @@ const Index = () => {
             </div>
 
             {showMap && !isMobile ? (
-              <ResizablePanelGroup direction="horizontal" className="min-h-[600px] rounded-lg border">
+              <ResizablePanelGroup direction="horizontal" className="h-[70vh] max-h-[500px] rounded-lg border">
                 <ResizablePanel defaultSize={33} minSize={25} maxSize={50}>
                   <div className="h-full overflow-y-auto p-4">
                     <div className="grid grid-cols-1 gap-4">

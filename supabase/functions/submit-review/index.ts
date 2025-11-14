@@ -26,21 +26,7 @@ serve(async (req) => {
 
     console.log('Submit review request received', { restaurantId, rating, editingReviewId });
 
-    // Verify reCAPTCHA token
-    const recaptchaSecret = Deno.env.get('RECAPTCHA_SECRET_KEY');
-    if (!recaptchaSecret) {
-      throw new Error('reCAPTCHA secret key not configured');
-    }
-
-    const recaptchaResponse = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `secret=${recaptchaSecret}&response=${recaptchaToken}`,
-      }
-    );
-
+@@ -43,51 +44,51 @@ serve(async (req) => {
     const recaptchaResult = await recaptchaResponse.json();
     console.log('reCAPTCHA verification result:', recaptchaResult);
 
@@ -59,36 +45,19 @@ serve(async (req) => {
     console.log('Client IP:', clientIP);
 
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
-
-    if (!supabaseUrl) {
-      throw new Error('Supabase URL not configured');
-    }
-
-    const supabaseKey = serviceRoleKey || anonKey;
-
-    if (!supabaseKey) {
-      throw new Error('Supabase key not configured');
-    }
-
-    const authHeader = req.headers.get('Authorization') || '';
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      global: {
-        headers: authHeader ? { Authorization: authHeader } : {},
-      },
-    });
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get user ID if authenticated
+    const authHeader = req.headers.get('Authorization');
     let userId: string | null = null;
-    let userEmail: string | null = null;
+    
 
     if (authHeader) {
       const token = authHeader.replace('Bearer ', '');
       const { data: { user } } = await supabase.auth.getUser(token);
       userId = user?.id || null;
-      userEmail = user?.email || null;
     }
 
     // Check rate limit: max 2 reviews per day from same IP (only for new reviews)
@@ -110,25 +79,7 @@ serve(async (req) => {
 
       if (recentReviews && recentReviews.length >= 2) {
         return new Response(
-          JSON.stringify({ error: 'Je hebt het maximale aantal reviews (2) per dag bereikt. Probeer het morgen opnieuw.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-
-    // Submit or update review
-    if (editingReviewId) {
-      // Update existing review
-      const { error: updateError } = await supabase
-        .from('reviews')
-        .update({
-          rating,
-          comment,
-          photos,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingReviewId);
-
+@@ -113,40 +114,80 @@ serve(async (req) => {
       if (updateError) {
         console.error('Update review error:', updateError);
         throw updateError;
@@ -137,7 +88,7 @@ serve(async (req) => {
       console.log('Review updated successfully');
     } else {
       // Insert new review
-      const { data: insertedReview, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('reviews')
         .insert({
           restaurant_id: restaurantId,
@@ -146,9 +97,7 @@ serve(async (req) => {
           comment,
           photos,
           ip_address: clientIP
-        })
-        .select('id, created_at, status')
-        .single();
+        });
 
       if (insertError) {
         console.error('Insert review error:', insertError);
@@ -180,16 +129,16 @@ serve(async (req) => {
           Restaurant ID: ${restaurantId}
           Beoordeling: ${rating} / 5
           Opmerking: ${comment || 'Geen opmerkingen opgegeven.'}
-          Gebruiker: ${userEmail || 'Onbekende gebruiker'}
-          Review ID: ${insertedReview?.id}
+          Gebruiker ID: ${userId || 'Onbekend'}
+          Tijdstip: ${new Date().toLocaleString('nl-NL')}
         `,
         html: `
-          <h2>Nieuwe review geplaatst</h2>
+          <h2>Nieuwe Review Geplaatst</h2>
           <p><strong>Restaurant ID:</strong> ${restaurantId}</p>
           <p><strong>Beoordeling:</strong> ${rating} / 5</p>
           <p><strong>Opmerking:</strong> ${comment ? comment.replace(/\n/g, '<br>') : 'Geen opmerkingen opgegeven.'}</p>
-          <p><strong>Gebruiker:</strong> ${userEmail || 'Onbekende gebruiker'}</p>
-          <p><strong>Review ID:</strong> ${insertedReview?.id}</p>
+          <p><strong>Gebruiker ID:</strong> ${userId || 'Onbekend'}</p>
+          <p><strong>Tijdstip:</strong> ${new Date().toLocaleString('nl-NL')}</p>
         `,
       });
 

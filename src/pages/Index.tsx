@@ -242,6 +242,9 @@ const Index = () => {
     lat: r.lat,
     lon: r.lon,
     display_name: r.display_name,
+    placeId: r.place_id,
+    citySlug: r.city?.slug || "unknown",
+    provinceSlug: r.city?.province?.slug || "unknown",
   }));
 
   // SEO meta tags
@@ -316,7 +319,7 @@ const Index = () => {
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel defaultSize={67} minSize={50}>
-                  <div className="h-full">
+                  <div className="h-full sticky top-0">
                     <MapView
                       locations={locations}
                       center={mapCenter}

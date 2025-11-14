@@ -20,12 +20,17 @@ export const generateSitemap = async (): Promise<string> => {
   // Add restaurant pages for each language
   restaurants.forEach(restaurant => {
     languages.forEach(lang => {
-      sitemap += '  <url>\n';
-      sitemap += `    <loc>${baseUrl}/${lang}/restaurant/${restaurant.place_id}</loc>\n`;
-      sitemap += `    <lastmod>${new Date(restaurant.updated_at).toISOString().split('T')[0]}</lastmod>\n`;
-      sitemap += '    <changefreq>weekly</changefreq>\n';
-      sitemap += '    <priority>0.8</priority>\n';
-      sitemap += '  </url>\n';
+      const citySlug = restaurant.city?.slug;
+      const provinceSlug = restaurant.city?.province?.slug;
+
+      if (citySlug && provinceSlug) {
+        sitemap += '  <url>\n';
+        sitemap += `    <loc>${baseUrl}/${lang}/${provinceSlug}/${citySlug}/${restaurant.place_id}</loc>\n`;
+        sitemap += `    <lastmod>${new Date(restaurant.updated_at).toISOString().split('T')[0]}</lastmod>\n`;
+        sitemap += '    <changefreq>weekly</changefreq>\n';
+        sitemap += '    <priority>0.8</priority>\n';
+        sitemap += '  </url>\n';
+      }
     });
   });
   

@@ -60,31 +60,27 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
     });
   };
 
-  // Initialize map once  
+  // Initialize map once
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container || mapRef.current) return;
-    
-    // Wait for Leaflet CDN to load (with quick check)
-    if (typeof L === 'undefined' || typeof (L as any).markerClusterGroup !== 'function') {
-      const timer = setTimeout(() => {
-        // Retry once after CDN loads
-        if (typeof L !== 'undefined' && typeof (L as any).markerClusterGroup === 'function') {
-          initMap();
-        }
-      }, 50);
-      return () => clearTimeout(timer);
-    }
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let attempts = 0;
+    const maxAttempts = 50;
 
-    initMap();
-
-    function initMap() {
+    const initializeMap = () => {
+      const container = containerRef.current;
       if (!container || mapRef.current) return;
 
-      // Clear any existing Leaflet instance
-      if ((container as any)._leaflet_id) {
-        delete (container as any)._leaflet_id;
+      // Proceed as soon as Leaflet is available; clustering is optional
+      if (typeof L === 'undefined') {
+        if (attempts < maxAttempts) {
+          attempts++;
+          timeoutId = setTimeout(initializeMap, 100);
+        }
+        return;
       }
+
+      const hasCluster = typeof (L as any).markerClusterGroup === 'function';
+      if ((container as any)._leaflet_id) delete (container as any)._leaflet_id;
 
       const map = L.map(container, {
         center,
@@ -98,37 +94,34 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
         maxZoom: 19,
       }).addTo(map);
 
-      const clusterGroup = (L as any).markerClusterGroup({
-        maxClusterRadius: 60,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
-        iconCreateFunction: (cluster: any) => {
-          const count = cluster.getChildCount();
-          let size = "small";
-          let colorClass = "bg-primary";
-          if (count > 10) {
-            size = "large";
-            colorClass = "bg-accent";
-          } else if (count > 5) {
-            size = "medium";
-            colorClass = "bg-primary";
-          }
-          return new L.DivIcon({
-            html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
-            className: `marker-cluster ${colorClass}`,
-            iconSize: [40, 40],
-          });
-        },
-      });
+      const group = (typeof (L as any).markerClusterGroup === 'function')
+        ? (L as any).markerClusterGroup({
+            maxClusterRadius: 60,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            iconCreateFunction: (cluster: any) => {
+              const count = cluster.getChildCount();
+              let size = 'small';
+              let colorClass = 'bg-primary';
+              if (count > 10) { size = 'large'; colorClass = 'bg-accent'; }
+              else if (count > 5) { size = 'medium'; colorClass = 'bg-primary'; }
+              return new L.DivIcon({
+                html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
+                className: `marker-cluster ${colorClass}`,
+                iconSize: [40, 40],
+              });
+            },
+          })
+        : L.layerGroup();
 
-      markersLayerRef.current = clusterGroup;
-      map.addLayer(clusterGroup);
+      markersLayerRef.current = group;
+      map.addLayer(group);
       mapRef.current = map;
 
-      setTimeout(() => map.invalidateSize(), 50);
+      setTimeout(() => map.invalidateSize(), 120);
 
-      map.on("moveend zoomend", () => {
+      map.on('moveend zoomend', () => {
         const c = map.getCenter();
         const b = map.getBounds();
         setMapInfo({
@@ -137,13 +130,13 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
           bounds: { north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() },
         });
       });
-    }
+    };
+
+    initializeMap();
 
     return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
+      if (timeoutId) clearTimeout(timeoutId);
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
       markersLayerRef.current = null;
     };
   }, [center, zoom]);

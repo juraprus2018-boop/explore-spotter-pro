@@ -67,6 +67,10 @@ const createTranslations = (lang: string) => {
         notAvailable: "Niet beschikbaar",
         directions: "Routebeschrijving",
       },
+      navigation: {
+        title: "EatNavigator brengt je naar {{name}}",
+        subtitle: "Route naar {{name}}",
+      },
       reviews: {
         title: "Recensies",
         description: "Deel je ervaring",
@@ -252,6 +256,10 @@ const createTranslations = (lang: string) => {
         hours: "Opening Hours",
         notAvailable: "Not available",
         directions: "Directions",
+      },
+      navigation: {
+        title: "EatNavigator brings you to {{name}}",
+        subtitle: "Route to {{name}}",
       },
       reviews: {
         title: "Reviews",
@@ -439,6 +447,10 @@ const createTranslations = (lang: string) => {
         notAvailable: "Nicht verfügbar",
         directions: "Wegbeschreibung",
       },
+      navigation: {
+        title: "EatNavigator bringt Sie zu {{name}}",
+        subtitle: "Route zu {{name}}",
+      },
       reviews: {
         title: "Bewertungen",
         description: "Teilen Sie Ihre Erfahrung",
@@ -560,6 +572,10 @@ const createTranslations = (lang: string) => {
         hours: "Heures d'ouverture",
         notAvailable: "Non disponible",
         directions: "Itinéraire",
+      },
+      navigation: {
+        title: "EatNavigator vous amène à {{name}}",
+        subtitle: "Itinéraire vers {{name}}",
       },
       reviews: {
         title: "Avis",

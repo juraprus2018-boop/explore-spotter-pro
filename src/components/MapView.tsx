@@ -2,11 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
-// Import markercluster after leaflet
+// Leaflet CSS is loaded via CDN in index.html
+// Import markercluster JS after leaflet
 import "leaflet.markercluster";
 
 interface Location {

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import ReCAPTCHA from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
@@ -15,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { executeRecaptcha } from "@/lib/recaptcha";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -27,7 +27,6 @@ type ContactFormData = z.infer<typeof contactSchema>;
 
 const Contact = () => {
   const { t } = useTranslation();
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -42,17 +41,11 @@ const Contact = () => {
   });
 
   const onSubmit = async (data: ContactFormData) => {
-    if (!recaptchaToken) {
-      toast({
-        title: t('contact.verificationRequired'),
-        description: t('contact.verificationRequiredDesc'),
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
+      // Execute reCAPTCHA v3
+      const recaptchaToken = await executeRecaptcha('contact_form');
+
       const { error } = await supabase.functions.invoke("send-contact-email", {
         body: {
           ...data,
@@ -68,7 +61,6 @@ const Contact = () => {
       });
 
       form.reset();
-      setRecaptchaToken(null);
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
@@ -200,13 +192,6 @@ const Contact = () => {
                       </FormItem>
                     )}
                   />
-
-                  <div className="flex justify-center">
-                    <ReCAPTCHA
-                      sitekey="6LdASgwsAAAAAOchNw06D6sJZq3hdRsbBbgr0DQ1"
-                      onChange={(token) => setRecaptchaToken(token)}
-                    />
-                  </div>
 
                   <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
                     {isSubmitting ? t('contact.sending') : t('contact.sendButton')}

@@ -8,22 +8,18 @@ import { Navigation, Car, Footprints, Loader2, AlertCircle, ArrowRight, ArrowLef
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-
 interface RouteNavigationProps {
   destinationLat: number;
   destinationLon: number;
   destinationName: string;
 }
-
 type TravelMode = "walking" | "driving";
-
 interface RouteData {
   distance: number;
   duration: number;
   coordinates: [number, number][];
   steps?: RouteStep[];
 }
-
 interface RouteStep {
   distance: number;
   duration: number;
@@ -41,24 +37,36 @@ delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png"
 });
 
 // Internal Leaflet map using core API to avoid react-leaflet Context.Consumer
-function RouteLeafletMap({ userLocation, destination, route, bounds }: { userLocation: [number, number]; destination: [number, number]; route: [number, number][]; bounds: [[number, number],[number, number]] }) {
+function RouteLeafletMap({
+  userLocation,
+  destination,
+  route,
+  bounds
+}: {
+  userLocation: [number, number];
+  destination: [number, number];
+  route: [number, number][];
+  bounds: [[number, number], [number, number]];
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
   const routeRef = useRef<L.Polyline | null>(null);
-
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current, { center: userLocation, zoom: 13, scrollWheelZoom: false });
+    const map = L.map(containerRef.current, {
+      center: userLocation,
+      zoom: 13,
+      scrollWheelZoom: false
+    });
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {}).addTo(map);
     markersRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
   }, []);
-
   useEffect(() => {
     if (!mapRef.current || !markersRef.current) return;
     const group = markersRef.current;
@@ -70,69 +78,77 @@ function RouteLeafletMap({ userLocation, destination, route, bounds }: { userLoc
       routeRef.current = null;
     }
     if (route && route.length > 1) {
-      routeRef.current = L.polyline(route, { color: "#3b82f6", weight: 5, opacity: 0.7 }).addTo(mapRef.current);
+      routeRef.current = L.polyline(route, {
+        color: "#3b82f6",
+        weight: 5,
+        opacity: 0.7
+      }).addTo(mapRef.current);
     }
     const allPoints = [...(route || []), userLocation, destination];
-    const llb = L.latLngBounds(allPoints.map((p) => L.latLng(p[0], p[1])));
-    mapRef.current.fitBounds(llb, { padding: [50, 50] });
+    const llb = L.latLngBounds(allPoints.map(p => L.latLng(p[0], p[1])));
+    mapRef.current.fitBounds(llb, {
+      padding: [50, 50]
+    });
   }, [userLocation.join("|"), destination.join("|"), JSON.stringify(route), JSON.stringify(bounds)]);
-
-  return <div ref={containerRef} style={{ height: "100%", width: "100%" }} />;
+  return <div ref={containerRef} style={{
+    height: "100%",
+    width: "100%"
+  }} />;
 }
-
-const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: RouteNavigationProps) => {
+const RouteNavigation = ({
+  destinationLat,
+  destinationLon,
+  destinationName
+}: RouteNavigationProps) => {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [travelMode, setTravelMode] = useState<TravelMode>("driving");
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [showRoute, setShowRoute] = useState(false);
   const [locationStatus, setLocationStatus] = useState<"loading" | "ready" | "error">("loading");
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocationStatus("error");
       toast({
         title: "Locatie niet beschikbaar",
         description: "Je browser ondersteunt geen locatiedeling.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setLocationStatus("loading");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation([position.coords.latitude, position.coords.longitude]);
-        setLocationStatus("ready");
-      },
-      (error) => {
-        console.log("Geolocation error:", error);
-        setLocationStatus("error");
-        toast({
-          title: "Locatie niet beschikbaar",
-          description: "Geef toestemming voor locatietoegang om navigatie te gebruiken.",
-          variant: "destructive",
-        });
-      },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
-    );
+    navigator.geolocation.getCurrentPosition(position => {
+      setUserLocation([position.coords.latitude, position.coords.longitude]);
+      setLocationStatus("ready");
+    }, error => {
+      console.log("Geolocation error:", error);
+      setLocationStatus("error");
+      toast({
+        title: "Locatie niet beschikbaar",
+        description: "Geef toestemming voor locatietoegang om navigatie te gebruiken.",
+        variant: "destructive"
+      });
+    }, {
+      enableHighAccuracy: false,
+      timeout: 8000,
+      maximumAge: 60000
+    });
   }, [toast]);
-
   useEffect(() => {
     requestLocation();
   }, [requestLocation]);
-
   const fetchRoute = async () => {
     if (!userLocation) {
       toast({
         title: "Locatie vereist",
         description: "We hebben je locatie nodig om een route te berekenen.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setIsLoadingRoute(true);
 
     // Helper to add a timeout to fetch (prevents hanging requests)
@@ -140,14 +156,15 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const res = await fetch(url, { signal: controller.signal });
+        const res = await fetch(url, {
+          signal: controller.signal
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
       } finally {
         clearTimeout(id);
       }
     };
-
     try {
       const userLonLat = `${userLocation[1]},${userLocation[0]}`;
       const destLonLat = `${destinationLon},${destinationLat}`;
@@ -160,7 +177,6 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
       const fallbackBase = travelMode === "driving" ? "routed-car" : "routed-foot";
       const fallbackProfile = travelMode === "driving" ? "driving" : "foot";
       const fallbackUrl = `https://routing.openstreetmap.de/${fallbackBase}/route/v1/${fallbackProfile}/${userLonLat};${destLonLat}?overview=full&geometries=geojson&steps=true`;
-
       let data: any | null = null;
 
       // Try primary, then fallback if it fails (network/CORS/rate limit)
@@ -170,11 +186,9 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
         console.warn("Primary OSRM failed, trying fallback:", e);
         data = await fetchWithTimeout(fallbackUrl, 10000);
       }
-
       if (data && data.code === "Ok" && data.routes && data.routes.length > 0) {
         const route = data.routes[0];
-        const coordinates: [number, number][] = route.geometry.coordinates.map(
-          (coord: [number, number]) => [coord[1], coord[0]] // [lon, lat] -> [lat, lon]
+        const coordinates: [number, number][] = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] // [lon, lat] -> [lat, lon]
         );
 
         // Extract turn-by-turn steps
@@ -189,23 +203,21 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
               maneuver: {
                 type: step.maneuver.type,
                 modifier: step.maneuver.modifier,
-                location: [step.maneuver.location[1], step.maneuver.location[0]], // [lon, lat] -> [lat, lon]
-              },
+                location: [step.maneuver.location[1], step.maneuver.location[0]] // [lon, lat] -> [lat, lon]
+              }
             });
           });
         }
-
         setRouteData({
           distance: route.distance,
           duration: route.duration,
           coordinates,
-          steps,
+          steps
         });
         setShowRoute(true);
-
         toast({
           title: "Route berekend",
-          description: `${formatDistance(route.distance)} - ${formatDuration(route.duration)}`,
+          description: `${formatDistance(route.distance)} - ${formatDuration(route.duration)}`
         });
       } else {
         throw new Error("Geen route gevonden");
@@ -215,7 +227,7 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
       toast({
         title: "Fout bij routeberekening",
         description: "Probeer later opnieuw of open de route in Google Maps.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoadingRoute(false);
@@ -226,7 +238,6 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
   const getManeuverInstruction = (maneuver: any): string => {
     const type = maneuver.type;
     const modifier = maneuver.modifier;
-
     if (type === "depart") return "Vertrek";
     if (type === "arrive") return "Aangekomen bij bestemming";
     if (type === "turn") {
@@ -249,15 +260,16 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
       if (modifier === "right") return "Aan het einde rechtsaf";
     }
     if (type === "continue") return "Blijf rechtdoor";
-
     return "Volg de route";
   };
 
   // Get icon for maneuver type
-  const getManeuverIcon = (maneuver: { type: string; modifier?: string }) => {
+  const getManeuverIcon = (maneuver: {
+    type: string;
+    modifier?: string;
+  }) => {
     const type = maneuver.type;
     const modifier = maneuver.modifier;
-
     if (type === "depart" || type === "arrive") return <Navigation className="h-5 w-5" />;
     if (type === "turn") {
       if (modifier === "left" || modifier === "sharp left") return <ArrowLeft className="h-5 w-5" />;
@@ -272,17 +284,14 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
       if (modifier === "right") return <ArrowUpRight className="h-5 w-5" />;
     }
     if (type === "continue") return <ArrowUp className="h-5 w-5" />;
-
     return <ArrowUp className="h-5 w-5" />;
   };
-
   const formatDistance = (meters: number) => {
     if (meters < 1000) {
       return `${Math.round(meters)} m`;
     }
     return `${(meters / 1000).toFixed(1)} km`;
   };
-
   const formatDuration = (seconds: number) => {
     const minutes = Math.round(seconds / 60);
     if (minutes < 60) {
@@ -292,10 +301,8 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
     const remainingMinutes = minutes % 60;
     return `${hours} u ${remainingMinutes} min`;
   };
-
   if (locationStatus !== "ready") {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Navigation className="h-5 w-5" />
@@ -306,13 +313,10 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {locationStatus === "loading" ? (
-            <div className="flex flex-col items-center justify-center py-8">
+          {locationStatus === "loading" ? <div className="flex flex-col items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
               <p className="text-muted-foreground">Locatie ophalen...</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
+            </div> : <div className="space-y-4">
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
@@ -323,47 +327,21 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
                 <Button onClick={requestLocation} variant="outline" className="flex-1">
                   Opnieuw proberen
                 </Button>
-                <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${destinationLat},${destinationLon}&travelmode=${travelMode}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1"
-                >
+                <a href={`https://www.google.com/maps/dir/?api=1&destination=${destinationLat},${destinationLon}&travelmode=${travelMode}`} target="_blank" rel="noopener noreferrer" className="flex-1">
                   <Button className="w-full">Open in Google Maps</Button>
                 </a>
               </div>
-            </div>
-          )}
+            </div>}
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  const bounds: [[number, number], [number, number]] = routeData
-    ? [
-        [
-          Math.min(...routeData.coordinates.map(c => c[0])),
-          Math.min(...routeData.coordinates.map(c => c[1])),
-        ],
-        [
-          Math.max(...routeData.coordinates.map(c => c[0])),
-          Math.max(...routeData.coordinates.map(c => c[1])),
-        ],
-      ]
-    : userLocation
-    ? [
-        [Math.min(userLocation[0], destinationLat), Math.min(userLocation[1], destinationLon)],
-        [Math.max(userLocation[0], destinationLat), Math.max(userLocation[1], destinationLon)],
-      ]
-    : [[destinationLat, destinationLon], [destinationLat, destinationLon]];
+  const bounds: [[number, number], [number, number]] = routeData ? [[Math.min(...routeData.coordinates.map(c => c[0])), Math.min(...routeData.coordinates.map(c => c[1]))], [Math.max(...routeData.coordinates.map(c => c[0])), Math.max(...routeData.coordinates.map(c => c[1]))]] : userLocation ? [[Math.min(userLocation[0], destinationLat), Math.min(userLocation[1], destinationLon)], [Math.max(userLocation[0], destinationLat), Math.max(userLocation[1], destinationLon)]] : [[destinationLat, destinationLon], [destinationLat, destinationLon]];
 
   // Safety check - should never happen due to early return above
   if (!userLocation) {
     return null;
   }
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Navigation className="h-5 w-5" />
@@ -374,76 +352,45 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            100% gratis routeberekening via OpenStreetMap - geen API key nodig!
-          </AlertDescription>
-        </Alert>
+        
 
         <div className="flex gap-2">
-          <Button
-            variant={travelMode === "driving" ? "default" : "outline"}
-            onClick={() => setTravelMode("driving")}
-            className="flex-1"
-          >
+          <Button variant={travelMode === "driving" ? "default" : "outline"} onClick={() => setTravelMode("driving")} className="flex-1">
             <Car className="h-4 w-4 mr-2" />
             Auto
           </Button>
-          <Button
-            variant={travelMode === "walking" ? "default" : "outline"}
-            onClick={() => setTravelMode("walking")}
-            className="flex-1"
-          >
+          <Button variant={travelMode === "walking" ? "default" : "outline"} onClick={() => setTravelMode("walking")} className="flex-1">
             <Footprints className="h-4 w-4 mr-2" />
             Lopen
           </Button>
         </div>
 
-        <Button
-          onClick={fetchRoute}
-          disabled={isLoadingRoute}
-          className="w-full"
-          size="lg"
-        >
-          {isLoadingRoute ? (
-            <>
+        <Button onClick={fetchRoute} disabled={isLoadingRoute} className="w-full" size="lg">
+          {isLoadingRoute ? <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               Route berekenen...
-            </>
-          ) : (
-            <>
+            </> : <>
               <Navigation className="h-4 w-4 mr-2" />
               Toon route
-            </>
-          )}
+            </>}
         </Button>
 
-        {routeData && (
-          <div className="flex gap-4 justify-center">
+        {routeData && <div className="flex gap-4 justify-center">
             <Badge variant="secondary" className="text-lg py-2 px-4">
               {formatDistance(routeData.distance)}
             </Badge>
             <Badge variant="secondary" className="text-lg py-2 px-4">
               {formatDuration(routeData.duration)}
             </Badge>
-          </div>
-        )}
+          </div>}
 
-        {showRoute && (
-          <>
+        {showRoute && <>
             <div className="h-[400px] rounded-lg overflow-hidden border mb-4">
-              <RouteLeafletMap
-                userLocation={userLocation}
-                destination={[destinationLat, destinationLon]}
-                route={routeData?.coordinates || []}
-                bounds={bounds}
-              />
+              <RouteLeafletMap userLocation={userLocation} destination={[destinationLat, destinationLon]} route={routeData?.coordinates || []} bounds={bounds} />
             </div>
 
             {/* Turn-by-turn instructions */}
-            {routeData?.steps && routeData.steps.length > 0 && (
-              <Card>
+            {routeData?.steps && routeData.steps.length > 0 && <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Navigation className="h-5 w-5" />
@@ -455,45 +402,32 @@ const RouteNavigation = ({ destinationLat, destinationLon, destinationName }: Ro
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {routeData.steps.map((step, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors"
-                      >
+                    {routeData.steps.map((step, index) => <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors">
                         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                           {getManeuverIcon(step.maneuver)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm">
                             {step.instruction}
-                            {step.name && step.name !== "" && (
-                              <span className="text-muted-foreground"> op {step.name}</span>
-                            )}
+                            {step.name && step.name !== "" && <span className="text-muted-foreground"> op {step.name}</span>}
                           </p>
                           <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                             <span>{formatDistance(step.distance)}</span>
-                            {step.duration > 0 && (
-                              <>
+                            {step.duration > 0 && <>
                                 <span>•</span>
                                 <span>{formatDuration(step.duration)}</span>
-                              </>
-                            )}
+                              </>}
                           </div>
                         </div>
                         <div className="flex-shrink-0 text-xs font-medium text-muted-foreground bg-background px-2 py-1 rounded">
                           {index + 1}
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
-          </>
-        )}
+              </Card>}
+          </>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default RouteNavigation;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import ReCAPTCHA from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
+import { executeRecaptcha } from "@/lib/recaptcha";
 
 interface Review {
   id: string;
@@ -42,7 +42,6 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
   const [editingReview, setEditingReview] = useState<string | null>(null);
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   useEffect(() => {
     // Check auth state
@@ -122,21 +121,11 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
       return;
     }
 
-    // Get reCAPTCHA token
-    const recaptchaToken = await recaptchaRef.current?.executeAsync();
-    recaptchaRef.current?.reset();
-
-    if (!recaptchaToken) {
-      toast({
-        title: "Verificatie vereist",
-        description: "reCAPTCHA verificatie mislukt. Probeer het opnieuw.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
+      // Execute reCAPTCHA v3
+      const recaptchaToken = await executeRecaptcha('submit_review');
+
       // Upload photos first
       const photoUrls: string[] = [];
       for (const file of uploadedPhotos) {
@@ -374,14 +363,6 @@ const ReviewSection = ({ restaurantId, restaurantName }: ReviewSectionProps) => 
                   )}
                 </div>
               </div>
-            </div>
-
-            <div className="pt-2">
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                size="invisible"
-                sitekey="6LdASgwsAAAAAOchNw06D6sJZq3hdRsbBbgr0DQ1"
-              />
             </div>
 
             <div className="flex gap-2">

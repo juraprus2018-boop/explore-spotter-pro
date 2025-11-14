@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { createSlug } from "@/lib/database";
+import { executeRecaptcha } from "@/lib/recaptcha";
 
 const restaurantSchema = z.object({
   name: z.string().min(2, "Naam moet minimaal 2 karakters zijn").max(100),
@@ -104,6 +105,9 @@ const AddRestaurantForm = ({ onSuccess }: AddRestaurantFormProps) => {
 
     setIsLoading(true);
     try {
+      // Execute reCAPTCHA v3
+      const recaptchaToken = await executeRecaptcha('add_restaurant');
+
       // Check if user is authenticated
       const { data: { user } } = await supabase.auth.getUser();
       

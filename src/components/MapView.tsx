@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import L, { Icon, LatLngExpression, Map as LeafletMap, LayerGroup, DivIcon } from "leaflet";
+import L, { Icon, LatLngExpression, Map as LeafletMap, LayerGroup, DivIcon, LatLngBounds } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster";
 
 interface Location {
   name: string;
@@ -61,7 +64,35 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
         maxZoom: 19,
       }).addTo(map);
 
-      markersLayerRef.current = L.layerGroup().addTo(map);
+      // Create marker cluster group with custom options
+      const clusterGroup = (L as any).markerClusterGroup({
+        maxClusterRadius: 60,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        iconCreateFunction: (cluster: any) => {
+          const count = cluster.getChildCount();
+          let size = 'small';
+          let colorClass = 'bg-primary';
+          
+          if (count > 10) {
+            size = 'large';
+            colorClass = 'bg-accent';
+          } else if (count > 5) {
+            size = 'medium';
+            colorClass = 'bg-primary';
+          }
+          
+          return new DivIcon({
+            html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
+            className: `marker-cluster ${colorClass}`,
+            iconSize: [40, 40],
+          });
+        },
+      });
+
+      markersLayerRef.current = clusterGroup;
+      map.addLayer(clusterGroup);
       mapRef.current = map;
     }
 
@@ -81,7 +112,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
 
   // Render markers when locations change
   useEffect(() => {
-    if (!markersLayerRef.current) return;
+    if (!markersLayerRef.current || !mapRef.current) return;
 
     // Clear previous markers
     markersLayerRef.current.clearLayers();
@@ -136,6 +167,17 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
 
       markersLayerRef.current!.addLayer(marker);
     });
+
+    // Auto-fit bounds to show all markers
+    if (locations.length > 0) {
+      const bounds = new LatLngBounds(
+        locations.map(loc => [loc.lat, loc.lon] as LatLngExpression)
+      );
+      mapRef.current.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 15,
+      });
+    }
   }, [locations, navigate, lang]);
 
   return (

@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+
+// Leaflet CSS is loaded via CDN in index.html
 
 // Fix for default marker icons in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;

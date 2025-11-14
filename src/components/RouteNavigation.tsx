@@ -8,6 +8,7 @@ import { Navigation, Car, Footprints, Loader2, AlertCircle, ArrowRight, ArrowLef
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 interface RouteNavigationProps {
   destinationLat: number;
   destinationLon: number;
@@ -106,9 +107,8 @@ const RouteNavigation = ({
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [showRoute, setShowRoute] = useState(false);
   const [locationStatus, setLocationStatus] = useState<"loading" | "ready" | "error">("loading");
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const { t } = useTranslation();
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocationStatus("error");
@@ -303,15 +303,15 @@ const RouteNavigation = ({
   };
   if (locationStatus !== "ready") {
     return <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Navigation className="h-5 w-5" />
-            Navigatie
-          </CardTitle>
-          <CardDescription>
-            Route naar {destinationName}
-          </CardDescription>
-        </CardHeader>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Navigation className="h-5 w-5" />
+          {t("navigation.title", { name: destinationName })}
+        </CardTitle>
+        <CardDescription>
+          {t("navigation.subtitle", { name: destinationName })}
+        </CardDescription>
+      </CardHeader>
         <CardContent>
           {locationStatus === "loading" ? <div className="flex flex-col items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
@@ -345,10 +345,10 @@ const RouteNavigation = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Navigation className="h-5 w-5" />
-          Navigatie
+          {t("navigation.title", { name: destinationName })}
         </CardTitle>
         <CardDescription>
-          Route naar {destinationName}
+          {t("navigation.subtitle", { name: destinationName })}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import L, { Icon, LatLngExpression, Map as LeafletMap, LayerGroup, DivIcon, LatLngBounds } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
+import { MapPin } from "lucide-react";
 
 interface Location {
   name: string;
@@ -28,6 +29,15 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
   const mapRef = useRef<LeafletMap | null>(null);
   const markersLayerRef = useRef<LayerGroup | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [mapInfo, setMapInfo] = useState<{
+    center: { lat: number; lng: number };
+    zoom: number;
+    bounds: { north: number; south: number; east: number; west: number } | null;
+  }>({
+    center: { lat: center[0], lng: center[1] },
+    zoom: zoom,
+    bounds: null,
+  });
 
   // Create custom marker icon
   const createCustomIcon = () => {
@@ -94,6 +104,22 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
       markersLayerRef.current = clusterGroup;
       map.addLayer(clusterGroup);
       mapRef.current = map;
+
+      // Update map info on move/zoom
+      map.on('moveend zoomend', () => {
+        const center = map.getCenter();
+        const bounds = map.getBounds();
+        setMapInfo({
+          center: { lat: center.lat, lng: center.lng },
+          zoom: map.getZoom(),
+          bounds: {
+            north: bounds.getNorth(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            west: bounds.getWest(),
+          },
+        });
+      });
     }
 
     return () => {
@@ -181,8 +207,43 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6 }: MapViewPro
   }, [locations, navigate, lang]);
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden shadow-lg border border-border bg-card">
+    <div className="w-full h-full rounded-lg overflow-hidden shadow-lg border border-border bg-card relative">
       <div ref={containerRef} className="h-full w-full" />
+      
+      {/* Map Info Panel */}
+      <div className="absolute top-4 left-4 bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3 z-[1000] max-w-xs">
+        <div className="flex items-center gap-2 mb-2">
+          <MapPin className="h-4 w-4 text-primary" />
+          <h3 className="font-semibold text-sm text-foreground">Kaart Positie</h3>
+        </div>
+        <div className="space-y-1 text-xs text-muted-foreground">
+          <div className="flex justify-between gap-4">
+            <span className="font-medium">Centrum:</span>
+            <span className="font-mono">
+              {mapInfo.center.lat.toFixed(4)}, {mapInfo.center.lng.toFixed(4)}
+            </span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="font-medium">Zoom:</span>
+            <span className="font-mono">{mapInfo.zoom}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="font-medium">Markers:</span>
+            <span className="font-mono">{locations.length}</span>
+          </div>
+          {mapInfo.bounds && (
+            <div className="pt-2 mt-2 border-t border-border">
+              <div className="font-medium mb-1">Gebied:</div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
+                <span>N: {mapInfo.bounds.north.toFixed(3)}</span>
+                <span>S: {mapInfo.bounds.south.toFixed(3)}</span>
+                <span>E: {mapInfo.bounds.east.toFixed(3)}</span>
+                <span>W: {mapInfo.bounds.west.toFixed(3)}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

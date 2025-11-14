@@ -240,7 +240,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
   }, [locations, navigate, lang, highlightedPlaceId]);
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden shadow-lg border border-border bg-card relative">
+    <div className="w-full h-full min-h-[420px] md:min-h-[520px] rounded-lg overflow-hidden shadow-lg border border-border bg-card relative">
       <div ref={containerRef} className="h-full w-full" />
       
       {/* Map Info Panel */}

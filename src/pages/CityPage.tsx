@@ -43,7 +43,7 @@ const CityPage = () => {
   const [selectedCuisine, setSelectedCuisine] = useState<string>("all");
   const [selectedFacility, setSelectedFacility] = useState<string>("all");
   const [selectedDiet, setSelectedDiet] = useState<string>("all");
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {

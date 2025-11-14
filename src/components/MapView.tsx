@@ -61,8 +61,20 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
 
   // Initialize map once
   useEffect(() => {
+    // Wait for Leaflet and MarkerCluster to be loaded from CDN
+    if (typeof L === 'undefined' || !L.markerClusterGroup) {
+      console.log('Waiting for Leaflet libraries to load...');
+      return;
+    }
+
     if (containerRef.current && !mapRef.current) {
-      const map = L.map(containerRef.current, {
+      // Clear any existing Leaflet instance on the container
+      const container = containerRef.current;
+      if ((container as any)._leaflet_id) {
+        delete (container as any)._leaflet_id;
+      }
+
+      const map = L.map(container, {
         center: center,
         zoom,
         scrollWheelZoom: true,
@@ -74,7 +86,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
       }).addTo(map);
 
       // Create marker cluster group with custom options
-      const clusterGroup = (L as any).markerClusterGroup({
+      const clusterGroup = L.markerClusterGroup({
         maxClusterRadius: 60,
         spiderfyOnMaxZoom: true,
         showCoverageOnHover: false,
@@ -122,8 +134,14 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
     }
 
     return () => {
-      // optional cleanup when component unmounts
-      // mapRef.current?.remove();
+      // Properly cleanup map on unmount
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+      if (markersLayerRef.current) {
+        markersLayerRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

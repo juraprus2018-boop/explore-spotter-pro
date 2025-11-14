@@ -8,8 +8,16 @@
     <meta name="description" content="Ontdek duizenden restaurants in Nederland met interactieve kaarten, reviews en gedetailleerde informatie" />
     <meta name="author" content="EatNavigator" />
     
-    <!-- Map styles and scripts moved to ESM imports via Vite -->
-    <!-- Leaflet CSS/JS and MarkerCluster are now imported in the app bundle -->
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Leaflet MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <meta property="og:title" content="EatNavigator - Vind de beste restaurants" />
     <meta property="og:description" content="Ontdek duizenden restaurants in Nederland met interactieve kaarten en reviews" />

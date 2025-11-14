@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.81.0";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -65,11 +66,13 @@ serve(async (req) => {
     // Get user ID if authenticated
     const authHeader = req.headers.get('Authorization');
     let userId: string | null = null;
-    
+    let userEmail: string | null = null;
+
     if (authHeader) {
       const token = authHeader.replace('Bearer ', '');
       const { data: { user } } = await supabase.auth.getUser(token);
       userId = user?.id || null;
+      userEmail = user?.email || null;
     }
 
     // Check rate limit: max 2 reviews per day from same IP (only for new reviews)
@@ -118,7 +121,7 @@ serve(async (req) => {
       console.log('Review updated successfully');
     } else {
       // Insert new review
-      const { error: insertError } = await supabase
+      const { data: insertedReview, error: insertError } = await supabase
         .from('reviews')
         .insert({
           restaurant_id: restaurantId,
@@ -127,7 +130,9 @@ serve(async (req) => {
           comment,
           photos,
           ip_address: clientIP
-        });
+        })
+        .select('id, created_at, status')
+        .single();
 
       if (insertError) {
         console.error('Insert review error:', insertError);
@@ -135,6 +140,46 @@ serve(async (req) => {
       }
 
       console.log('Review created successfully');
+
+      // Notify admin about the new review via email
+      const client = new SMTPClient({
+        connection: {
+          hostname: Deno.env.get('SMTP_HOST')!,
+          port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
+          tls: true,
+          auth: {
+            username: Deno.env.get('SMTP_USER')!,
+            password: Deno.env.get('SMTP_PASSWORD')!,
+          },
+        },
+      });
+
+      await client.send({
+        from: Deno.env.get('SMTP_FROM_EMAIL')!,
+        to: 'info@eatnavigator.com',
+        subject: 'Nieuwe review geplaatst - EatNavigator',
+        content: `
+          Er is een nieuwe review geplaatst op EatNavigator.
+
+          Restaurant ID: ${restaurantId}
+          Beoordeling: ${rating} / 5
+          Opmerking: ${comment || 'Geen opmerkingen opgegeven.'}
+          Gebruiker: ${userEmail || 'Onbekende gebruiker'}
+          Review ID: ${insertedReview?.id}
+        `,
+        html: `
+          <h2>Nieuwe review geplaatst</h2>
+          <p><strong>Restaurant ID:</strong> ${restaurantId}</p>
+          <p><strong>Beoordeling:</strong> ${rating} / 5</p>
+          <p><strong>Opmerking:</strong> ${comment ? comment.replace(/\n/g, '<br>') : 'Geen opmerkingen opgegeven.'}</p>
+          <p><strong>Gebruiker:</strong> ${userEmail || 'Onbekende gebruiker'}</p>
+          <p><strong>Review ID:</strong> ${insertedReview?.id}</p>
+        `,
+      });
+
+      await client.close();
+
+      console.log('Admin notification email for new review sent');
     }
 
     return new Response(

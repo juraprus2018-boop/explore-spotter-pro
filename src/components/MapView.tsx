@@ -196,7 +196,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
           const citySlug = button.getAttribute('data-city-slug');
           const provinceSlug = button.getAttribute('data-province-slug');
           if (placeId && citySlug && provinceSlug) {
-            navigate(`/${lang}/restaurant/${provinceSlug}/${citySlug}/${placeId}`);
+            navigate(`/${lang}/${provinceSlug}/${citySlug}/${placeId}`);
           }
         });
       }

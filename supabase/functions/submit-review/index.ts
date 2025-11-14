@@ -59,20 +59,45 @@ serve(async (req) => {
     console.log('Client IP:', clientIP);
 
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (!supabaseUrl) {
+      throw new Error('Supabase URL not configured');
+    }
+
+    const supabaseKey = serviceRoleKey || anonKey;
+
+    if (!supabaseKey) {
+      throw new Error('Supabase key not configured');
+    }
+
+    const authHeader = req.headers.get('Authorization') || '';
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      },
+    });
 
     // Get user ID if authenticated
-    const authHeader = req.headers.get('Authorization');
     let userId: string | null = null;
     let userEmail: string | null = null;
 
-    if (authHeader) {
+    if (authHeader.startsWith('Bearer ')) {
       const token = authHeader.replace('Bearer ', '');
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id || null;
-      userEmail = user?.email || null;
+      try {
+        const base64Url = token.split('.')[1];
+        if (base64Url) {
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+          const payload = JSON.parse(atob(padded));
+          userId = payload?.sub || null;
+          userEmail = payload?.email || null;
+        }
+      } catch (decodeError) {
+        console.error('Failed to decode auth token for review submission:', decodeError);
+      }
     }
 
     // Check rate limit: max 2 reviews per day from same IP (only for new reviews)

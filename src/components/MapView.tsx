@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import L from "leaflet";
-import "leaflet.markercluster";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+
+// Import markercluster after leaflet
+import "leaflet.markercluster";
 
 interface Location {
   name: string;
@@ -63,81 +65,73 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
 
   // Initialize map once
   useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    
-    const initializeMap = () => {
-      // MarkerCluster loaded via ESM imports; no CDN wait needed.
-      if (containerRef.current && !mapRef.current) {
-        // Clear any existing Leaflet instance on the container
-        const container = containerRef.current;
-        if ((container as any)._leaflet_id) {
-          delete (container as any)._leaflet_id;
-        }
+    if (containerRef.current && !mapRef.current) {
+      // Clear any existing Leaflet instance on the container
+      const container = containerRef.current;
+      if ((container as any)._leaflet_id) {
+        delete (container as any)._leaflet_id;
+      }
 
-        const map = L.map(container, {
-          center: center,
-          zoom,
-          scrollWheelZoom: true,
-          zoomControl: true,
-        });
+      const map = L.map(container, {
+        center: center,
+        zoom,
+        scrollWheelZoom: true,
+        zoomControl: true,
+      });
 
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-          maxZoom: 19,
-        }).addTo(map);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19,
+      }).addTo(map);
 
-        // Create marker cluster group with custom options
-        const clusterGroup = L.markerClusterGroup({
-          maxClusterRadius: 60,
-          spiderfyOnMaxZoom: true,
-          showCoverageOnHover: false,
-          zoomToBoundsOnClick: true,
-          iconCreateFunction: (cluster: any) => {
-            const count = cluster.getChildCount();
-            let size = 'small';
-            let colorClass = 'bg-primary';
-            
-            if (count > 10) {
-              size = 'large';
-              colorClass = 'bg-accent';
-            } else if (count > 5) {
-              size = 'medium';
-              colorClass = 'bg-primary';
-            }
-            
-            return new L.DivIcon({
-              html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
-              className: `marker-cluster ${colorClass}`,
-              iconSize: [40, 40],
-            });
+      // Create marker cluster group with custom options
+      const clusterGroup = L.markerClusterGroup({
+        maxClusterRadius: 60,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        iconCreateFunction: (cluster: any) => {
+          const count = cluster.getChildCount();
+          let size = 'small';
+          let colorClass = 'bg-primary';
+          
+          if (count > 10) {
+            size = 'large';
+            colorClass = 'bg-accent';
+          } else if (count > 5) {
+            size = 'medium';
+            colorClass = 'bg-primary';
+          }
+          
+          return new L.DivIcon({
+            html: `<div class="cluster-marker ${size}"><span class="cluster-count">${count}</span></div>`,
+            className: `marker-cluster ${colorClass}`,
+            iconSize: [40, 40],
+          });
+        },
+      });
+
+      markersLayerRef.current = clusterGroup;
+      map.addLayer(clusterGroup);
+      mapRef.current = map;
+
+      // Update map info on move/zoom
+      map.on('moveend zoomend', () => {
+        const center = map.getCenter();
+        const bounds = map.getBounds();
+        setMapInfo({
+          center: { lat: center.lat, lng: center.lng },
+          zoom: map.getZoom(),
+          bounds: {
+            north: bounds.getNorth(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            west: bounds.getWest(),
           },
         });
-
-        markersLayerRef.current = clusterGroup;
-        map.addLayer(clusterGroup);
-        mapRef.current = map;
-
-        // Update map info on move/zoom
-        map.on('moveend zoomend', () => {
-          const center = map.getCenter();
-          const bounds = map.getBounds();
-          setMapInfo({
-            center: { lat: center.lat, lng: center.lng },
-            zoom: map.getZoom(),
-            bounds: {
-              north: bounds.getNorth(),
-              south: bounds.getSouth(),
-              east: bounds.getEast(),
-              west: bounds.getWest(),
-            },
-          });
-        });
-      }
-    };
-
-    initializeMap();
+      });
+    }
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId as any);
       // Properly cleanup map on unmount
       if (mapRef.current) {
         mapRef.current.remove();

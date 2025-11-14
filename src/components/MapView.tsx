@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MapPin } from "lucide-react";
-
-// Leaflet is loaded via CDN in index.html
-declare const L: any;
+import L from "leaflet";
+import "leaflet.markercluster";
+import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 interface Location {
   name: string;
@@ -61,16 +63,10 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
 
   // Initialize map once
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     
     const initializeMap = () => {
-      // Wait for Leaflet and MarkerCluster to be loaded from CDN
-      if (typeof L === 'undefined' || !L.markerClusterGroup) {
-        console.log('Waiting for Leaflet libraries to load...');
-        timeoutId = setTimeout(initializeMap, 100);
-        return;
-      }
-
+      // MarkerCluster loaded via ESM imports; no CDN wait needed.
       if (containerRef.current && !mapRef.current) {
         // Clear any existing Leaflet instance on the container
         const container = containerRef.current;
@@ -141,7 +137,7 @@ const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedP
     initializeMap();
 
     return () => {
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId as any);
       // Properly cleanup map on unmount
       if (mapRef.current) {
         mapRef.current.remove();

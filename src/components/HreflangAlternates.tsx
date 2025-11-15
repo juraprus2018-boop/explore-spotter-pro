@@ -1,13 +1,14 @@
 import { Helmet } from "react-helmet";
 import { useLocation } from "react-router-dom";
+import { SUPPORTED_LANGUAGES } from "@/lib/languages";
 
 interface HreflangAlternatesProps {
   languages?: string[];
   baseUrl?: string;
 }
 
-const HreflangAlternates = ({ 
-  languages = ["nl", "en", "de", "fr", "es", "it", "pt", "pl", "hr", "ru", "ja", "zh", "ar", "tr", "sv", "da", "no", "fi", "cs", "ro"],
+const HreflangAlternates = ({
+  languages = [...SUPPORTED_LANGUAGES],
   baseUrl = "https://www.eatnavigator.com"
 }: HreflangAlternatesProps) => {
   const location = useLocation();

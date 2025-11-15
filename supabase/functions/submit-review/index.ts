@@ -137,46 +137,62 @@ serve(async (req) => {
 
       console.log('Review created successfully');
 
-
       // Notify admin about the new review via email
-      const client = new SMTPClient({
-        connection: {
-          hostname: Deno.env.get('SMTP_HOST')!,
-          port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
-          tls: true,
-          auth: {
-            username: Deno.env.get('SMTP_USER')!,
-            password: Deno.env.get('SMTP_PASSWORD')!,
+      try {
+        console.log('Attempting to send admin notification email...');
+        
+        const client = new SMTPClient({
+          connection: {
+            hostname: Deno.env.get('SMTP_HOST')!,
+            port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
+            tls: true,
+            auth: {
+              username: Deno.env.get('SMTP_USER')!,
+              password: Deno.env.get('SMTP_PASSWORD')!,
+            },
           },
-        },
-      });
+        });
 
-      await client.send({
-        from: Deno.env.get('SMTP_FROM_EMAIL')!,
-        to: 'info@eatnavigator.com',
-        subject: 'Nieuwe review geplaatst - EatNavigator',
-        content: `
-          Er is een nieuwe review geplaatst op EatNavigator.
+        console.log('SMTP client created, sending email to info@eatnavigator.com');
 
-          Restaurant ID: ${restaurantId}
-          Beoordeling: ${rating} / 5
-          Opmerking: ${comment || 'Geen opmerkingen opgegeven.'}
-          Gebruiker ID: ${userId || 'Onbekend'}
-          Tijdstip: ${new Date().toLocaleString('nl-NL')}
-        `,
-        html: `
-          <h2>Nieuwe Review Geplaatst</h2>
-          <p><strong>Restaurant ID:</strong> ${restaurantId}</p>
-          <p><strong>Beoordeling:</strong> ${rating} / 5</p>
-          <p><strong>Opmerking:</strong> ${comment ? comment.replace(/\n/g, '<br>') : 'Geen opmerkingen opgegeven.'}</p>
-          <p><strong>Gebruiker ID:</strong> ${userId || 'Onbekend'}</p>
-          <p><strong>Tijdstip:</strong> ${new Date().toLocaleString('nl-NL')}</p>
-        `,
-      });
+        await client.send({
+          from: Deno.env.get('SMTP_FROM_EMAIL')!,
+          to: 'info@eatnavigator.com',
+          subject: 'Nieuwe review geplaatst - EatNavigator',
+          content: `
+            Er is een nieuwe review geplaatst op EatNavigator.
 
-      await client.close();
+            Restaurant ID: ${restaurantId}
+            Beoordeling: ${rating} / 5
+            Opmerking: ${comment || 'Geen opmerkingen opgegeven.'}
+            Gebruiker ID: ${userId || 'Onbekend'}
+            Tijdstip: ${new Date().toLocaleString('nl-NL')}
+          `,
+          html: `
+            <h2>Nieuwe Review Geplaatst</h2>
+            <p><strong>Restaurant ID:</strong> ${restaurantId}</p>
+            <p><strong>Beoordeling:</strong> ${rating} / 5</p>
+            <p><strong>Opmerking:</strong> ${comment ? comment.replace(/\n/g, '<br>') : 'Geen opmerkingen opgegeven.'}</p>
+            <p><strong>Gebruiker ID:</strong> ${userId || 'Onbekend'}</p>
+            <p><strong>Tijdstip:</strong> ${new Date().toLocaleString('nl-NL')}</p>
+          `,
+        });
 
-      console.log('Admin notification email for new review sent');
+        await client.close();
+
+        console.log('Admin notification email for new review sent successfully');
+      } catch (emailError: any) {
+        console.error('Failed to send admin notification email:', emailError);
+        console.error('Email error details:', {
+          message: emailError.message,
+          stack: emailError.stack,
+          smtp_host: Deno.env.get('SMTP_HOST'),
+          smtp_port: Deno.env.get('SMTP_PORT'),
+          smtp_user: Deno.env.get('SMTP_USER'),
+          smtp_from: Deno.env.get('SMTP_FROM_EMAIL')
+        });
+        // Don't throw - we don't want email failure to fail the review submission
+      }
     }
 
     return new Response(

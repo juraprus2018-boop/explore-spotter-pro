@@ -14,54 +14,397 @@ export type Database = {
   }
   public: {
     Tables: {
+      cities: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          province_id: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          province_id: string
+          slug: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          province_id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      countries: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      page_views: {
+        Row: {
+          city_name: string | null
+          country_code: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          page_url: string
+          user_agent: string | null
+        }
+        Insert: {
+          city_name?: string | null
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          page_url: string
+          user_agent?: string | null
+        }
+        Update: {
+          city_name?: string | null
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          page_url?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      provinces: {
+        Row: {
+          country_id: string
+          created_at: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          country_id: string
+          created_at?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          country_id?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provinces_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_suggestions: {
+        Row: {
+          created_at: string | null
+          current_value: string | null
+          description: string | null
+          id: string
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_note: string | null
+          photos: string[] | null
+          restaurant_id: string
+          status: string | null
+          suggested_value: string | null
+          suggestion_type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_value?: string | null
+          description?: string | null
+          id?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          photos?: string[] | null
+          restaurant_id: string
+          status?: string | null
+          suggested_value?: string | null
+          suggestion_type: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_value?: string | null
+          description?: string | null
+          id?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          photos?: string[] | null
+          restaurant_id?: string
+          status?: string | null
+          suggested_value?: string | null
+          suggestion_type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_suggestions_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurants: {
         Row: {
           address_type: string | null
-          city: string | null
+          amenity: string | null
+          brand: string | null
+          building: string | null
+          city_id: string | null
+          claim_status: string | null
+          claimed_at: string | null
+          contact_info: Json | null
           created_at: string | null
+          cuisine: string | null
+          delivery: string | null
+          description: string | null
+          diet_options: Json | null
           display_name: string
+          extratags: Json | null
           id: string
           lat: number
           lon: number
           name: string
+          opening_hours: Json | null
+          operator: string | null
           osm_id: number | null
           osm_type: string | null
+          outdoor_seating: string | null
+          owner_email: string | null
+          owner_id: string | null
+          payment_options: Json | null
+          phone: string | null
+          photos: string[] | null
           place_id: number
           search_count: number | null
+          status: string | null
+          takeaway: string | null
           type: string | null
           updated_at: string | null
+          user_submitted: boolean | null
+          verification_documents: string[] | null
+          verification_note: string | null
+          verified_at: string | null
+          verified_by: string | null
+          website: string | null
+          wheelchair: string | null
         }
         Insert: {
           address_type?: string | null
-          city?: string | null
+          amenity?: string | null
+          brand?: string | null
+          building?: string | null
+          city_id?: string | null
+          claim_status?: string | null
+          claimed_at?: string | null
+          contact_info?: Json | null
           created_at?: string | null
+          cuisine?: string | null
+          delivery?: string | null
+          description?: string | null
+          diet_options?: Json | null
           display_name: string
+          extratags?: Json | null
           id?: string
           lat: number
           lon: number
           name: string
+          opening_hours?: Json | null
+          operator?: string | null
           osm_id?: number | null
           osm_type?: string | null
+          outdoor_seating?: string | null
+          owner_email?: string | null
+          owner_id?: string | null
+          payment_options?: Json | null
+          phone?: string | null
+          photos?: string[] | null
           place_id: number
           search_count?: number | null
+          status?: string | null
+          takeaway?: string | null
           type?: string | null
           updated_at?: string | null
+          user_submitted?: boolean | null
+          verification_documents?: string[] | null
+          verification_note?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          website?: string | null
+          wheelchair?: string | null
         }
         Update: {
           address_type?: string | null
-          city?: string | null
+          amenity?: string | null
+          brand?: string | null
+          building?: string | null
+          city_id?: string | null
+          claim_status?: string | null
+          claimed_at?: string | null
+          contact_info?: Json | null
           created_at?: string | null
+          cuisine?: string | null
+          delivery?: string | null
+          description?: string | null
+          diet_options?: Json | null
           display_name?: string
+          extratags?: Json | null
           id?: string
           lat?: number
           lon?: number
           name?: string
+          opening_hours?: Json | null
+          operator?: string | null
           osm_id?: number | null
           osm_type?: string | null
+          outdoor_seating?: string | null
+          owner_email?: string | null
+          owner_id?: string | null
+          payment_options?: Json | null
+          phone?: string | null
+          photos?: string[] | null
           place_id?: number
           search_count?: number | null
+          status?: string | null
+          takeaway?: string | null
           type?: string | null
           updated_at?: string | null
+          user_submitted?: boolean | null
+          verification_documents?: string[] | null
+          verification_note?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          website?: string | null
+          wheelchair?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurants_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_note: string | null
+          photos: string[] | null
+          rating: number
+          restaurant_id: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          photos?: string[] | null
+          rating: number
+          restaurant_id: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          photos?: string[] | null
+          rating?: number
+          restaurant_id?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -70,10 +413,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -200,6 +549,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

@@ -22,49 +22,62 @@ Deno.serve(async (req) => {
       .select(`
         place_id,
         updated_at,
-        city:cities (
+        cities!inner (
           slug,
-          province:provinces (
+          provinces!inner (
             slug
           )
         )
       `)
       .eq('status', 'approved');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+
+    console.log('Fetched restaurants:', restaurants?.length || 0);
 
     const baseUrl = req.headers.get('origin') || 'https://eatnavigator.com';
     const languages = ['nl', 'en', 'de', 'fr'];
     
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
     
-    // Add homepage for each language
+    // Add homepage for each language with hreflang
     languages.forEach(lang => {
       sitemap += '  <url>\n';
       sitemap += `    <loc>${baseUrl}/${lang}</loc>\n`;
+      // Add hreflang alternates
+      languages.forEach(alternateLang => {
+        sitemap += `    <xhtml:link rel="alternate" hreflang="${alternateLang}" href="${baseUrl}/${alternateLang}" />\n`;
+      });
       sitemap += '    <changefreq>daily</changefreq>\n';
       sitemap += '    <priority>1.0</priority>\n';
       sitemap += '  </url>\n';
     });
     
-    // Add restaurant pages for each language
+    // Add restaurant pages for each language with hreflang
     restaurants?.forEach((restaurant: any) => {
-      languages.forEach(lang => {
-        const city = Array.isArray(restaurant.city) ? restaurant.city[0] : restaurant.city;
-        const province = city?.province && Array.isArray(city.province) ? city.province[0] : city?.province;
-        const citySlug = city?.slug;
-        const provinceSlug = province?.slug;
+      const city = restaurant.cities;
+      const province = city?.provinces;
+      const citySlug = city?.slug;
+      const provinceSlug = province?.slug;
 
-        if (citySlug && provinceSlug) {
+      if (citySlug && provinceSlug) {
+        languages.forEach(lang => {
           sitemap += '  <url>\n';
           sitemap += `    <loc>${baseUrl}/${lang}/${provinceSlug}/${citySlug}/${restaurant.place_id}</loc>\n`;
+          // Add hreflang alternates for this restaurant
+          languages.forEach(alternateLang => {
+            sitemap += `    <xhtml:link rel="alternate" hreflang="${alternateLang}" href="${baseUrl}/${alternateLang}/${provinceSlug}/${citySlug}/${restaurant.place_id}" />\n`;
+          });
           sitemap += `    <lastmod>${new Date(restaurant.updated_at).toISOString().split('T')[0]}</lastmod>\n`;
           sitemap += '    <changefreq>weekly</changefreq>\n';
           sitemap += '    <priority>0.8</priority>\n';
           sitemap += '  </url>\n';
-        }
-      });
+        });
+      }
     });
     
     sitemap += '</urlset>';

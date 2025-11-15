@@ -3,8 +3,32 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.81.0';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET,OPTIONS',
   'Content-Type': 'application/xml; charset=utf-8',
 };
+
+const SUPPORTED_LANGUAGES = [
+  'nl',
+  'en',
+  'de',
+  'fr',
+  'es',
+  'it',
+  'pt',
+  'pl',
+  'hr',
+  'ru',
+  'ja',
+  'zh',
+  'ar',
+  'tr',
+  'sv',
+  'da',
+  'no',
+  'fi',
+  'cs',
+  'ro'
+];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,8 +36,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey =
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase credentials are not configured');
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get all restaurants with their city and province data
@@ -38,8 +68,13 @@ Deno.serve(async (req) => {
 
     console.log('Fetched restaurants:', restaurants?.length || 0);
 
-    const baseUrl = req.headers.get('origin') || 'https://eatnavigator.com';
-    const languages = ['nl', 'en', 'de', 'fr'];
+    const requestedUrl = new URL(req.url);
+    const forwardedHost = req.headers.get('x-forwarded-host') || req.headers.get('host');
+    const forwardedProto = req.headers.get('x-forwarded-proto');
+    const baseUrl = forwardedHost
+      ? `${forwardedProto || requestedUrl.protocol.replace(':', '')}://${forwardedHost}`
+      : req.headers.get('origin') || 'https://eatnavigator.com';
+    const languages = SUPPORTED_LANGUAGES;
     
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
     sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';

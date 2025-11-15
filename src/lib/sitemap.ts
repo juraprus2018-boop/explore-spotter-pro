@@ -1,9 +1,10 @@
 import { getAllRestaurants } from "./database";
+import { SUPPORTED_LANGUAGES } from "./languages";
 
 export const generateSitemap = async (): Promise<string> => {
   const restaurants = await getAllRestaurants();
   const baseUrl = window.location.origin;
-  const languages = ['nl', 'en', 'de', 'fr'];
+  const languages = SUPPORTED_LANGUAGES;
   
   let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
   sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';

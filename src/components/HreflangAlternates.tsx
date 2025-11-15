@@ -1,21 +1,36 @@
 import { Helmet } from "react-helmet";
 import { useLocation } from "react-router-dom";
+import {
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
+  isSupportedLanguage,
+} from "@/lib/languages";
 
 interface HreflangAlternatesProps {
   languages?: string[];
   baseUrl?: string;
 }
 
-const HreflangAlternates = ({ 
-  languages = ["nl", "en", "de", "fr", "es", "it", "pt", "pl", "hr", "ru", "ja", "zh", "ar", "tr", "sv", "da", "no", "fi", "cs", "ro"],
-  baseUrl = "https://www.eatnavigator.com"
+const HreflangAlternates = ({
+  languages = [...SUPPORTED_LANGUAGES],
+  baseUrl,
 }: HreflangAlternatesProps) => {
   const location = useLocation();
-  
+
   // Extract the path without language prefix
   const pathParts = location.pathname.split('/').filter(Boolean);
   const currentLang = pathParts[0];
   const pathWithoutLang = pathParts.length > 1 ? '/' + pathParts.slice(1).join('/') : '';
+
+  const resolvedBaseUrl =
+    baseUrl ||
+    (typeof window !== 'undefined' && window.location.origin) ||
+    'https://eatnavigator.com';
+
+  const canonicalLanguage =
+    currentLang && isSupportedLanguage(currentLang)
+      ? currentLang
+      : DEFAULT_LANGUAGE;
 
   return (
     <Helmet>
@@ -23,23 +38,23 @@ const HreflangAlternates = ({
       <link
         rel="alternate"
         hrefLang="x-default"
-        href={`${baseUrl}/en${pathWithoutLang}`}
+        href={`${resolvedBaseUrl}/${DEFAULT_LANGUAGE}${pathWithoutLang}`}
       />
-      
+
       {/* Language alternates */}
       {languages.map((lang) => (
         <link
           key={lang}
           rel="alternate"
           hrefLang={lang}
-          href={`${baseUrl}/${lang}${pathWithoutLang}`}
+          href={`${resolvedBaseUrl}/${lang}${pathWithoutLang}`}
         />
       ))}
 
       {/* Canonical URL for current language */}
       <link
         rel="canonical"
-        href={`${baseUrl}/${currentLang}${pathWithoutLang}`}
+        href={`${resolvedBaseUrl}/${canonicalLanguage}${pathWithoutLang}`}
       />
     </Helmet>
   );

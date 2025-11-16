@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Static sitemap generated without backend. Update as needed. -->
+  
+  <!-- Language homepages with hreflang alternates -->
+  <url>
+    <loc>https://eatnavigator.com/nl</loc>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eatnavigator.com/en" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://eatnavigator.com/nl" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://eatnavigator.com/en" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://eatnavigator.com/de" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://eatnavigator.com/fr" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://eatnavigator.com/es" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://eatnavigator.com/it" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://eatnavigator.com/pt" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://eatnavigator.com/pl" />
+    <xhtml:link rel="alternate" hreflang="hr" href="https://eatnavigator.com/hr" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://eatnavigator.com/ru" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://eatnavigator.com/ja" />
+    <xhtml:link rel="alternate" hreflang="zh" href="https://eatnavigator.com/zh" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://eatnavigator.com/ar" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://eatnavigator.com/tr" />
+    <xhtml:link rel="alternate" hreflang="sv" href="https://eatnavigator.com/sv" />
+    <xhtml:link rel="alternate" hreflang="da" href="https://eatnavigator.com/da" />
+    <xhtml:link rel="alternate" hreflang="no" href="https://eatnavigator.com/no" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://eatnavigator.com/fi" />
+    <xhtml:link rel="alternate" hreflang="cs" href="https://eatnavigator.com/cs" />
+    <xhtml:link rel="alternate" hreflang="ro" href="https://eatnavigator.com/ro" />
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://eatnavigator.com/en</loc>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eatnavigator.com/en" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://eatnavigator.com/nl" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://eatnavigator.com/en" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://eatnavigator.com/de" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://eatnavigator.com/fr" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://eatnavigator.com/es" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://eatnavigator.com/it" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://eatnavigator.com/pt" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://eatnavigator.com/pl" />
+    <xhtml:link rel="alternate" hreflang="hr" href="https://eatnavigator.com/hr" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://eatnavigator.com/ru" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://eatnavigator.com/ja" />
+    <xhtml:link rel="alternate" hreflang="zh" href="https://eatnavigator.com/zh" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://eatnavigator.com/ar" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://eatnavigator.com/tr" />
+    <xhtml:link rel="alternate" hreflang="sv" href="https://eatnavigator.com/sv" />
+    <xhtml:link rel="alternate" hreflang="da" href="https://eatnavigator.com/da" />
+    <xhtml:link rel="alternate" hreflang="no" href="https://eatnavigator.com/no" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://eatnavigator.com/fi" />
+    <xhtml:link rel="alternate" hreflang="cs" href="https://eatnavigator.com/cs" />
+    <xhtml:link rel="alternate" hreflang="ro" href="https://eatnavigator.com/ro" />
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Repeat language homepage URLs for each language to ensure discoverability -->
+  <url><loc>https://eatnavigator.com/de</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/fr</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/es</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/it</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/pt</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/pl</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/hr</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/ru</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/ja</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/zh</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/ar</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/tr</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/sv</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/da</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/no</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/fi</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/cs</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eatnavigator.com/ro</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+
+</urlset>

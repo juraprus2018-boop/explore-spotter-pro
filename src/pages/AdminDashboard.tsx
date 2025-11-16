@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, FileCheck, AlertCircle, Loader2, BarChart3, Edit, Eye } from "lucide-react";
+import { Shield, FileCheck, AlertCircle, Loader2, BarChart3, Edit, Eye, Map } from "lucide-react";
 import ReviewModeration from "@/components/admin/ReviewModeration";
 import RestaurantVerification from "@/components/admin/RestaurantVerification";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import SuggestionModeration from "@/components/admin/SuggestionModeration";
 import PageViewsAnalytics from "@/components/admin/PageViewsAnalytics";
+import SitemapGenerator from "@/components/SitemapGenerator";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5 max-w-4xl">
+          <TabsList className="grid w-full grid-cols-6 max-w-5xl">
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
               Statistieken
@@ -68,6 +69,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="pageviews">
               <Eye className="h-4 w-4 mr-2" />
               Page Views
+            </TabsTrigger>
+            <TabsTrigger value="sitemap">
+              <Map className="h-4 w-4 mr-2" />
+              Sitemap
             </TabsTrigger>
             <TabsTrigger value="reviews">
               Review Moderatie
@@ -87,6 +92,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="pageviews" className="space-y-4">
             <PageViewsAnalytics />
+          </TabsContent>
+
+          <TabsContent value="sitemap" className="space-y-4">
+            <SitemapGenerator />
           </TabsContent>
 
           <TabsContent value="reviews" className="space-y-4">

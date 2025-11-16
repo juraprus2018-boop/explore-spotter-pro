@@ -36,15 +36,25 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('Sitemap generation started');
+    console.log('Request headers:', {
+      host: req.headers.get('host'),
+      'x-forwarded-host': req.headers.get('x-forwarded-host'),
+      'x-forwarded-proto': req.headers.get('x-forwarded-proto'),
+      origin: req.headers.get('origin'),
+    });
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey =
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY');
 
     if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase credentials');
       throw new Error('Supabase credentials are not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('Supabase client created');
 
     // Get all restaurants with their city and province data
     const { data: restaurants, error } = await supabase
@@ -68,12 +78,20 @@ Deno.serve(async (req) => {
 
     console.log('Fetched restaurants:', restaurants?.length || 0);
 
+    // Determine base URL - prioritize custom domain
     const requestedUrl = new URL(req.url);
     const forwardedHost = req.headers.get('x-forwarded-host') || req.headers.get('host');
-    const forwardedProto = req.headers.get('x-forwarded-proto');
-    const baseUrl = forwardedHost
-      ? `${forwardedProto || requestedUrl.protocol.replace(':', '')}://${forwardedHost}`
-      : req.headers.get('origin') || 'https://eatnavigator.com';
+    const forwardedProto = req.headers.get('x-forwarded-proto') || 'https';
+    
+    let baseUrl = 'https://eatnavigator.com'; // Default fallback
+    
+    if (forwardedHost) {
+      // Remove port if present
+      const hostWithoutPort = forwardedHost.split(':')[0];
+      baseUrl = `${forwardedProto}://${hostWithoutPort}`;
+    }
+    
+    console.log('Using base URL:', baseUrl);
     const languages = SUPPORTED_LANGUAGES;
     
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';

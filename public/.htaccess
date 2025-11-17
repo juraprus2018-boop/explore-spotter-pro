@@ -18,8 +18,6 @@
   RewriteEngine On
   RewriteBase /
   
-  # Serve sitemap.xml from edge function
-  RewriteRule ^sitemap\.xml$ https://htpnlpmktvmswzkhkfwy.supabase.co/functions/v1/generate-sitemap [R=302,L]
   
 
   # Don't rewrite files or directories

@@ -40,6 +40,12 @@ const createTranslations = (lang: string) => {
         title: "Populaire provincies",
         description: "Ontdek restaurants per provincie",
       },
+      page: {
+        citiesIn: "Steden in",
+        restaurantsIn: "Restaurants in",
+        discoverRestaurants: "Ontdek restaurants in",
+        discoverCities: "Ontdek restaurants in {{count}} steden in",
+      },
       results: {
         title: "Gevonden Restaurants",
         searching: "Aan het zoeken...",
@@ -229,6 +235,12 @@ const createTranslations = (lang: string) => {
       provinces: {
         title: "Popular Provinces",
         description: "Discover restaurants by province",
+      },
+      page: {
+        citiesIn: "Cities in",
+        restaurantsIn: "Restaurants in",
+        discoverRestaurants: "Discover restaurants in",
+        discoverCities: "Discover restaurants in {{count}} cities in",
       },
       results: {
         title: "Found Restaurants",
@@ -420,6 +432,12 @@ const createTranslations = (lang: string) => {
         title: "Beliebte Provinzen",
         description: "Entdecken Sie Restaurants nach Provinz",
       },
+      page: {
+        citiesIn: "Städte in",
+        restaurantsIn: "Restaurants in",
+        discoverRestaurants: "Entdecken Sie Restaurants in",
+        discoverCities: "Entdecken Sie Restaurants in {{count}} Städten in",
+      },
       results: {
         title: "Gefundene Restaurants",
         searching: "Suchen...",
@@ -545,6 +563,12 @@ const createTranslations = (lang: string) => {
       provinces: {
         title: "Provinces populaires",
         description: "Découvrez les restaurants par province",
+      },
+      page: {
+        citiesIn: "Villes en",
+        restaurantsIn: "Restaurants à",
+        discoverRestaurants: "Découvrez des restaurants à",
+        discoverCities: "Découvrez des restaurants dans {{count}} villes en",
       },
       results: {
         title: "Restaurants trouvés",

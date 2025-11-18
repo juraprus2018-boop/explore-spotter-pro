@@ -165,8 +165,8 @@ const CityPage = () => {
   const displayRestaurants = filteredRestaurants.length > 0 ? filteredRestaurants : restaurants;
   
   // SEO meta tags
-  const seoTitle = `Restaurants in ${cityName}, ${provinceName} | EatNavigator`;
-  const seoDescription = `Ontdek ${displayRestaurants.length} restaurants in ${cityName}, ${provinceName}. Bekijk reviews, menu's, openingstijden en locaties. Vind het perfecte restaurant bij jou in de buurt.`;
+  const seoTitle = `${t('page.restaurantsIn')} ${cityName}, ${provinceName} | EatNavigator`;
+  const seoDescription = `${t('page.discoverRestaurants')} ${cityName}, ${provinceName}. ${t('detail.aboutDesc')}`;
 
   const locations = displayRestaurants.map(r => ({
     name: r.name,
@@ -232,7 +232,7 @@ const CityPage = () => {
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
               <MapPin className="h-8 w-8 text-primary" />
-              Restaurants in {cityName}
+              {t('page.restaurantsIn')} {cityName}
             </h1>
             <p className="text-muted-foreground text-lg">
               {restaurants.length} {restaurants.length === 1 ? "restaurant" : "restaurants"} gevonden

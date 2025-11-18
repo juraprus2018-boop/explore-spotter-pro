@@ -66,8 +66,8 @@ const ProvincePage = () => {
   };
   
   // SEO meta tags
-  const seoTitle = `Steden in ${provinceData?.name || province} | EatNavigator`;
-  const seoDescription = `Ontdek restaurants in ${cities.length} steden in ${provinceData?.name || province}. Vind de beste eetgelegenheden per stad met reviews, menu's en locaties.`;
+  const seoTitle = `${t('page.citiesIn')} ${provinceData?.name || province} | EatNavigator`;
+  const seoDescription = `${t('page.discoverCities', { count: cities.length })} ${provinceData?.name || province}. ${t('detail.aboutDesc')}`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -104,7 +104,7 @@ const ProvincePage = () => {
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
               <MapPin className="h-8 w-8 text-primary" />
-              Steden in {provinceData?.name || province}
+              {t('page.citiesIn')} {provinceData?.name || province}
             </h1>
             <p className="text-muted-foreground text-lg">
               {cities.length} {cities.length === 1 ? "stad" : "steden"} gevonden

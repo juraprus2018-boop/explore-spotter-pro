@@ -22,7 +22,7 @@ export const SUPPORTED_LANGUAGES = [
 
 export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
 
-export const DEFAULT_LANGUAGE: SupportedLanguage = "nl";
+export const DEFAULT_LANGUAGE: SupportedLanguage = "en";
 
 export const PRIMARY_LANGUAGES: SupportedLanguage[] = ["nl", "en", "de", "fr"];
 

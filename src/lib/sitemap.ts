@@ -10,7 +10,7 @@ export const generateSitemap = async (): Promise<string> => {
   const baseUrl = window.location.origin;
   const languages = SUPPORTED_LANGUAGES;
   
-  let sitemap = '123<?xml version="1.0" encoding="UTF-8"?>\n';
+  let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
   sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
   
   // Add homepage for each language with hreflang

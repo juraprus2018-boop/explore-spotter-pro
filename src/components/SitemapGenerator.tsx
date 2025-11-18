@@ -14,8 +14,9 @@ const SitemapGenerator = () => {
     try {
       await downloadSitemap();
       toast({
-        title: "Sitemap gegenereerd",
-        description: "De volledige sitemap.xml met alle restaurants, cities en provinces is gedownload. Upload deze naar je server als public/sitemap.xml",
+        title: "Sitemaps gegenereerd",
+        description:
+          "Er is een sitemap-index plus meerdere gesplitste sitemap-bestanden gedownload. Upload alle bestanden naar je server zodat de verwijzingen kloppen.",
       });
     } catch (error) {
       console.error('Sitemap generation error:', error);
@@ -34,8 +35,9 @@ const SitemapGenerator = () => {
       <CardHeader>
         <CardTitle>Sitemap Generator</CardTitle>
         <CardDescription>
-          Genereer een volledige sitemap.xml met alle restaurants, cities, provinces en hreflang tags voor alle 20 talen.
-          Download het bestand en upload het naar je server als public/sitemap.xml
+          Genereer een sitemap-index met verwijzingen naar automatisch opgesplitste sitemap-bestanden (maximaal 45.000 URLs per
+          bestand) inclusief alle hreflang tags voor 20 talen. Alle bestanden worden direct gedownload zodat je ze stuk voor
+          stuk naar je server kunt uploaden.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -48,7 +50,7 @@ const SitemapGenerator = () => {
           ) : (
             <>
               <Download className="h-4 w-4 mr-2" />
-              Download Sitemap.xml
+              Download sitemaps
             </>
           )}
         </Button>

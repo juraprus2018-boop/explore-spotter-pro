@@ -44,7 +44,6 @@ const LanguageWrapper = ({ children }: { children: React.ReactNode }) => {
       pt: "pt-PT",
       pl: "pl-PL",
       hr: "hr-HR",
-      ru: "ru-RU",
       ja: "ja-JP",
       zh: "zh-CN",
       ar: "ar-SA",

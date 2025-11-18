@@ -22,7 +22,7 @@ interface MapViewProps {
   highlightedPlaceId?: number | null;
 }
 
-const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 6, highlightedPlaceId = null }: MapViewProps) => {
+const MapView = ({ locations, center = [52.3676, 4.9041], zoom = 7, highlightedPlaceId = null }: MapViewProps) => {
   const navigate = useNavigate();
   const { lang } = useParams();
   const mapRef = useRef<any>(null);

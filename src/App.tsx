@@ -30,11 +30,33 @@ const LanguageWrapper = ({ children }: { children: React.ReactNode }) => {
   usePageTracking();
 
   useEffect(() => {
-    if (lang && isSupportedLanguage(lang)) {
-      i18n.changeLanguage(lang);
-    } else {
-      i18n.changeLanguage(DEFAULT_LANGUAGE);
-    }
+    const targetLang = (lang && isSupportedLanguage(lang)) ? lang : DEFAULT_LANGUAGE;
+    i18n.changeLanguage(targetLang);
+    
+    // Set HTML lang attribute based on language
+    const langMap: Record<string, string> = {
+      nl: "nl-NL",
+      en: "en-US",
+      de: "de-DE",
+      fr: "fr-FR",
+      es: "es-ES",
+      it: "it-IT",
+      pt: "pt-PT",
+      pl: "pl-PL",
+      hr: "hr-HR",
+      ru: "ru-RU",
+      ja: "ja-JP",
+      zh: "zh-CN",
+      ar: "ar-SA",
+      tr: "tr-TR",
+      sv: "sv-SE",
+      da: "da-DK",
+      no: "no-NO",
+      fi: "fi-FI",
+      cs: "cs-CZ",
+      ro: "ro-RO",
+    };
+    document.documentElement.lang = langMap[targetLang] || "en-US";
   }, [lang, i18n]);
 
   return <>{children}</>;

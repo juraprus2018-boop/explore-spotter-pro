@@ -19,7 +19,6 @@ const languages = [
   { code: "pt", name: "Português", flag: "🇵🇹" },
   { code: "pl", name: "Polski", flag: "🇵🇱" },
   { code: "hr", name: "Hrvatski", flag: "🇭🇷" },
-  { code: "ru", name: "Русский", flag: "🇷🇺" },
   { code: "ja", name: "日本語", flag: "🇯🇵" },
   { code: "zh", name: "中文", flag: "🇨🇳" },
   { code: "ar", name: "العربية", flag: "🇸🇦" },

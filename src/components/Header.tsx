@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { Utensils, LogIn, LogOut, Shield, Store, Navigation } from "lucide-react";
+import { Utensils, LogIn, LogOut, Shield, Store, Navigation, GalleryHorizontalEnd } from "lucide-react";
 import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
@@ -111,7 +111,17 @@ const Header = () => {
             <Navigation className="h-4 w-4" />
             <span className="hidden sm:inline">{t('nearby.buttonShort')}</span>
           </Button>
-          
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2 hidden md:inline-flex"
+            onClick={() => navigate(`/${lang || i18n.language || 'nl'}/foodwall`)}
+          >
+            <GalleryHorizontalEnd className="h-4 w-4" />
+            {t('foodwall.nav')}
+          </Button>
+
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -67,6 +67,39 @@ export type Database = {
         }
         Relationships: []
       }
+      foodwall_posts: {
+        Row: {
+          author: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_urls: string[] | null
+          likes: number | null
+          location: string | null
+          tags: string[] | null
+        }
+        Insert: {
+          author?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_urls?: string[] | null
+          likes?: number | null
+          location?: string | null
+          tags?: string[] | null
+        }
+        Update: {
+          author?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_urls?: string[] | null
+          likes?: number | null
+          location?: string | null
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           city_name: string | null

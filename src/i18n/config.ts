@@ -2,6 +2,137 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
 // Base translation template for all common keys
+const FOODWALL_TRANSLATIONS: Record<string, any> = {
+  en: {
+    nav: "Foodwall",
+    heroTag: "Global food lovers",
+    title: "Share your favorite bites with the world",
+    subtitle:
+      "Upload mouth-watering dishes, write tasting notes, add tags and inspire other explorers in our live Foodwall.",
+    seoTitle: "Foodwall - Share your favorite dishes | EatNavigator",
+    seoDescription:
+      "Create vibrant food posts with photos, stories, and tags. Discover trending dishes from the EatNavigator community.",
+    upload: {
+      title: "Create a new drop",
+      subtitle: "Showcase your latest discovery with photos, notes and tags.",
+      images: "Food photos",
+      imageHint: "Up to 4 images (JPG, PNG, HEIC)",
+      description: "Story or tasting notes",
+      descriptionPlaceholder: "Tell everyone what makes this plate special...",
+      tags: "Tags",
+      tagsPlaceholder: "e.g. ramen, brunch, vegan",
+      addTag: "Add tag",
+      tagHint: "Press enter to add tags. Tap a tag to remove it.",
+      publish: "Publish to Foodwall",
+      publishing: "Publishing...",
+      you: "You",
+      yourLocation: "Somewhere delicious",
+    },
+    feed: {
+      title: "Community feed",
+      subtitle: "Fresh drops from explorers across the globe.",
+      empty: "No dishes yet. Share your first bite!",
+      like: "Like this drop",
+      liked: "Unlike this drop",
+      share: "Share",
+    },
+    tags: {
+      title: "Trending tags",
+      subtitle: "Popular flavors right now",
+    },
+    metrics: {
+      posts: "Shared dishes",
+      likes: "Total likes",
+      tags: "Unique tags",
+    },
+    community: {
+      title: "Built for culinary explorers",
+      subtitle: "Modern tools to curate your food journey.",
+      pointOne: "Upload in any language and inspire locals and travelers alike.",
+      pointTwo: "Tag cuisines, moods and locations to help others find their next bite.",
+    },
+    share: {
+      title: "Share this dish",
+      shared: "Shared!",
+      native: "Sent via your share menu",
+      copied: "Link copied to clipboard",
+      error: "Unable to share",
+      unsupported: "Sharing is not supported in this browser",
+      failed: "We couldn't open the share sheet",
+    },
+    toast: {
+      published: "Dish published",
+      publishedDesc: "Your drop is now live on the Foodwall.",
+      missingTitle: "Add something to share",
+      missingDesc: "Upload at least one photo or write a short story before publishing.",
+    },
+  },
+  nl: {
+    nav: "Foodwall",
+    heroTag: "Wereldwijde foodies",
+    title: "Deel jouw favoriete gerechten met de wereld",
+    subtitle:
+      "Upload smakelijke gerechten, schrijf je smaaknotities, voeg tags toe en inspireer andere ontdekkers in onze live Foodwall.",
+    seoTitle: "Foodwall - Deel jouw favoriete gerechten | EatNavigator",
+    seoDescription:
+      "Maak levendige foodposts met foto’s, verhalen en tags. Ontdek trending gerechten uit de EatNavigator-community.",
+    upload: {
+      title: "Nieuwe post",
+      subtitle: "Laat je nieuwste ontdekking zien met foto’s, notities en tags.",
+      images: "Foodfoto’s",
+      imageHint: "Maximaal 4 beelden (JPG, PNG, HEIC)",
+      description: "Verhaal of proefnotities",
+      descriptionPlaceholder: "Vertel waarom dit gerecht zo bijzonder is...",
+      tags: "Tags",
+      tagsPlaceholder: "bijv. ramen, brunch, vegan",
+      addTag: "Tag toevoegen",
+      tagHint: "Druk op enter om tags toe te voegen. Tik op een tag om te verwijderen.",
+      publish: "Publiceer op Foodwall",
+      publishing: "Publiceren...",
+      you: "Jij",
+      yourLocation: "Ergens lekkers",
+    },
+    feed: {
+      title: "Community feed",
+      subtitle: "Verse posts van ontdekkers over de hele wereld.",
+      empty: "Nog geen gerechten. Deel als eerste jouw hap!",
+      like: "Vind ik leuk",
+      liked: "Vind ik niet meer leuk",
+      share: "Delen",
+    },
+    tags: {
+      title: "Trending tags",
+      subtitle: "Populaire smaken van dit moment",
+    },
+    metrics: {
+      posts: "Gedeelde gerechten",
+      likes: "Totale likes",
+      tags: "Unieke tags",
+    },
+    community: {
+      title: "Gemaakt voor culinaire ontdekkers",
+      subtitle: "Moderne tools om je food journey te cureren.",
+      pointOne: "Upload in elke taal en inspireer zowel locals als reizigers.",
+      pointTwo: "Tag keukens, sferen en locaties zodat anderen hun volgende hap vinden.",
+    },
+    share: {
+      title: "Deel dit gerecht",
+      shared: "Gedeeld!",
+      native: "Verzonden via je share-menu",
+      copied: "Link gekopieerd naar klembord",
+      error: "Delen mislukt",
+      unsupported: "Delen wordt niet ondersteund in deze browser",
+      failed: "We konden het deelvenster niet openen",
+    },
+    toast: {
+      published: "Gerecht gepubliceerd",
+      publishedDesc: "Je post staat nu live op de Foodwall.",
+      missingTitle: "Voeg iets toe",
+      missingDesc: "Upload minimaal één foto of schrijf een kort verhaal voordat je publiceert.",
+    },
+  },
+};
+
 const createTranslations = (lang: string) => {
   const translations: Record<string, any> = {
     nl: {
@@ -3632,6 +3763,17 @@ cs: {
     // Compact version for remaining languages (ES, IT, PT, PL, HR, RU, JA, ZH, AR, TR, SV, DA, NO, FI, CS, RO)
     // All use the same structure with translated strings
   };
+
+  Object.keys(translations).forEach((language) => {
+    const fallbackFoodwall = FOODWALL_TRANSLATIONS.en;
+    translations[language].foodwall =
+      FOODWALL_TRANSLATIONS[language] || fallbackFoodwall;
+
+    if (translations[language].footer) {
+      translations[language].footer.foodwall =
+        translations[language].footer.foodwall || "Foodwall";
+    }
+  });
 
   return translations[lang] || translations.en;
 };

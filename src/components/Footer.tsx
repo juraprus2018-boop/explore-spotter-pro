@@ -27,6 +27,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><Link to={`/${lang}`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.home")}</Link></li>
               <li><Link to={`/${lang}/about`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.about")}</Link></li>
+              <li><Link to={`/${lang}/foodwall`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.foodwall")}</Link></li>
               <li><Link to={`/${lang}/contact`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.contact")}</Link></li>
             </ul>
           </div>

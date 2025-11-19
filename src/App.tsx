@@ -21,6 +21,7 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import FoodWall from "./pages/FoodWall";
 
 const queryClient = new QueryClient();
 
@@ -130,6 +131,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <Contact />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/foodwall"
+            element={
+              <LanguageWrapper>
+                <FoodWall />
               </LanguageWrapper>
             }
           />

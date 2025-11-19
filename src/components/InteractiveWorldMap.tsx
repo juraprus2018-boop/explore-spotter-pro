@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { reverseGeocode, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 // Leaflet loaded via CDN in index.html
 declare const L: any;
@@ -41,7 +42,79 @@ const InteractiveWorldMap = () => {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const loadRestaurantMarkers = useCallback(async () => {
+    if (!mapRef.current || !markersLayerRef.current) return;
+
+    const bounds = mapRef.current.getBounds();
+    const north = bounds.getNorth();
+    const south = bounds.getSouth();
+    const east = bounds.getEast();
+    const west = bounds.getWest();
+
+    try {
+      const { data: restaurants } = await supabase
+        .from('restaurants')
+        .select(`
+          id,
+          name,
+          place_id,
+          lat,
+          lon,
+          display_name,
+          city:cities(slug, province:provinces(slug))
+        `)
+        .gte('lat', south)
+        .lte('lat', north)
+        .gte('lon', west)
+        .lte('lon', east)
+        .eq('status', 'approved')
+        .limit(100);
+
+      if (!restaurants) return;
+
+      // Clear existing markers
+      markersLayerRef.current.clearLayers();
+
+      // Add markers for each restaurant
+      restaurants.forEach((restaurant) => {
+        if (!markersLayerRef.current) return;
+
+        const marker = L.marker([Number(restaurant.lat), Number(restaurant.lon)], {
+          icon: L.icon({
+            iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+            iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+            shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          })
+        });
+
+        const cityData = restaurant.city as any;
+        const popupContent = `
+          <div style="min-width: 200px;">
+            <h3 style="font-weight: 600; margin-bottom: 4px;">${restaurant.name}</h3>
+            <p style="font-size: 0.875rem; color: #666; margin-bottom: 8px;">${restaurant.display_name}</p>
+            <button 
+              onclick="window.location.href='/${lang}/${cityData?.province?.slug}/${cityData?.slug}/${restaurant.place_id}'"
+              style="width: 100%; padding: 8px; background: hsl(var(--primary)); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;"
+            >
+              Bekijk details
+            </button>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent);
+        marker.addTo(markersLayerRef.current);
+      });
+    } catch (error) {
+      console.error("Error loading restaurant markers:", error);
+    }
+  }, [lang]);
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -80,6 +153,10 @@ const InteractiveWorldMap = () => {
           maxZoom: 19,
         }).addTo(map);
 
+        // Create layer for restaurant markers
+        const markersLayer = L.layerGroup().addTo(map);
+        markersLayerRef.current = markersLayer;
+
         mapRef.current = map;
 
         // Handle map clicks
@@ -91,8 +168,14 @@ const InteractiveWorldMap = () => {
         setTimeout(() => {
           if (map) {
             map.invalidateSize();
+            loadRestaurantMarkers();
           }
         }, 100);
+
+        // Load markers when map moves
+        map.on('moveend', () => {
+          loadRestaurantMarkers();
+        });
       }
     };
 
@@ -104,8 +187,9 @@ const InteractiveWorldMap = () => {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      markersLayerRef.current = null;
     };
-  }, [lang]);
+  }, [lang, loadRestaurantMarkers]);
 
   const handleLocationClick = async (lat: number, lon: number) => {
     if (!mapRef.current) return;
@@ -195,6 +279,8 @@ const InteractiveWorldMap = () => {
         .single();
 
       if (cityData && cityData.province) {
+        // Reload markers to show newly saved restaurants
+        await loadRestaurantMarkers();
         navigate(`/${lang}/${cityData.province.slug}/${cityData.slug}`);
       }
     } catch (error) {

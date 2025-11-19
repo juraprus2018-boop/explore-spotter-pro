@@ -89,7 +89,7 @@ const collectSitemapEntries = async (baseUrl: string): Promise<string[]> => {
     getAllProvinces(),
   ]);
 
-  const languages = SUPPORTED_LANGUAGES;
+  const languages = [...SUPPORTED_LANGUAGES];
   const entries: string[] = [];
 
   // Homepage entries

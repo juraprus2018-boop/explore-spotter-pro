@@ -33,8 +33,6 @@ const FOODWALL_TRANSLATIONS: Record<string, any> = {
       subtitle: "Fresh drops from explorers across the globe.",
       empty: "No dishes yet. Share your first bite!",
       emptyFiltered: "No dishes match your filters. Try adjusting search or tags.",
-      loading: "Loading dishes...",
-      error: "We couldn't load new dishes right now. Please refresh and try again.",
       like: "Like this drop",
       liked: "Unlike this drop",
       share: "Share",

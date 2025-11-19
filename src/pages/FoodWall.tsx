@@ -17,18 +17,66 @@ import {
   ImagePlus,
   Users,
   Sparkles,
-  Loader2,
 } from "lucide-react";
-import {
-  createFoodwallPost,
-  fetchFoodwallPosts,
-  updateFoodwallLikes,
-  type FoodwallPost,
-} from "@/lib/foodwall";
 
-type FoodPost = FoodwallPost & { liked?: boolean };
+interface FoodPost {
+  id: string;
+  images: string[];
+  description: string;
+  tags: string[];
+  likes: number;
+  liked?: boolean;
+  author: string;
+  location: string;
+  createdAt: string;
+}
 
-const LIKED_STORAGE_KEY = "eatnavigator-foodwall-liked";
+const LOCAL_STORAGE_KEY = "eatnavigator-foodwall-posts";
+
+const demoPosts: FoodPost[] = [
+  {
+    id: "tokyo",
+    images: [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80",
+    ],
+    description:
+      "Weekend ramen crawl success! This triple-miso bowl from a hidden alley in Shinjuku had the perfect balance of smoke and spice.",
+    tags: ["ramen", "tokyo", "spicy"],
+    likes: 124,
+    author: "Mika Tanaka",
+    location: "Shinjuku, Tokyo",
+    createdAt: "2024-03-11T08:30:00.000Z",
+  },
+  {
+    id: "lisbon",
+    images: [
+      "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1485921325833-c519f76c4927?auto=format&fit=crop&w=1200&q=80",
+    ],
+    description:
+      "Sunset petiscos on a rooftop overlooking the Tejo river. Grilled sardines, citrus olives, and smoky piri-piri chicken skewers!",
+    tags: ["petiscos", "lisbon", "sunset", "seafood"],
+    likes: 96,
+    author: "João Pereira",
+    location: "Lisbon, Portugal",
+    createdAt: "2024-03-09T18:12:00.000Z",
+  },
+  {
+    id: "mexico-city",
+    images: [
+      "https://images.unsplash.com/photo-1478749485505-2a903a729c63?auto=format&fit=crop&w=1600&q=80",
+    ],
+    description:
+      "Taco al pastor perfection with extra charred pineapple. Street-side dining near Parque México hits different.",
+    tags: ["tacos", "cdmx", "streetfood"],
+    likes: 173,
+    author: "Sofía Morales",
+    location: "Mexico City, Mexico",
+    createdAt: "2024-03-05T14:45:00.000Z",
+  },
+];
 
 const readFileAsDataURL = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -43,9 +91,8 @@ type SortMode = "latest" | "popular" | "favorites";
 const FoodWall = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [posts, setPosts] = useState<FoodPost[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [posts, setPosts] = useState<FoodPost[]>(demoPosts);
+  const [images, setImages] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -53,10 +100,7 @@ const FoodWall = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("latest");
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadError, setHasLoadError] = useState(false);
-  const [likedPostIds, setLikedPostIds] = useState<string[]>([]);
-  const likedIdsRef = useRef<string[]>([]);
+  const hasHydrated = useRef(false);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const hasFilters = Boolean(normalizedQuery || activeTag || sortMode !== "latest");
@@ -89,72 +133,32 @@ const FoodWall = () => {
   }, [posts]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || hasHydrated.current) return;
 
     try {
-      const stored = window.localStorage.getItem(LIKED_STORAGE_KEY);
+      const stored = window.localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          setLikedPostIds(parsed);
+          setPosts(parsed);
         }
       }
     } catch (error) {
-      console.warn("Unable to load Foodwall likes", error);
+      console.warn("Unable to load Foodwall posts", error);
+    } finally {
+      hasHydrated.current = true;
     }
   }, []);
 
   useEffect(() => {
-    likedIdsRef.current = likedPostIds;
-
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !hasHydrated.current) return;
 
     try {
-      window.localStorage.setItem(
-        LIKED_STORAGE_KEY,
-        JSON.stringify(likedPostIds),
-      );
+      window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(posts));
     } catch (error) {
-      console.warn("Unable to persist Foodwall likes", error);
+      console.warn("Unable to persist Foodwall posts", error);
     }
-  }, [likedPostIds]);
-
-  const loadPosts = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const remotePosts = await fetchFoodwallPosts();
-      setPosts(
-        remotePosts.map((post) => ({
-          ...post,
-          liked: likedIdsRef.current.includes(post.id),
-        })),
-      );
-      setHasLoadError(false);
-    } catch (error) {
-      console.error("Unable to fetch Foodwall posts", error);
-      setHasLoadError(true);
-      toast({
-        variant: "destructive",
-        title: t("foodwall.toast.loadError"),
-        description: t("foodwall.toast.loadErrorDesc"),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [toast, t]);
-
-  useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
-
-  useEffect(() => {
-    setPosts((prev) =>
-      prev.map((post) => ({
-        ...post,
-        liked: likedPostIds.includes(post.id),
-      })),
-    );
-  }, [likedPostIds]);
+  }, [posts]);
 
   const filteredPosts = useMemo(() => {
     let computed = posts;
@@ -187,16 +191,12 @@ const FoodWall = () => {
   ) => {
     const files = Array.from(event.target.files || []).slice(0, 4);
     if (!files.length) {
-      setSelectedFiles([]);
-      setImagePreviews([]);
-      event.target.value = "";
+      setImages([]);
       return;
     }
 
-    setSelectedFiles(files);
     const previews = await Promise.all(files.map(readFileAsDataURL));
-    setImagePreviews(previews);
-    event.target.value = "";
+    setImages(previews);
   };
 
   const handleAddTag = useCallback(() => {
@@ -210,10 +210,10 @@ const FoodWall = () => {
     setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!description.trim() && selectedFiles.length === 0) {
+    if (!description.trim() && images.length === 0) {
       toast({
         variant: "destructive",
         title: t("foodwall.toast.missingTitle"),
@@ -224,31 +224,26 @@ const FoodWall = () => {
 
     setIsSubmitting(true);
     try {
-      const newPost = await createFoodwallPost({
+      const newPost: FoodPost = {
+        id: `${Date.now()}`,
+        images: images.length ? images : [],
         description: description.trim(),
         tags: tags.length ? tags : ["foodie"],
-        files: selectedFiles,
+        likes: 0,
         author: t("foodwall.upload.you"),
         location: t("foodwall.upload.yourLocation"),
-      });
+        createdAt: new Date().toISOString(),
+      };
 
-      setPosts((prev) => [{ ...newPost, liked: false }, ...prev]);
+      setPosts((prev) => [newPost, ...prev]);
       setDescription("");
-      setSelectedFiles([]);
-      setImagePreviews([]);
+      setImages([]);
       setTags([]);
       setTagInput("");
 
       toast({
         title: t("foodwall.toast.published"),
         description: t("foodwall.toast.publishedDesc"),
-      });
-    } catch (error) {
-      console.error("Unable to publish Foodwall post", error);
-      toast({
-        variant: "destructive",
-        title: t("foodwall.toast.publishError"),
-        description: t("foodwall.toast.publishErrorDesc"),
       });
     } finally {
       setIsSubmitting(false);
@@ -265,43 +260,18 @@ const FoodWall = () => {
     setActiveTag((current) => (current === tag ? null : tag));
   };
 
-  const toggleLike = async (post: FoodPost) => {
-    const alreadyLiked = likedPostIds.includes(post.id);
-    const nextLikes = Math.max(0, post.likes + (alreadyLiked ? -1 : 1));
-    const previousPosts = posts;
-    const previousLiked = likedPostIds;
-    const nextLikedIds = alreadyLiked
-      ? likedPostIds.filter((id) => id !== post.id)
-      : [...likedPostIds, post.id];
-
-    setLikedPostIds(nextLikedIds);
+  const toggleLike = (id: string) => {
     setPosts((prev) =>
-      prev.map((item) =>
-        item.id === post.id
-          ? { ...item, likes: nextLikes, liked: !alreadyLiked }
-          : item
+      prev.map((post) =>
+        post.id === id
+          ? {
+              ...post,
+              likes: post.liked ? post.likes - 1 : post.likes + 1,
+              liked: !post.liked,
+            }
+          : post
       )
     );
-
-    try {
-      const updated = await updateFoodwallLikes(post.id, nextLikes);
-      setPosts((prev) =>
-        prev.map((item) =>
-          item.id === updated.id
-            ? { ...updated, liked: nextLikedIds.includes(updated.id) }
-            : item
-        )
-      );
-    } catch (error) {
-      console.error("Unable to toggle Foodwall like", error);
-      setLikedPostIds(previousLiked);
-      setPosts(previousPosts);
-      toast({
-        variant: "destructive",
-        title: t("foodwall.toast.likeError"),
-        description: t("foodwall.toast.likeErrorDesc"),
-      });
-    }
   };
 
   const handleShare = async (post: FoodPost) => {
@@ -423,9 +393,9 @@ const FoodWall = () => {
                         multiple
                         onChange={handleImageChange}
                       />
-                      {imagePreviews.length > 0 && (
+                      {images.length > 0 && (
                         <div className="grid grid-cols-2 gap-2 mt-3">
-                          {imagePreviews.map((src, index) => (
+                          {images.map((src, index) => (
                             <div
                               key={index}
                               className="aspect-video rounded-lg overflow-hidden border"
@@ -593,20 +563,7 @@ const FoodWall = () => {
                   </CardContent>
                 </Card>
 
-                {hasLoadError && (
-                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 text-destructive px-4 py-3">
-                    {t("foodwall.feed.error")}
-                  </div>
-                )}
-
-                {isLoading ? (
-                  <Card>
-                    <CardContent className="py-12 text-center text-muted-foreground flex flex-col items-center gap-3">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <p>{t("foodwall.feed.loading")}</p>
-                    </CardContent>
-                  </Card>
-                ) : filteredPosts.length === 0 ? (
+                {filteredPosts.length === 0 ? (
                   <Card>
                     <CardContent className="py-12 text-center text-muted-foreground">
                       {hasFilters
@@ -685,7 +642,7 @@ const FoodWall = () => {
                       <Button
                         variant="ghost"
                         className="gap-2"
-                        onClick={() => toggleLike(post)}
+                        onClick={() => toggleLike(post.id)}
                       >
                         <Heart
                           className={`h-4 w-4 ${post.liked ? "fill-primary text-primary" : ""}`}

@@ -109,7 +109,7 @@ const Header = () => {
             className="gap-2"
           >
             <Navigation className="h-4 w-4" />
-            <span className="hidden sm:inline">In de buurt</span>
+            <span className="hidden sm:inline">{t('nearby.buttonShort')}</span>
           </Button>
           
           {user ? (

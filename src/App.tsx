@@ -10,6 +10,7 @@ import { usePageTracking } from "./hooks/usePageTracking";
 import Index from "./pages/Index";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import CityPage from "./pages/CityPage";
+import CitiesPage from "./pages/CitiesPage";
 import ProvincePage from "./pages/ProvincePage";
 import NotFound from "./pages/NotFound";
 import LanguageRedirect from "./pages/LanguageRedirect";
@@ -75,6 +76,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <Index />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/cities"
+            element={
+              <LanguageWrapper>
+                <CitiesPage />
               </LanguageWrapper>
             }
           />

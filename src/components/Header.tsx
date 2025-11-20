@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { Utensils, LogIn, LogOut, Shield, Store, Navigation, GalleryHorizontalEnd } from "lucide-react";
+import { Utensils, LogIn, LogOut, Shield, Store, Navigation, GalleryHorizontalEnd, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
@@ -110,6 +110,16 @@ const Header = () => {
           >
             <Navigation className="h-4 w-4" />
             <span className="hidden sm:inline">{t('nearby.buttonShort')}</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(`/${lang || 'nl'}/cities`)}
+            className="gap-2"
+          >
+            <MapPin className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('cities.button')}</span>
           </Button>
 
           <Button

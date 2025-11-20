@@ -632,6 +632,27 @@ export const getProvinceBySlug = async (slug: string): Promise<Province | null> 
   }
 };
 
+export const getCitiesByCountryCode = async (countryCode: string): Promise<City[]> => {
+  const { data, error } = await (db as any)
+    .from('cities')
+    .select(`
+      *,
+      province:provinces(
+        *,
+        country:countries(*)
+      )
+    `)
+    .eq('province.country.code', countryCode.toUpperCase())
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching cities by country code:', error);
+    return [];
+  }
+
+  return data || [];
+};
+
 export const getCityBySlug = async (slug: string): Promise<City | null> => {
   try {
     const { data, error } = await db

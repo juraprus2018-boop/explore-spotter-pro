@@ -215,6 +215,13 @@ const createTranslations = (lang: string) => {
         error: "Fout bij ophalen locatie",
         errorDesc: "Kon locatie niet ophalen. Probeer het later opnieuw.",
       },
+      cities: {
+        button: "Steden",
+        pageTitle: "Alle Steden",
+        pageDescription: "{{count}} steden gevonden",
+        breadcrumb: "Steden",
+        noCities: "Geen steden gevonden",
+      },
       map: {
         title: "Kaart Weergave",
         showMap: "Toon kaart",
@@ -411,6 +418,13 @@ const createTranslations = (lang: string) => {
         permissionDeniedDesc: "Please allow location access in your browser settings",
         error: "Error fetching location",
         errorDesc: "Could not fetch location. Please try again later.",
+      },
+      cities: {
+        button: "Cities",
+        pageTitle: "All Cities",
+        pageDescription: "{{count}} cities found",
+        breadcrumb: "Cities",
+        noCities: "No cities found",
       },
       map: {
         title: "Map View",
@@ -609,6 +623,13 @@ const createTranslations = (lang: string) => {
         error: "Fehler beim Abrufen des Standorts",
         errorDesc: "Standort konnte nicht abgerufen werden. Bitte versuchen Sie es später erneut.",
       },
+      cities: {
+        button: "Städte",
+        pageTitle: "Alle Städte",
+        pageDescription: "{{count}} Städte gefunden",
+        breadcrumb: "Städte",
+        noCities: "Keine Städte gefunden",
+      },
       map: {
         title: "Kartenansicht",
         showMap: "Karte anzeigen",
@@ -742,6 +763,13 @@ const createTranslations = (lang: string) => {
         error: "Erreur lors de la récupération de la localisation",
         errorDesc: "Impossible de récupérer la localisation. Veuillez réessayer plus tard.",
       },
+      cities: {
+        button: "Villes",
+        pageTitle: "Toutes les Villes",
+        pageDescription: "{{count}} villes trouvées",
+        breadcrumb: "Villes",
+        noCities: "Aucune ville trouvée",
+      },
       map: {
         title: "Vue carte",
         showMap: "Afficher la carte",
@@ -874,6 +902,13 @@ const createTranslations = (lang: string) => {
     permissionDeniedDesc: "Permite el acceso a la ubicación en la configuración de tu navegador",
     error: "Error al obtener la ubicación",
     errorDesc: "No se pudo obtener la ubicación. Intenta nuevamente más tarde.",
+  },
+  cities: {
+    button: "Ciudades",
+    pageTitle: "Todas las Ciudades",
+    pageDescription: "{{count}} ciudades encontradas",
+    breadcrumb: "Ciudades",
+    noCities: "No se encontraron ciudades",
   },
   map: {
     title: "Vista del mapa",

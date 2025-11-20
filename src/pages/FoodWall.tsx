@@ -17,7 +17,14 @@ import {
   ImagePlus,
   Users,
   Sparkles,
+  Loader2,
 } from "lucide-react";
+import { 
+  fetchFoodwallPosts, 
+  createFoodwallPost, 
+  updateFoodwallLikes,
+  type FoodwallPost 
+} from "@/lib/foodwall";
 
 interface FoodPost {
   id: string;
@@ -30,8 +37,6 @@ interface FoodPost {
   location: string;
   createdAt: string;
 }
-
-const LOCAL_STORAGE_KEY = "eatnavigator-foodwall-posts";
 
 const demoPosts: FoodPost[] = [
   {
@@ -78,29 +83,44 @@ const demoPosts: FoodPost[] = [
   },
 ];
 
-const readFileAsDataURL = (file: File) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 
 type SortMode = "latest" | "popular" | "favorites";
 
 const FoodWall = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [posts, setPosts] = useState<FoodPost[]>(demoPosts);
-  const [images, setImages] = useState<string[]>([]);
+  const [posts, setPosts] = useState<FoodPost[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [description, setDescription] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("latest");
-  const hasHydrated = useRef(false);
+  const [author, setAuthor] = useState("");
+  const [location, setLocation] = useState("");
+
+  // Load posts from database
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const fetchedPosts = await fetchFoodwallPosts();
+        setPosts(fetchedPosts);
+      } catch (error) {
+        console.error("Error loading posts:", error);
+        toast({
+          variant: "destructive",
+          title: t("foodwall.error.loadFailed"),
+          description: t("foodwall.error.tryAgain"),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPosts();
+  }, [toast, t]);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const hasFilters = Boolean(normalizedQuery || activeTag || sortMode !== "latest");
@@ -132,34 +152,6 @@ const FoodWall = () => {
       .map(([name]) => name);
   }, [posts]);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || hasHydrated.current) return;
-
-    try {
-      const stored = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setPosts(parsed);
-        }
-      }
-    } catch (error) {
-      console.warn("Unable to load Foodwall posts", error);
-    } finally {
-      hasHydrated.current = true;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !hasHydrated.current) return;
-
-    try {
-      window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(posts));
-    } catch (error) {
-      console.warn("Unable to persist Foodwall posts", error);
-    }
-  }, [posts]);
-
   const filteredPosts = useMemo(() => {
     let computed = posts;
 
@@ -186,17 +178,9 @@ const FoodWall = () => {
     return [...computed].sort(sorter);
   }, [posts, normalizedQuery, activeTag, sortMode]);
 
-  const handleImageChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = Array.from(event.target.files || []).slice(0, 4);
-    if (!files.length) {
-      setImages([]);
-      return;
-    }
-
-    const previews = await Promise.all(files.map(readFileAsDataURL));
-    setImages(previews);
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || []).slice(0, 4);
+    setFiles(selectedFiles);
   };
 
   const handleAddTag = useCallback(() => {
@@ -210,10 +194,10 @@ const FoodWall = () => {
     setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!description.trim() && images.length === 0) {
+    if (!description.trim() && files.length === 0) {
       toast({
         variant: "destructive",
         title: t("foodwall.toast.missingTitle"),
@@ -222,28 +206,43 @@ const FoodWall = () => {
       return;
     }
 
+    if (!author.trim() || !location.trim()) {
+      toast({
+        variant: "destructive",
+        title: t("foodwall.error.missingInfo"),
+        description: t("foodwall.error.provideAuthorLocation"),
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const newPost: FoodPost = {
-        id: `${Date.now()}`,
-        images: images.length ? images : [],
+      const newPost = await createFoodwallPost({
         description: description.trim(),
         tags: tags.length ? tags : ["foodie"],
-        likes: 0,
-        author: t("foodwall.upload.you"),
-        location: t("foodwall.upload.yourLocation"),
-        createdAt: new Date().toISOString(),
-      };
+        files,
+        author: author.trim(),
+        location: location.trim(),
+      });
 
       setPosts((prev) => [newPost, ...prev]);
       setDescription("");
-      setImages([]);
+      setFiles([]);
       setTags([]);
       setTagInput("");
+      setAuthor("");
+      setLocation("");
 
       toast({
         title: t("foodwall.toast.published"),
         description: t("foodwall.toast.publishedDesc"),
+      });
+    } catch (error) {
+      console.error("Error creating post:", error);
+      toast({
+        variant: "destructive",
+        title: t("foodwall.error.uploadFailed"),
+        description: t("foodwall.error.tryAgain"),
       });
     } finally {
       setIsSubmitting(false);
@@ -260,18 +259,40 @@ const FoodWall = () => {
     setActiveTag((current) => (current === tag ? null : tag));
   };
 
-  const toggleLike = (id: string) => {
+  const toggleLike = async (id: string) => {
+    const post = posts.find((p) => p.id === id);
+    if (!post) return;
+
+    const newLikes = post.liked ? post.likes - 1 : post.likes + 1;
+    const wasLiked = post.liked;
+
+    // Optimistic update
     setPosts((prev) =>
-      prev.map((post) =>
-        post.id === id
-          ? {
-              ...post,
-              likes: post.liked ? post.likes - 1 : post.likes + 1,
-              liked: !post.liked,
-            }
-          : post
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, likes: newLikes, liked: !wasLiked }
+          : p
       )
     );
+
+    try {
+      await updateFoodwallLikes(id, newLikes);
+    } catch (error) {
+      console.error("Error updating likes:", error);
+      // Revert on error
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? { ...p, likes: post.likes, liked: wasLiked }
+            : p
+        )
+      );
+      toast({
+        variant: "destructive",
+        title: t("foodwall.error.likeFailed"),
+        description: t("foodwall.error.tryAgain"),
+      });
+    }
   };
 
   const handleShare = async (post: FoodPost) => {
@@ -295,8 +316,9 @@ const FoodWall = () => {
         return;
       }
 
-      if (typeof navigator !== "undefined" && navigator.clipboard) {
-        await navigator.clipboard.writeText(url);
+      if (typeof navigator !== "undefined" && "clipboard" in navigator) {
+        const nav = navigator as Navigator & { clipboard: Clipboard };
+        await nav.clipboard.writeText(url);
         toast({
           title: t("foodwall.share.shared"),
           description: t("foodwall.share.copied"),
@@ -393,22 +415,33 @@ const FoodWall = () => {
                         multiple
                         onChange={handleImageChange}
                       />
-                      {images.length > 0 && (
-                        <div className="grid grid-cols-2 gap-2 mt-3">
-                          {images.map((src, index) => (
-                            <div
-                              key={index}
-                              className="aspect-video rounded-lg overflow-hidden border"
-                            >
-                              <img
-                                src={src}
-                                alt="preview"
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          ))}
-                        </div>
+                      {files.length > 0 && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {files.length} {t("foodwall.upload.filesSelected")}
+                        </p>
                       )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        {t("foodwall.upload.author")}
+                      </label>
+                      <Input
+                        value={author}
+                        onChange={(e) => setAuthor(e.target.value)}
+                        placeholder={t("foodwall.upload.authorPlaceholder")}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        {t("foodwall.upload.location")}
+                      </label>
+                      <Input
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder={t("foodwall.upload.locationPlaceholder")}
+                        required
+                      />
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-2 block">
@@ -463,8 +496,22 @@ const FoodWall = () => {
                         ))}
                       </div>
                     </div>
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? t("foodwall.upload.publishing") : t("foodwall.upload.publish")}
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {t("foodwall.upload.posting")}
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="h-4 w-4 mr-2" />
+                          {t("foodwall.upload.publish")}
+                        </>
+                      )}
                     </Button>
                   </form>
                 </CardContent>

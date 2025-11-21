@@ -24,7 +24,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import FoodWall from "./pages/FoodWall";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient(); 
 
 const LanguageWrapper = ({ children }: { children: React.ReactNode }) => {
   const { lang } = useParams();

@@ -1107,6 +1107,13 @@ const createTranslations = (lang: string) => {
     error: "Errore nel recupero della posizione",
     errorDesc: "Impossibile recuperare la posizione. Riprova più tardi.",
   },
+  cities: {
+    button: "Città",
+    pageTitle: "Tutte le Città",
+    pageDescription: "{{count}} città trovate",
+    breadcrumb: "Città",
+    noCities: "Nessuna città trovata",
+  },
   map: {
     title: "Vista mappa",
     showMap: "Mostra mappa",
@@ -1303,6 +1310,13 @@ pt: {
     permissionDeniedDesc: "Permite o acesso à localização nas definições do navegador",
     error: "Erro ao obter localização",
     errorDesc: "Não foi possível obter a localização. Tenta novamente mais tarde.",
+  },
+  cities: {
+    button: "Cidades",
+    pageTitle: "Todas as Cidades",
+    pageDescription: "{{count}} cidades encontradas",
+    breadcrumb: "Cidades",
+    noCities: "Nenhuma cidade encontrada",
   },
   map: {
     title: "Vista do mapa",
@@ -1501,6 +1515,13 @@ pt: {
     error: "Błąd pobierania lokalizacji",
     errorDesc: "Nie udało się pobrać lokalizacji. Spróbuj ponownie później.",
   },
+  cities: {
+    button: "Miasta",
+    pageTitle: "Wszystkie Miasta",
+    pageDescription: "Znaleziono {{count}} miast",
+    breadcrumb: "Miasta",
+    noCities: "Nie znaleziono miast",
+  },
   map: {
     title: "Widok mapy",
     showMap: "Pokaż mapę",
@@ -1697,6 +1718,13 @@ pt: {
     permissionDeniedDesc: "Omogući pristup lokaciji u postavkama preglednika",
     error: "Pogreška pri dohvaćanju lokacije",
     errorDesc: "Lokaciju nije moguće dohvatiti. Pokušaj ponovno kasnije.",
+  },
+  cities: {
+    button: "Gradovi",
+    pageTitle: "Svi Gradovi",
+    pageDescription: "Pronađeno {{count}} gradova",
+    breadcrumb: "Gradovi",
+    noCities: "Nema pronađenih gradova",
   },
   map: {
     title: "Prikaz karte",
@@ -1895,6 +1923,13 @@ pt: {
     error: "位置情報取得エラー",
     errorDesc: "位置情報を取得できませんでした。後でもう一度お試しください。",
   },
+  cities: {
+    button: "都市",
+    pageTitle: "すべての都市",
+    pageDescription: "{{count}} 都市が見つかりました",
+    breadcrumb: "都市",
+    noCities: "都市が見つかりません",
+  },
   map: {
     title: "地図ビュー",
     showMap: "地図を表示",
@@ -2091,6 +2126,13 @@ pt: {
     permissionDeniedDesc: "请在浏览器设置中允许访问位置信息",
     error: "获取位置时出错",
     errorDesc: "无法获取位置，请稍后再试。",
+  },
+  cities: {
+    button: "城市",
+    pageTitle: "所有城市",
+    pageDescription: "找到 {{count}} 个城市",
+    breadcrumb: "城市",
+    noCities: "未找到城市",
   },
   map: {
     title: "地图视图",
@@ -2289,6 +2331,13 @@ pt: {
     error: "خطأ في جلب الموقع",
     errorDesc: "تعذّر الحصول على الموقع. يرجى المحاولة لاحقًا.",
   },
+  cities: {
+    button: "المدن",
+    pageTitle: "جميع المدن",
+    pageDescription: "تم العثور على {{count}} مدينة",
+    breadcrumb: "المدن",
+    noCities: "لم يتم العثور على مدن",
+  },
   map: {
     title: "عرض الخريطة",
     showMap: "إظهار الخريطة",
@@ -2485,6 +2534,13 @@ pt: {
     permissionDeniedDesc: "Tarayıcı ayarlarından konum erişimine izin verin",
     error: "Konum alınırken hata oluştu",
     errorDesc: "Konum alınamadı. Lütfen daha sonra tekrar deneyin.",
+  },
+  cities: {
+    button: "Şehirler",
+    pageTitle: "Tüm Şehirler",
+    pageDescription: "{{count}} şehir bulundu",
+    breadcrumb: "Şehirler",
+    noCities: "Şehir bulunamadı",
   },
   map: {
     title: "Harita Görünümü",
@@ -2683,6 +2739,13 @@ pt: {
     error: "Fel vid hämtning av plats",
     errorDesc: "Kunde inte hämta plats. Försök igen senare.",
   },
+  cities: {
+    button: "Städer",
+    pageTitle: "Alla Städer",
+    pageDescription: "{{count}} städer hittades",
+    breadcrumb: "Städer",
+    noCities: "Inga städer hittades",
+  },
   map: {
     title: "Kartvy",
     showMap: "Visa karta",
@@ -2879,6 +2942,13 @@ da: {
     permissionDeniedDesc: "Tillad adgang til placering i din browsers indstillinger",
     error: "Fejl ved hentning af placering",
     errorDesc: "Kunne ikke hente placering. Prøv igen senere.",
+  },
+  cities: {
+    button: "Byer",
+    pageTitle: "Alle Byer",
+    pageDescription: "{{count}} byer fundet",
+    breadcrumb: "Byer",
+    noCities: "Ingen byer fundet",
   },
   map: {
     title: "Kortvisning",
@@ -3077,6 +3147,13 @@ da: {
     error: "Feil ved henting av posisjon",
     errorDesc: "Kunne ikke hente posisjon. Prøv igjen senere.",
   },
+  cities: {
+    button: "Byer",
+    pageTitle: "Alle Byer",
+    pageDescription: "{{count}} byer funnet",
+    breadcrumb: "Byer",
+    noCities: "Ingen byer funnet",
+  },
   map: {
     title: "Kartvisning",
     showMap: "Vis kart",
@@ -3273,6 +3350,13 @@ da: {
     permissionDeniedDesc: "Salli sijainnin käyttö selaimesi asetuksissa",
     error: "Virhe sijaintia haettaessa",
     errorDesc: "Sijaintia ei voitu hakea. Yritä myöhemmin uudelleen.",
+  },
+  cities: {
+    button: "Kaupungit",
+    pageTitle: "Kaikki Kaupungit",
+    pageDescription: "{{count}} kaupunkia löytyi",
+    breadcrumb: "Kaupungit",
+    noCities: "Ei kaupunkeja löytynyt",
   },
   map: {
     title: "Karttanäkymä",
@@ -3471,6 +3555,13 @@ cs: {
     error: "Chyba při získávání polohy",
     errorDesc: "Nelze získat polohu. Zkuste to znovu později.",
   },
+  cities: {
+    button: "Města",
+    pageTitle: "Všechna Města",
+    pageDescription: "Nalezeno {{count}} měst",
+    breadcrumb: "Města",
+    noCities: "Nebyla nalezena žádná města",
+  },
   map: {
     title: "Zobrazení mapy",
     showMap: "Zobrazit mapu",
@@ -3667,6 +3758,13 @@ cs: {
     permissionDeniedDesc: "Permite accesul la locație din setările browserului tău",
     error: "Eroare la preluarea locației",
     errorDesc: "Nu s-a putut prelua locația. Încearcă din nou mai târziu.",
+  },
+  cities: {
+    button: "Orașe",
+    pageTitle: "Toate Orașele",
+    pageDescription: "{{count}} orașe găsite",
+    breadcrumb: "Orașe",
+    noCities: "Nu au fost găsite orașe",
   },
   map: {
     title: "Vizualizare hartă",

@@ -45,6 +45,28 @@ const InteractiveWorldMap = () => {
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Create custom marker icon (same as MapView)
+  const createCustomIcon = (isHighlighted: boolean = false) => {
+    if (typeof L === 'undefined') return null;
+    return new L.DivIcon({
+      className: 'custom-marker-icon',
+      html: `
+        <div class="relative ${isHighlighted ? 'highlighted-marker' : ''}">
+          <div class="w-10 h-10 ${isHighlighted ? 'bg-accent' : 'bg-primary'} rounded-full shadow-lg border-4 border-white flex items-center justify-center transform transition-all duration-200 hover:scale-110 ${isHighlighted ? 'scale-125 animate-pulse' : ''}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] ${isHighlighted ? 'border-t-accent' : 'border-t-primary'}"></div>
+        </div>
+      `,
+      iconSize: [40, 48],
+      iconAnchor: [20, 48],
+      popupAnchor: [0, -48],
+    });
+  };
+
   const loadRestaurantMarkers = useCallback(async () => {
     if (!mapRef.current || !markersLayerRef.current) return;
 
@@ -82,16 +104,11 @@ const InteractiveWorldMap = () => {
       restaurants.forEach((restaurant) => {
         if (!markersLayerRef.current) return;
 
+        const customIcon = createCustomIcon(false);
+        if (!customIcon) return;
+
         const marker = L.marker([Number(restaurant.lat), Number(restaurant.lon)], {
-          icon: L.icon({
-            iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-            iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-            shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-          })
+          icon: customIcon,
         });
 
         const cityData = restaurant.city as any;
@@ -200,8 +217,11 @@ const InteractiveWorldMap = () => {
     if (markerRef.current) {
       markerRef.current.remove();
     }
-    markerRef.current = L.marker([lat, lon]).addTo(mapRef.current);
-    markerRef.current.bindPopup("Restaurants laden...").openPopup();
+    const customIcon = createCustomIcon(true);
+    if (customIcon) {
+      markerRef.current = L.marker([lat, lon], { icon: customIcon }).addTo(mapRef.current);
+      markerRef.current.bindPopup("Restaurants laden...").openPopup();
+    }
 
     try {
       // 1. Reverse geocode to get location details

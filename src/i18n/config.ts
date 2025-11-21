@@ -227,6 +227,10 @@ const createTranslations = (lang: string) => {
         showMap: "Toon kaart",
         hideMap: "Verberg kaart",
       },
+      worldMap: {
+        title: "Of ontdek restaurants via de wereldkaart",
+        description: "Klik op een locatie op de kaart om restaurants binnen 2 km te vinden en op te slaan.",
+      },
       provinces: {
         title: "Populaire provincies",
         description: "Ontdek restaurants per provincie",
@@ -430,6 +434,10 @@ const createTranslations = (lang: string) => {
         title: "Map View",
         showMap: "Show map",
         hideMap: "Hide map",
+      },
+      worldMap: {
+        title: "Or discover restaurants via the world map",
+        description: "Click on a location on the map to find and save restaurants within 2 km.",
       },
       provinces: {
         title: "Popular Provinces",
@@ -635,6 +643,10 @@ const createTranslations = (lang: string) => {
         showMap: "Karte anzeigen",
         hideMap: "Karte verbergen",
       },
+      worldMap: {
+        title: "Oder entdecken Sie Restaurants über die Weltkarte",
+        description: "Klicken Sie auf einen Ort auf der Karte, um Restaurants im Umkreis von 2 km zu finden und zu speichern.",
+      },
       provinces: {
         title: "Beliebte Provinzen",
         description: "Entdecken Sie Restaurants nach Provinz",
@@ -775,6 +787,10 @@ const createTranslations = (lang: string) => {
         showMap: "Afficher la carte",
         hideMap: "Masquer la carte",
       },
+      worldMap: {
+        title: "Ou découvrez des restaurants via la carte du monde",
+        description: "Cliquez sur un emplacement sur la carte pour trouver et enregistrer des restaurants dans un rayon de 2 km.",
+      },
       provinces: {
         title: "Provinces populaires",
         description: "Découvrez les restaurants par province",
@@ -914,6 +930,10 @@ const createTranslations = (lang: string) => {
     title: "Vista del mapa",
     showMap: "Mostrar mapa",
     hideMap: "Ocultar mapa",
+  },
+  worldMap: {
+    title: "O descubre restaurantes a través del mapa mundial",
+    description: "Haz clic en una ubicación del mapa para encontrar y guardar restaurantes en un radio de 2 km.",
   },
   provinces: {
     title: "Provincias populares",
@@ -1119,6 +1139,10 @@ const createTranslations = (lang: string) => {
     showMap: "Mostra mappa",
     hideMap: "Nascondi mappa",
   },
+  worldMap: {
+    title: "Oppure scopri i ristoranti tramite la mappa del mondo",
+    description: "Fai clic su una posizione sulla mappa per trovare e salvare ristoranti entro 2 km.",
+  },
   provinces: {
     title: "Province popolari",
     description: "Scopri ristoranti per provincia",
@@ -1322,6 +1346,10 @@ pt: {
     title: "Vista do mapa",
     showMap: "Mostrar mapa",
     hideMap: "Ocultar mapa",
+  },
+  worldMap: {
+    title: "Ou descubra restaurantes através do mapa mundial",
+    description: "Clique numa localização no mapa para encontrar e guardar restaurantes num raio de 2 km.",
   },
   provinces: {
     title: "Províncias populares",
@@ -1527,6 +1555,10 @@ pt: {
     showMap: "Pokaż mapę",
     hideMap: "Ukryj mapę",
   },
+  worldMap: {
+    title: "Lub odkryj restauracje za pomocą mapy świata",
+    description: "Kliknij lokalizację na mapie, aby znaleźć i zapisać restauracje w promieniu 2 km.",
+  },
   provinces: {
     title: "Popularne województwa",
     description: "Odkryj restauracje według województwa",
@@ -1730,6 +1762,10 @@ pt: {
     title: "Prikaz karte",
     showMap: "Prikaži kartu",
     hideMap: "Sakrij kartu",
+  },
+  worldMap: {
+    title: "Ili otkrijte restorane putem karte svijeta",
+    description: "Kliknite na lokaciju na karti kako biste pronašli i spremili restorane u radijusu od 2 km.",
   },
   provinces: {
     title: "Popularne županije",
@@ -1935,6 +1971,10 @@ pt: {
     showMap: "地図を表示",
     hideMap: "地図を非表示",
   },
+  worldMap: {
+    title: "または世界地図でレストランを発見",
+    description: "地図上の場所をクリックして、2 km以内のレストランを検索して保存します。",
+  },
   provinces: {
     title: "人気の地域",
     description: "地域ごとにレストランを見つける",
@@ -2138,6 +2178,10 @@ pt: {
     title: "地图视图",
     showMap: "显示地图",
     hideMap: "隐藏地图",
+  },
+  worldMap: {
+    title: "或通过世界地图发现餐厅",
+    description: "点击地图上的位置以查找并保存2公里内的餐厅。",
   },
   provinces: {
     title: "热门地区",
@@ -2343,6 +2387,10 @@ pt: {
     showMap: "إظهار الخريطة",
     hideMap: "إخفاء الخريطة",
   },
+  worldMap: {
+    title: "أو اكتشف المطاعم عبر خريطة العالم",
+    description: "انقر على موقع على الخريطة للعثور على المطاعم وحفظها في نطاق 2 كم.",
+  },
   provinces: {
     title: "المناطق الشهيرة",
     description: "استكشف المطاعم حسب المنطقة",
@@ -2546,6 +2594,10 @@ pt: {
     title: "Harita Görünümü",
     showMap: "Haritayı göster",
     hideMap: "Haritayı gizle",
+  },
+  worldMap: {
+    title: "Veya dünya haritası üzerinden restoranları keşfedin",
+    description: "2 km içindeki restoranları bulmak ve kaydetmek için haritada bir konuma tıklayın.",
   },
   provinces: {
     title: "Popüler Bölgeler",
@@ -2751,6 +2803,10 @@ pt: {
     showMap: "Visa karta",
     hideMap: "Dölj karta",
   },
+  worldMap: {
+    title: "Eller upptäck restauranger via världskartan",
+    description: "Klicka på en plats på kartan för att hitta och spara restauranger inom 2 km.",
+  },
   provinces: {
     title: "Populära regioner",
     description: "Upptäck restauranger per region",
@@ -2954,6 +3010,10 @@ da: {
     title: "Kortvisning",
     showMap: "Vis kort",
     hideMap: "Skjul kort",
+  },
+  worldMap: {
+    title: "Eller opdag restauranter via verdenskortet",
+    description: "Klik på en placering på kortet for at finde og gemme restauranter inden for 2 km.",
   },
   provinces: {
     title: "Populære regioner",
@@ -3159,6 +3219,10 @@ da: {
     showMap: "Vis kart",
     hideMap: "Skjul kart",
   },
+  worldMap: {
+    title: "Eller oppdag restauranter via verdenskartet",
+    description: "Klikk på et sted på kartet for å finne og lagre restauranter innen 2 km.",
+  },
   provinces: {
     title: "Populære regioner",
     description: "Oppdag restauranter etter region",
@@ -3362,6 +3426,10 @@ da: {
     title: "Karttanäkymä",
     showMap: "Näytä kartta",
     hideMap: "Piilota kartta",
+  },
+  worldMap: {
+    title: "Tai löydä ravintoloita maailmankartan kautta",
+    description: "Napsauta sijaintia kartalla löytääksesi ja tallentaaksesi ravintoloita 2 km:n säteellä.",
   },
   provinces: {
     title: "Suositut alueet",
@@ -3567,6 +3635,10 @@ cs: {
     showMap: "Zobrazit mapu",
     hideMap: "Skrýt mapu",
   },
+  worldMap: {
+    title: "Nebo objevte restaurace pomocí světové mapy",
+    description: "Klikněte na místo na mapě a najděte a uložte restaurace do vzdálenosti 2 km.",
+  },
   provinces: {
     title: "Populární regiony",
     description: "Objevte restaurace podle regionu",
@@ -3770,6 +3842,10 @@ cs: {
     title: "Vizualizare hartă",
     showMap: "Arată harta",
     hideMap: "Ascunde harta",
+  },
+  worldMap: {
+    title: "Sau descoperă restaurante prin harta lumii",
+    description: "Faceți clic pe o locație pe hartă pentru a găsi și salva restaurante într-o rază de 2 km.",
   },
   provinces: {
     title: "Regiuni populare",

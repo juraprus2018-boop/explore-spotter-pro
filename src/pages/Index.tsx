@@ -383,10 +383,10 @@ const Index = () => {
           <div className="space-y-12">
             <div>
               <h2 className="text-3xl font-bold mb-4 text-center text-foreground">
-                Of ontdek restaurants via de wereldkaart
+                {t("worldMap.title")}
               </h2>
               <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Klik op een locatie op de kaart om restaurants binnen 2 km te vinden en op te slaan.
+                {t("worldMap.description")}
               </p>
               <InteractiveWorldMap />
             </div>

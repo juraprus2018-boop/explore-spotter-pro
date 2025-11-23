@@ -161,8 +161,8 @@ export const searchLocations = async (query: string): Promise<NominatimResult[]>
 
     console.log("Nominatim search results for", query, ":", response.data);
 
-    // Filter to only include cities, towns, villages, countries, states
-    const acceptedTypes = ['city', 'town', 'village', 'county', 'state', 'country', 'municipality', 'administrative'];
+    // Filter to only include cities, towns, villages, and countries - strict location search
+    const acceptedTypes = ['city', 'town', 'village', 'country', 'municipality'];
     const locationResults = (response.data as NominatimResult[]).filter((result) =>
       acceptedTypes.includes(result.type) || acceptedTypes.includes(result.class)
     );

@@ -252,8 +252,8 @@ const Index = () => {
   }));
 
   // SEO meta tags
-  const seoTitle = "EatNavigator - Vind de beste restaurants bij jou in de buurt";
-  const seoDescription = "Ontdek duizenden restaurants wereldwijd met EatNavigator. Zoek op locatie, bekijk reviews, menu's en openingstijden. Vind het perfecte restaurant voor elke gelegenheid.";
+  const seoTitle = t("home.metaTitle");
+  const seoDescription = t("home.metaDescription");
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

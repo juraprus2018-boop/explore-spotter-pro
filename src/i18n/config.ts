@@ -215,6 +215,10 @@ const createTranslations = (lang: string) => {
         error: "Fout bij ophalen locatie",
         errorDesc: "Kon locatie niet ophalen. Probeer het later opnieuw.",
       },
+      home: {
+        metaTitle: "EatNavigator - Vind de beste restaurants bij jou in de buurt",
+        metaDescription: "Ontdek duizenden restaurants wereldwijd met EatNavigator. Zoek op locatie, bekijk reviews, menu's en openingstijden. Vind het perfecte restaurant voor elke gelegenheid.",
+      },
       cities: {
         button: "Steden",
         pageTitle: "Alle Steden",
@@ -422,6 +426,10 @@ const createTranslations = (lang: string) => {
         permissionDeniedDesc: "Please allow location access in your browser settings",
         error: "Error fetching location",
         errorDesc: "Could not fetch location. Please try again later.",
+      },
+      home: {
+        metaTitle: "EatNavigator - Find the best restaurants near you",
+        metaDescription: "Discover thousands of restaurants worldwide with EatNavigator. Search by location, view reviews, menus and opening hours. Find the perfect restaurant for every occasion.",
       },
       cities: {
         button: "Cities",
@@ -631,6 +639,10 @@ const createTranslations = (lang: string) => {
         error: "Fehler beim Abrufen des Standorts",
         errorDesc: "Standort konnte nicht abgerufen werden. Bitte versuchen Sie es später erneut.",
       },
+      home: {
+        metaTitle: "EatNavigator - Finden Sie die besten Restaurants in Ihrer Nähe",
+        metaDescription: "Entdecken Sie Tausende von Restaurants weltweit mit EatNavigator. Suchen Sie nach Standort, sehen Sie Bewertungen, Menüs und Öffnungszeiten. Finden Sie das perfekte Restaurant für jeden Anlass.",
+      },
       cities: {
         button: "Städte",
         pageTitle: "Alle Städte",
@@ -775,6 +787,10 @@ const createTranslations = (lang: string) => {
         error: "Erreur lors de la récupération de la localisation",
         errorDesc: "Impossible de récupérer la localisation. Veuillez réessayer plus tard.",
       },
+      home: {
+        metaTitle: "EatNavigator - Trouvez les meilleurs restaurants près de chez vous",
+        metaDescription: "Découvrez des milliers de restaurants dans le monde entier avec EatNavigator. Recherchez par emplacement, consultez les avis, les menus et les horaires d'ouverture. Trouvez le restaurant parfait pour chaque occasion.",
+      },
       cities: {
         button: "Villes",
         pageTitle: "Toutes les Villes",
@@ -918,6 +934,10 @@ const createTranslations = (lang: string) => {
     permissionDeniedDesc: "Permite el acceso a la ubicación en la configuración de tu navegador",
     error: "Error al obtener la ubicación",
     errorDesc: "No se pudo obtener la ubicación. Intenta nuevamente más tarde.",
+  },
+  home: {
+    metaTitle: "EatNavigator - Encuentra los mejores restaurantes cerca de ti",
+    metaDescription: "Descubre miles de restaurantes en todo el mundo con EatNavigator. Busca por ubicación, consulta reseñas, menús y horarios de apertura. Encuentra el restaurante perfecto para cada ocasión.",
   },
   cities: {
     button: "Ciudades",
@@ -1127,6 +1147,10 @@ const createTranslations = (lang: string) => {
     error: "Errore nel recupero della posizione",
     errorDesc: "Impossibile recuperare la posizione. Riprova più tardi.",
   },
+  home: {
+    metaTitle: "EatNavigator - Trova i migliori ristoranti vicino a te",
+    metaDescription: "Scopri migliaia di ristoranti in tutto il mondo con EatNavigator. Cerca per posizione, visualizza recensioni, menu e orari di apertura. Trova il ristorante perfetto per ogni occasione.",
+  },
   cities: {
     button: "Città",
     pageTitle: "Tutte le Città",
@@ -1334,6 +1358,10 @@ pt: {
     permissionDeniedDesc: "Permite o acesso à localização nas definições do navegador",
     error: "Erro ao obter localização",
     errorDesc: "Não foi possível obter a localização. Tenta novamente mais tarde.",
+  },
+  home: {
+    metaTitle: "EatNavigator - Encontre os melhores restaurantes perto de você",
+    metaDescription: "Descubra milhares de restaurantes em todo o mundo com EatNavigator. Pesquise por localização, veja avaliações, menus e horários de funcionamento. Encontre o restaurante perfeito para cada ocasião.",
   },
   cities: {
     button: "Cidades",
@@ -1543,6 +1571,10 @@ pt: {
     error: "Błąd pobierania lokalizacji",
     errorDesc: "Nie udało się pobrać lokalizacji. Spróbuj ponownie później.",
   },
+  home: {
+    metaTitle: "EatNavigator - Znajdź najlepsze restauracje w pobliżu",
+    metaDescription: "Odkryj tysiące restauracji na całym świecie z EatNavigator. Wyszukuj według lokalizacji, przeglądaj recenzje, menu i godziny otwarcia. Znajdź idealną restaurację na każdą okazję.",
+  },
   cities: {
     button: "Miasta",
     pageTitle: "Wszystkie Miasta",
@@ -1750,6 +1782,10 @@ pt: {
     permissionDeniedDesc: "Omogući pristup lokaciji u postavkama preglednika",
     error: "Pogreška pri dohvaćanju lokacije",
     errorDesc: "Lokaciju nije moguće dohvatiti. Pokušaj ponovno kasnije.",
+  },
+  home: {
+    metaTitle: "EatNavigator - Pronađite najbolje restorane u svojoj blizini",
+    metaDescription: "Otkrijte tisuće restorana širom svijeta s EatNavigator. Pretražujte prema lokaciji, pregledajte recenzije, jelovnike i radno vrijeme. Pronađite savršen restoran za svaku priliku.",
   },
   cities: {
     button: "Gradovi",
@@ -1959,6 +1995,10 @@ pt: {
     error: "位置情報取得エラー",
     errorDesc: "位置情報を取得できませんでした。後でもう一度お試しください。",
   },
+  home: {
+    metaTitle: "EatNavigator - あなたの近くの最高のレストランを見つける",
+    metaDescription: "EatNavigatorで世界中の何千ものレストランを発見してください。場所で検索し、レビュー、メニュー、営業時間を表示します。あらゆる機会に最適なレストランを見つけましょう。",
+  },
   cities: {
     button: "都市",
     pageTitle: "すべての都市",
@@ -2166,6 +2206,10 @@ pt: {
     permissionDeniedDesc: "请在浏览器设置中允许访问位置信息",
     error: "获取位置时出错",
     errorDesc: "无法获取位置，请稍后再试。",
+  },
+  home: {
+    metaTitle: "EatNavigator - 寻找您附近最好的餐厅",
+    metaDescription: "使用EatNavigator发现全球数千家餐厅。按地点搜索,查看评论、菜单和营业时间。为每个场合找到完美的餐厅。",
   },
   cities: {
     button: "城市",
@@ -2375,6 +2419,10 @@ pt: {
     error: "خطأ في جلب الموقع",
     errorDesc: "تعذّر الحصول على الموقع. يرجى المحاولة لاحقًا.",
   },
+  home: {
+    metaTitle: "EatNavigator - اعثر على أفضل المطاعم بالقرب منك",
+    metaDescription: "اكتشف آلاف المطاعم حول العالم مع EatNavigator. ابحث حسب الموقع، واطلع على التقييمات والقوائم وأوقات العمل. اعثر على المطعم المثالي لكل مناسبة.",
+  },
   cities: {
     button: "المدن",
     pageTitle: "جميع المدن",
@@ -2582,6 +2630,10 @@ pt: {
     permissionDeniedDesc: "Tarayıcı ayarlarından konum erişimine izin verin",
     error: "Konum alınırken hata oluştu",
     errorDesc: "Konum alınamadı. Lütfen daha sonra tekrar deneyin.",
+  },
+  home: {
+    metaTitle: "EatNavigator - Yakınınızdaki en iyi restoranları bulun",
+    metaDescription: "EatNavigator ile dünya çapında binlerce restoranı keşfedin. Konuma göre arayın, değerlendirmeleri, menüleri ve açılış saatlerini görüntüleyin. Her durum için mükemmel restoranı bulun.",
   },
   cities: {
     button: "Şehirler",
@@ -2791,6 +2843,10 @@ pt: {
     error: "Fel vid hämtning av plats",
     errorDesc: "Kunde inte hämta plats. Försök igen senare.",
   },
+  home: {
+    metaTitle: "EatNavigator - Hitta de bästa restaurangerna nära dig",
+    metaDescription: "Upptäck tusentals restauranger över hela världen med EatNavigator. Sök efter plats, visa recensioner, menyer och öppettider. Hitta den perfekta restaurangen för varje tillfälle.",
+  },
   cities: {
     button: "Städer",
     pageTitle: "Alla Städer",
@@ -2998,6 +3054,10 @@ da: {
     permissionDeniedDesc: "Tillad adgang til placering i din browsers indstillinger",
     error: "Fejl ved hentning af placering",
     errorDesc: "Kunne ikke hente placering. Prøv igen senere.",
+  },
+  home: {
+    metaTitle: "EatNavigator - Find de bedste restauranter i nærheden",
+    metaDescription: "Opdag tusindvis af restauranter verden over med EatNavigator. Søg efter placering, se anmeldelser, menuer og åbningstider. Find den perfekte restaurant til enhver lejlighed.",
   },
   cities: {
     button: "Byer",
@@ -3207,6 +3267,10 @@ da: {
     error: "Feil ved henting av posisjon",
     errorDesc: "Kunne ikke hente posisjon. Prøv igjen senere.",
   },
+  home: {
+    metaTitle: "EatNavigator - Finn de beste restaurantene i nærheten",
+    metaDescription: "Oppdag tusenvis av restauranter over hele verden med EatNavigator. Søk etter sted, se anmeldelser, menyer og åpningstider. Finn den perfekte restauranten for enhver anledning.",
+  },
   cities: {
     button: "Byer",
     pageTitle: "Alle Byer",
@@ -3414,6 +3478,10 @@ da: {
     permissionDeniedDesc: "Salli sijainnin käyttö selaimesi asetuksissa",
     error: "Virhe sijaintia haettaessa",
     errorDesc: "Sijaintia ei voitu hakea. Yritä myöhemmin uudelleen.",
+  },
+  home: {
+    metaTitle: "EatNavigator - Löydä parhaat ravintolat läheltäsi",
+    metaDescription: "Löydä tuhansia ravintoloita ympäri maailmaa EatNavigatorin avulla. Hae sijainnin mukaan, katso arvostelut, ruokalistat ja aukioloajat. Löydä täydellinen ravintola jokaiseen tilanteeseen.",
   },
   cities: {
     button: "Kaupungit",
@@ -3623,6 +3691,10 @@ cs: {
     error: "Chyba při získávání polohy",
     errorDesc: "Nelze získat polohu. Zkuste to znovu později.",
   },
+  home: {
+    metaTitle: "EatNavigator - Najděte nejlepší restaurace ve vašem okolí",
+    metaDescription: "Objevte tisíce restaurací po celém světě s EatNavigator. Hledejte podle polohy, prohlížejte si recenze, menu a otevírací dobu. Najděte perfektní restauraci pro každou příležitost.",
+  },
   cities: {
     button: "Města",
     pageTitle: "Všechna Města",
@@ -3830,6 +3902,10 @@ cs: {
     permissionDeniedDesc: "Permite accesul la locație din setările browserului tău",
     error: "Eroare la preluarea locației",
     errorDesc: "Nu s-a putut prelua locația. Încearcă din nou mai târziu.",
+  },
+  home: {
+    metaTitle: "EatNavigator - Găsiți cele mai bune restaurante în apropierea dvs.",
+    metaDescription: "Descoperiți mii de restaurante din întreaga lume cu EatNavigator. Căutați după locație, vedeți recenzii, meniuri și programul de funcționare. Găsiți restaurantul perfect pentru fiecare ocazie.",
   },
   cities: {
     button: "Orașe",

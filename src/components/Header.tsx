@@ -94,13 +94,13 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(`/${lang || 'nl'}`)}>
-          <Utensils className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-foreground">EatNavigator</span>
+      <div className="container mx-auto px-2 sm:px-4 flex h-16 items-center justify-between max-w-full">
+        <div className="flex items-center gap-1 sm:gap-2 cursor-pointer flex-shrink-0" onClick={() => navigate(`/${lang || 'nl'}`)}>
+          <Utensils className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <span className="text-base sm:text-xl font-bold text-foreground">EatNavigator</span>
         </div>
         
-        <nav className="flex items-center gap-2 md:gap-4">
+        <nav className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <Button
             variant="outline"
             size="sm"

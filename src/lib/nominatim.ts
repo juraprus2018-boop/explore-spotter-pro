@@ -152,7 +152,8 @@ export const searchLocations = async (query: string): Promise<NominatimResult[]>
         q: query,
         format: "json",
         addressdetails: 1,
-        limit: 10,
+        limit: 20,
+        featuretype: 'settlement', // Only search for settlements (cities, towns, villages)
       },
       headers: {
         "User-Agent": "EatNavigator/1.0",
@@ -162,12 +163,24 @@ export const searchLocations = async (query: string): Promise<NominatimResult[]>
     console.log("Nominatim search results for", query, ":", response.data);
 
     // Filter to only include cities, towns, villages, and countries - strict location search
-    const acceptedTypes = ['city', 'town', 'village', 'country', 'municipality'];
-    const locationResults = (response.data as NominatimResult[]).filter((result) =>
-      acceptedTypes.includes(result.type) || acceptedTypes.includes(result.class)
-    );
+    const acceptedTypes = ['city', 'town', 'village', 'country', 'municipality', 'administrative'];
+    const acceptedClasses = ['place', 'boundary'];
+    
+    const locationResults = (response.data as NominatimResult[])
+      .filter((result) => {
+        const hasValidType = acceptedTypes.includes(result.type);
+        const hasValidClass = acceptedClasses.includes(result.class);
+        const hasValidAddresstype = result.addresstype && ['city', 'town', 'village', 'municipality', 'country'].includes(result.addresstype);
+        
+        return (hasValidType || hasValidClass || hasValidAddresstype);
+      })
+      .sort((a, b) => {
+        // Sort by importance score (higher is better)
+        return (b.importance || 0) - (a.importance || 0);
+      })
+      .slice(0, 10); // Limit to top 10 results
 
-    console.log("Filtered location results:", locationResults);
+    console.log("Filtered and sorted location results:", locationResults);
     return locationResults;
   } catch (error) {
     console.error("Error searching locations:", error);

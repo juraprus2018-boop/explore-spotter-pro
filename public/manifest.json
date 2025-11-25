@@ -1,0 +1,23 @@
+{
+  "name": "EatNavigator - Vind de beste restaurants",
+  "short_name": "EatNavigator",
+  "description": "Ontdek duizenden restaurants in Nederland met interactieve kaarten, reviews en gedetailleerde informatie",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

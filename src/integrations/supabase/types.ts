@@ -67,6 +67,35 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          restaurant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          restaurant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          restaurant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       foodwall_posts: {
         Row: {
           author: string
@@ -253,6 +282,7 @@ export type Database = {
           phone: string | null
           photos: string[] | null
           place_id: number
+          price_range: number | null
           search_count: number | null
           status: string | null
           takeaway: string | null
@@ -297,6 +327,7 @@ export type Database = {
           phone?: string | null
           photos?: string[] | null
           place_id: number
+          price_range?: number | null
           search_count?: number | null
           status?: string | null
           takeaway?: string | null
@@ -341,6 +372,7 @@ export type Database = {
           phone?: string | null
           photos?: string[] | null
           place_id?: number
+          price_range?: number | null
           search_count?: number | null
           status?: string | null
           takeaway?: string | null

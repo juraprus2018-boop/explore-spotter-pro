@@ -68,6 +68,7 @@ export interface DatabaseRestaurant {
   payment_options?: any | null;
   contact_info?: any | null;
   extratags?: any | null;
+  price_range?: number | null;
   city?: City;
 }
 
@@ -676,5 +677,59 @@ export const getCityBySlug = async (slug: string): Promise<City | null> => {
   } catch (error) {
     console.error("Error in getCityBySlug:", error);
     return null;
+  }
+};
+
+export const getSimilarRestaurants = async (
+  restaurantId: string,
+  lat: number,
+  lon: number,
+  cuisine: string | null,
+  priceRange: number | null
+): Promise<DatabaseRestaurant[]> => {
+  try {
+    const radiusKm = 3;
+    const latDelta = radiusKm / 111;
+    const lonDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
+
+    let query = (db as any)
+      .from("restaurants")
+      .select(
+        `
+        *,
+        city:cities (
+          *,
+          province:provinces (
+            *,
+            country:countries (*)
+          )
+        )
+      `
+      )
+      .neq("id", restaurantId)
+      .gte("lat", lat - latDelta)
+      .lte("lat", lat + latDelta)
+      .gte("lon", lon - lonDelta)
+      .lte("lon", lon + lonDelta);
+
+    if (cuisine) {
+      query = query.ilike("cuisine", `%${cuisine}%`);
+    }
+
+    if (priceRange) {
+      query = query.eq("price_range", priceRange);
+    }
+
+    const { data, error } = await query.limit(6);
+
+    if (error) {
+      console.error("Error fetching similar restaurants:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getSimilarRestaurants:", error);
+    return [];
   }
 };

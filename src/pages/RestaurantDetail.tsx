@@ -26,6 +26,10 @@ import {
 import { NavLink } from "@/components/NavLink";
 import ClaimRestaurantDialog from "@/components/ClaimRestaurantDialog";
 import SuggestChangeDialog from "@/components/SuggestChangeDialog";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { SocialShareButtons } from "@/components/SocialShareButtons";
+import { PriceRangeIndicator } from "@/components/PriceRangeIndicator";
+import { SimilarRestaurants } from "@/components/SimilarRestaurants";
 
 const RestaurantDetail = () => {
   const { placeId, city, province, lang } = useParams();
@@ -209,11 +213,27 @@ const RestaurantDetail = () => {
           </Breadcrumb>
 
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-4 text-foreground">{restaurant.name}</h1>
-            <div className="flex items-start gap-2 text-muted-foreground">
-              <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
-              <p className="text-lg">{restaurant.display_name}</p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold mb-4 text-foreground">{restaurant.name}</h1>
+                <div className="flex items-start gap-2 text-muted-foreground">
+                  <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <p className="text-lg">{restaurant.display_name}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <FavoriteButton restaurantId={restaurant.id} restaurantName={restaurant.name} />
+                <SocialShareButtons 
+                  restaurantName={restaurant.name} 
+                  restaurantUrl={`/${lang}/${province}/${city}/${restaurant.place_id}`} 
+                />
+              </div>
             </div>
+            {(restaurant as any).price_range && (
+              <div className="mt-4">
+                <PriceRangeIndicator priceRange={(restaurant as any).price_range} />
+              </div>
+            )}
           </div>
 
           {/* Restaurant Photos */}
@@ -445,6 +465,15 @@ const RestaurantDetail = () => {
               restaurantName={restaurant.name}
             />
           </div>
+
+          {/* Similar Restaurants Section */}
+          <SimilarRestaurants
+            restaurantId={restaurant.id}
+            lat={restaurant.lat}
+            lon={restaurant.lon}
+            cuisine={(restaurant as any).cuisine}
+            priceRange={(restaurant as any).price_range}
+          />
         </div>
       </main>
 

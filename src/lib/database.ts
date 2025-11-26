@@ -733,3 +733,57 @@ export const getSimilarRestaurants = async (
     return [];
   }
 };
+
+export const getTopRatedRestaurantsByCity = async (citySlug: string, limit: number = 6): Promise<DatabaseRestaurant[]> => {
+  try {
+    const { data, error } = await db
+      .from('restaurants')
+      .select(`
+        *,
+        city:cities!inner (
+          *,
+          province:provinces (
+            *,
+            country:countries (*)
+          )
+        ),
+        reviews:reviews(rating)
+      `)
+      .eq('city.slug', citySlug)
+      .order('search_count', { ascending: false })
+      .limit(limit * 3);
+
+    if (error) {
+      console.error("Error fetching top rated restaurants:", error);
+      return [];
+    }
+
+    // Calculate average rating for each restaurant
+    const restaurantsWithRatings = (data || []).map(restaurant => {
+      const reviews = (restaurant as any).reviews || [];
+      const avgRating = reviews.length > 0
+        ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length
+        : 0;
+      
+      return {
+        ...restaurant,
+        avgRating,
+        reviewCount: reviews.length
+      };
+    });
+
+    // Sort by average rating and review count, filter out those with no reviews
+    return restaurantsWithRatings
+      .filter(r => r.reviewCount > 0)
+      .sort((a, b) => {
+        if (b.avgRating !== a.avgRating) {
+          return b.avgRating - a.avgRating;
+        }
+        return b.reviewCount - a.reviewCount;
+      })
+      .slice(0, limit);
+  } catch (error) {
+    console.error("Error in getTopRatedRestaurantsByCity:", error);
+    return [];
+  }
+};

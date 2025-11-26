@@ -11,6 +11,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HreflangAlternates from "@/components/HreflangAlternates";
 import CityStructuredData from "@/components/CityStructuredData";
+import CityStats from "@/components/CityStats";
+import TopRestaurants from "@/components/TopRestaurants";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -229,14 +231,20 @@ const CityPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <MapPin className="h-8 w-8 text-primary" />
-              {t('page.restaurantsIn')} {cityName}
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              {restaurants.length} {restaurants.length === 1 ? "restaurant" : "restaurants"} gevonden
-            </p>
+          <div className="mb-8 space-y-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+                <MapPin className="h-8 w-8 text-primary" />
+                {t('page.restaurantsIn')} {cityName}
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Ontdek {restaurants.length} {restaurants.length === 1 ? "restaurant" : "restaurants"} in {cityName}, {provinceName}
+              </p>
+            </div>
+            
+            {restaurants.length > 0 && (
+              <CityStats restaurants={restaurants} />
+            )}
           </div>
 
           {isLoading ? (
@@ -246,6 +254,9 @@ const CityPage = () => {
             </div>
           ) : restaurants.length > 0 ? (
             <div className="space-y-8">
+              {/* Top Restaurants */}
+              <TopRestaurants citySlug={city || ""} provinceSlug={provinceSlug} />
+              
               {/* Filters */}
               <Card>
                 <CardContent className="pt-6">

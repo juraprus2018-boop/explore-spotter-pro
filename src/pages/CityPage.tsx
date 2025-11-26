@@ -13,6 +13,9 @@ import HreflangAlternates from "@/components/HreflangAlternates";
 import CityStructuredData from "@/components/CityStructuredData";
 import CityStats from "@/components/CityStats";
 import TopRestaurants from "@/components/TopRestaurants";
+import RecentRestaurants from "@/components/RecentRestaurants";
+import PopularCuisines from "@/components/PopularCuisines";
+import PriceDistribution from "@/components/PriceDistribution";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -254,6 +257,19 @@ const CityPage = () => {
             </div>
           ) : restaurants.length > 0 ? (
             <div className="space-y-8">
+              {/* Recent Restaurants */}
+              <RecentRestaurants 
+                restaurants={restaurants} 
+                citySlug={city || ""} 
+                provinceSlug={provinceSlug} 
+              />
+
+              {/* Statistics Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <PopularCuisines restaurants={restaurants} />
+                <PriceDistribution restaurants={restaurants} />
+              </div>
+              
               {/* Top Restaurants */}
               <TopRestaurants citySlug={city || ""} provinceSlug={provinceSlug} />
               

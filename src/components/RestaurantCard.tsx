@@ -15,6 +15,7 @@ interface RestaurantCardProps {
   provinceSlug: string;
   onViewOnMap?: () => void;
   cuisine?: string | null;
+  distance?: number; // Distance in meters
   facilities?: {
     wheelchair?: string;
     outdoor_seating?: string;
@@ -32,6 +33,7 @@ const RestaurantCard = ({
   provinceSlug,
   onViewOnMap,
   cuisine,
+  distance,
   facilities,
 }: RestaurantCardProps) => {
   const { lang } = useParams();
@@ -58,6 +60,11 @@ const RestaurantCard = ({
             <CardDescription className="text-sm">
               {displayName.split(",").slice(1, 3).join(",")}
             </CardDescription>
+            {distance !== undefined && (
+              <p className="text-xs text-muted-foreground mt-1">
+                📍 {(distance / 1000).toFixed(1)} km
+              </p>
+            )}
           </div>
           <Badge variant="secondary" className="shrink-0 capitalize">
             {type}

@@ -77,6 +77,7 @@ export const SimilarRestaurants = ({
             citySlug={restaurant.city?.slug || ''}
             provinceSlug={restaurant.city?.province?.slug || ''}
             cuisine={restaurant.cuisine}
+            distance={(restaurant as any).distance}
           />
         ))}
       </div>

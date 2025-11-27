@@ -30,6 +30,9 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { PriceRangeIndicator } from "@/components/PriceRangeIndicator";
 import { SimilarRestaurants } from "@/components/SimilarRestaurants";
+import { PhotoGallery } from "@/components/PhotoGallery";
+import { OpeningHoursDisplay } from "@/components/OpeningHoursDisplay";
+import { NearbyRestaurantsList } from "@/components/NearbyRestaurantsList";
 
 const RestaurantDetail = () => {
   const { placeId, city, province, lang } = useParams();
@@ -237,28 +240,10 @@ const RestaurantDetail = () => {
           </div>
 
           {/* Restaurant Photos */}
-          {(restaurant as any).photos && (restaurant as any).photos.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">Foto's</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {(restaurant as any).photos.map((photo: string, index: number) => (
-                  <a
-                    key={index}
-                    href={photo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative aspect-square overflow-hidden rounded-lg border border-border hover:opacity-90 transition-opacity"
-                  >
-                    <img
-                      src={photo}
-                      alt={`${restaurant.name} - foto ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
+          <PhotoGallery 
+            photos={(restaurant as any).photos || []} 
+            restaurantName={restaurant.name}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             {/* Left column: Restaurant Information */}
@@ -310,16 +295,6 @@ const RestaurantDetail = () => {
                     >
                       Bezoek website
                     </a>
-                  </div>
-                )}
-                {(restaurant as any).opening_hours && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Openingstijden</p>
-                    <p className="font-medium whitespace-pre-line">
-                      {typeof (restaurant as any).opening_hours === 'object' 
-                        ? (restaurant as any).opening_hours.hours || JSON.stringify((restaurant as any).opening_hours)
-                        : (restaurant as any).opening_hours}
-                    </p>
                   </div>
                 )}
                 
@@ -433,7 +408,7 @@ const RestaurantDetail = () => {
             </Card>
 
             {/* Right column: Navigation and Location */}
-            <div className="space-y-8 sticky top-4 self-start">
+            <div className="space-y-6 sticky top-4 self-start">
               <RouteNavigation
                 destinationLat={restaurant.lat}
                 destinationLon={restaurant.lon}
@@ -455,6 +430,14 @@ const RestaurantDetail = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <OpeningHoursDisplay openingHours={(restaurant as any).opening_hours} />
+              
+              <NearbyRestaurantsList
+                restaurantId={restaurant.id}
+                lat={restaurant.lat}
+                lon={restaurant.lon}
+              />
             </div>
           </div>
 

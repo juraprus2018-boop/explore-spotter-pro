@@ -688,7 +688,7 @@ export const getSimilarRestaurants = async (
   priceRange: number | null
 ): Promise<DatabaseRestaurant[]> => {
   try {
-    const radiusKm = 3;
+    const radiusKm = 10; // Increased radius to find more similar restaurants
     const latDelta = radiusKm / 111;
     const lonDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
 
@@ -720,14 +720,37 @@ export const getSimilarRestaurants = async (
       query = query.eq("price_range", priceRange);
     }
 
-    const { data, error } = await query.limit(6);
+    const { data, error } = await query.limit(20);
 
     if (error) {
       console.error("Error fetching similar restaurants:", error);
       return [];
     }
 
-    return data || [];
+    if (!data) return [];
+
+    // Calculate distance for each restaurant
+    const restaurantsWithDistance = data.map((restaurant: any) => {
+      const R = 6371; // Earth's radius in km
+      const dLat = ((restaurant.lat - lat) * Math.PI) / 180;
+      const dLon = ((restaurant.lon - lon) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((lat * Math.PI) / 180) *
+          Math.cos((restaurant.lat * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c * 1000; // Distance in meters
+
+      return {
+        ...restaurant,
+        distance,
+      };
+    });
+
+    // Sort by distance (closest first) and limit to 6
+    return restaurantsWithDistance.sort((a, b) => a.distance - b.distance).slice(0, 6);
   } catch (error) {
     console.error("Error in getSimilarRestaurants:", error);
     return [];

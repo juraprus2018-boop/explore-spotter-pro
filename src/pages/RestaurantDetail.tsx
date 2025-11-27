@@ -32,7 +32,6 @@ import { PriceRangeIndicator } from "@/components/PriceRangeIndicator";
 import { SimilarRestaurants } from "@/components/SimilarRestaurants";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { OpeningHoursDisplay } from "@/components/OpeningHoursDisplay";
-import { NearbyRestaurantsList } from "@/components/NearbyRestaurantsList";
 
 const RestaurantDetail = () => {
   const { placeId, city, province, lang } = useParams();
@@ -432,12 +431,6 @@ const RestaurantDetail = () => {
               </Card>
 
               <OpeningHoursDisplay openingHours={(restaurant as any).opening_hours} />
-              
-              <NearbyRestaurantsList
-                restaurantId={restaurant.id}
-                lat={restaurant.lat}
-                lon={restaurant.lon}
-              />
             </div>
           </div>
 

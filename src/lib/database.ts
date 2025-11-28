@@ -749,8 +749,17 @@ export const getSimilarRestaurants = async (
       };
     });
 
+    // Remove duplicates based on place_id (keep the first occurrence)
+    const uniqueRestaurants = restaurantsWithDistance.reduce((acc: any[], current: any) => {
+      const duplicate = acc.find(item => item.place_id === current.place_id);
+      if (!duplicate) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
+
     // Sort by distance (closest first) and limit to 6
-    return restaurantsWithDistance.sort((a, b) => a.distance - b.distance).slice(0, 6);
+    return uniqueRestaurants.sort((a, b) => a.distance - b.distance).slice(0, 6);
   } catch (error) {
     console.error("Error in getSimilarRestaurants:", error);
     return [];

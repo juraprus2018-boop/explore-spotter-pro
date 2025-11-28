@@ -62,7 +62,10 @@ const RestaurantCard = ({
             </CardDescription>
             {distance !== undefined && (
               <p className="text-xs text-muted-foreground mt-1">
-                📍 {(distance / 1000).toFixed(1)} km
+                📍 {distance < 1000 
+                  ? `${Math.round(distance)} m` 
+                  : `${(distance / 1000).toFixed(1)} km`
+                }
               </p>
             )}
           </div>

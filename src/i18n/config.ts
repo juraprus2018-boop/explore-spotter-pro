@@ -322,6 +322,8 @@ const createTranslations = (lang: string) => {
         privacy: "Privacybeleid",
         terms: "Algemene Voorwaarden",
         rights: "Alle rechten voorbehouden.",
+        seoText: "EatNavigator is jouw ultieme gids voor het ontdekken van restaurants wereldwijd. Met duizenden restaurants in onze database, real-time kaarten en uitgebreide locatiegegevens, helpen we fijnproevers de perfecte eetervaring te vinden. Ontdek lokale geheimen, lees authentieke recensies en vind restaurants op basis van jouw voorkeur voor cuisine, sfeer en prijsklasse.",
+        foodwall: "Foodwall",
       },
       contact: {
         title: "Neem contact op",
@@ -534,6 +536,8 @@ const createTranslations = (lang: string) => {
         privacy: "Privacy Policy",
         terms: "Terms & Conditions",
         rights: "All rights reserved.",
+        seoText: "EatNavigator is your ultimate guide to discovering restaurants worldwide. With thousands of restaurants in our database, real-time maps, and comprehensive location data, we help food lovers find the perfect dining experience. Discover local gems, read authentic reviews, and find restaurants based on your preferences for cuisine, atmosphere, and price range.",
+        foodwall: "Foodwall",
       },
       contact: {
         title: "Contact Us",
@@ -746,6 +750,7 @@ const createTranslations = (lang: string) => {
         privacy: "Datenschutz",
         terms: "AGB",
         rights: "Alle Rechte vorbehalten.",
+        seoText: "EatNavigator ist Ihr ultimativer Führer zum Entdecken von Restaurants weltweit. Mit Tausenden von Restaurants in unserer Datenbank, Echtzeit-Karten und umfassenden Standortdaten helfen wir Feinschmeckern, das perfekte kulinarische Erlebnis zu finden. Entdecken Sie lokale Geheimtipps, lesen Sie authentische Bewertungen und finden Sie Restaurants basierend auf Ihren Vorlieben für Küche, Atmosphäre und Preisklasse.",
       },
       toast: {
         resultsFound: "Suchergebnisse gefunden!",
@@ -894,6 +899,7 @@ const createTranslations = (lang: string) => {
         privacy: "Confidentialité",
         terms: "Conditions générales",
         rights: "Tous droits réservés.",
+        seoText: "EatNavigator est votre guide ultime pour découvrir des restaurants dans le monde entier. Avec des milliers de restaurants dans notre base de données, des cartes en temps réel et des données de localisation complètes, nous aidons les amateurs de gastronomie à trouver l'expérience culinaire parfaite. Découvrez des trésors locaux, lisez des avis authentiques et trouvez des restaurants en fonction de vos préférences pour la cuisine, l'atmosphère et la gamme de prix.",
       },
       toast: {
         resultsFound: "Résultats de recherche trouvés !",
@@ -1042,6 +1048,7 @@ const createTranslations = (lang: string) => {
     privacy: "Política de privacidad",
     terms: "Términos y condiciones",
     rights: "Todos los derechos reservados.",
+    seoText: "EatNavigator es tu guía definitiva para descubrir restaurantes en todo el mundo. Con miles de restaurantes en nuestra base de datos, mapas en tiempo real y datos de ubicación completos, ayudamos a los amantes de la comida a encontrar la experiencia gastronómica perfecta. Descubre joyas locales, lee reseñas auténticas y encuentra restaurantes según tus preferencias de cocina, ambiente y rango de precios.",
   },
   contact: {
     title: "Contáctanos",
@@ -1254,6 +1261,7 @@ const createTranslations = (lang: string) => {
     privacy: "Privacy",
     terms: "Termini e condizioni",
     rights: "Tutti i diritti riservati.",
+    seoText: "EatNavigator è la tua guida definitiva per scoprire ristoranti in tutto il mondo. Con migliaia di ristoranti nel nostro database, mappe in tempo reale e dati di localizzazione completi, aiutiamo gli amanti del cibo a trovare l'esperienza culinaria perfetta. Scopri gemme locali, leggi recensioni autentiche e trova ristoranti in base alle tue preferenze per cucina, atmosfera e fascia di prezzo.",
   },
   contact: {
     title: "Contattaci",
@@ -1466,6 +1474,7 @@ pt: {
     privacy: "Privacidade",
     terms: "Termos e condições",
     rights: "Todos os direitos reservados.",
+    seoText: "EatNavigator é o teu guia definitivo para descobrir restaurantes em todo o mundo. Com milhares de restaurantes na nossa base de dados, mapas em tempo real e dados de localização abrangentes, ajudamos os amantes de comida a encontrar a experiência gastronómica perfeita. Descobre joias locais, lê avaliações autênticas e encontra restaurantes com base nas tuas preferências de cozinha, atmosfera e faixa de preço.",
   },
   contact: {
     title: "Contacta-nos",
@@ -1678,6 +1687,7 @@ pt: {
     privacy: "Prywatność",
     terms: "Regulamin",
     rights: "Wszelkie prawa zastrzeżone.",
+    seoText: "EatNavigator to Twój najlepszy przewodnik po restauracjach na całym świecie. Z tysiącami restauracji w naszej bazie danych, mapami w czasie rzeczywistym i kompleksowymi danymi o lokalizacji, pomagamy miłośnikom jedzenia znaleźć idealne doświadczenie kulinarne. Odkryj lokalne perełki, czytaj autentyczne recenzje i znajdź restauracje zgodne z Twoimi preferencjami dotyczącymi kuchni, atmosfery i przedziału cenowego.",
   },
   contact: {
     title: "Skontaktuj się z nami",
@@ -1890,6 +1900,7 @@ pt: {
     privacy: "Privatnost",
     terms: "Uvjeti korištenja",
     rights: "Sva prava pridržana.",
+    seoText: "EatNavigator je tvoj najbolji vodič za otkrivanje restorana širom svijeta. S tisućama restorana u našoj bazi podataka, kartama u stvarnom vremenu i sveobuhvatnim podacima o lokaciji, pomažemo ljubiteljima hrane pronaći savršeno iskustvo. Otkrij skrivene lokalne dragulje, čitaj autentične recenzije i pronađi restorane prema svojim preferencijama za kuhinju, atmosferu i cjenovni raspon.",
   },
   contact: {
     title: "Kontaktiraj nas",
@@ -2102,6 +2113,7 @@ pt: {
     privacy: "プライバシーポリシー",
     terms: "利用規約",
     rights: "無断転載禁止。",
+    seoText: "EatNavigatorは、世界中のレストランを発見するための究極のガイドです。データベースに数千のレストラン、リアルタイムマップ、包括的な位置情報を備え、グルメの皆様に最高の食事体験を見つけるお手伝いをします。地元の隠れた名店を発見し、本物のレビューを読み、料理、雰囲気、価格帯の好みに基づいてレストランを見つけましょう。",
   },
   contact: {
     title: "お問い合わせ",
@@ -2314,6 +2326,7 @@ pt: {
     privacy: "隐私政策",
     terms: "使用条款",
     rights: "版权所有。",
+    seoText: "EatNavigator 是你探索全球餐厅的终极指南。我们的数据库拥有数千家餐厅，实时地图和全面的位置数据，帮助美食爱好者找到完美的用餐体验。发现当地隐藏的美食宝藏，阅读真实评论，并根据你对菜系、氛围和价格范围的偏好查找餐厅。",
   },
   contact: {
     title: "联系我们",
@@ -2526,6 +2539,7 @@ pt: {
     privacy: "سياسة الخصوصية",
     terms: "الشروط والأحكام",
     rights: "جميع الحقوق محفوظة.",
+    seoText: "EatNavigator هو دليلك النهائي لاكتشاف المطاعم في جميع أنحاء العالم. مع آلاف المطاعم في قاعدة بياناتنا، والخرائط في الوقت الفعلي، وبيانات الموقع الشاملة، نساعد عشاق الطعام في العثور على تجربة تناول الطعام المثالية. اكتشف الجواهر المحلية المخفية، واقرأ المراجعات الأصلية، وابحث عن المطاعم بناءً على تفضيلاتك للمطبخ والأجواء ونطاق الأسعار.",
   },
   contact: {
     title: "اتصل بنا",
@@ -2738,6 +2752,7 @@ pt: {
     privacy: "Gizlilik Politikası",
     terms: "Kullanım Şartları",
     rights: "Tüm hakları saklıdır.",
+    seoText: "EatNavigator, dünya çapında restoranları keşfetmek için nihai rehberinizdir. Veritabanımızda binlerce restoran, gerçek zamanlı haritalar ve kapsamlı konum verileri ile yemek severlerin mükemmel yemek deneyimini bulmasına yardımcı oluyoruz. Yerel gizli mücevherleri keşfedin, otantik yorumları okuyun ve mutfak, atmosfer ve fiyat aralığı tercihlerinize göre restoranlar bulun.",
   },
   contact: {
     title: "Bizimle iletişime geçin",
@@ -2950,6 +2965,7 @@ pt: {
     privacy: "Integritetspolicy",
     terms: "Villkor",
     rights: "Alla rättigheter förbehållna.",
+    seoText: "EatNavigator är din ultimata guide för att upptäcka restauranger världen över. Med tusentals restauranger i vår databas, realtidskartor och omfattande platsdata hjälper vi matälskare att hitta den perfekta matupplevelsen. Upptäck lokala pärlor, läs autentiska recensioner och hitta restauranger baserat på dina preferenser för kök, atmosfär och prisintervall.",
   },
   contact: {
     title: "Kontakta oss",
@@ -3162,6 +3178,7 @@ da: {
     privacy: "Privatlivspolitik",
     terms: "Vilkår",
     rights: "Alle rettigheder forbeholdes.",
+    seoText: "EatNavigator er din ultimative guide til at opdage restauranter verden over. Med tusindvis af restauranter i vores database, realtidskort og omfattende lokationsdata hjælper vi madentusiaster med at finde den perfekte spiseoplevelse. Opdag lokale perler, læs autentiske anmeldelser og find restauranter baseret på dine præferencer for køkken, atmosfære og prisklasse.",
   },
   contact: {
     title: "Kontakt os",
@@ -3374,6 +3391,7 @@ da: {
     privacy: "Personvern",
     terms: "Vilkår",
     rights: "Alle rettigheter forbeholdt.",
+    seoText: "EatNavigator er din ultimate guide for å oppdage restauranter verden over. Med tusenvis av restauranter i databasen vår, sanntidskart og omfattende stedsdata hjelper vi matelskere med å finne den perfekte matopplevelsen. Oppdag lokale perler, les autentiske anmeldelser og finn restauranter basert på dine preferanser for kjøkken, atmosfære og prisklasse.",
   },
   contact: {
     title: "Kontakt oss",
@@ -3586,6 +3604,7 @@ da: {
     privacy: "Tietosuojakäytäntö",
     terms: "Käyttöehdot",
     rights: "Kaikki oikeudet pidätetään.",
+    seoText: "EatNavigator on lopullinen oppaasi ravintoloiden löytämiseen ympäri maailmaa. Tietokannassamme on tuhansia ravintoloita, reaaliaikaiset kartat ja kattavat sijaintitiedot, jotka auttavat ruoanystäviä löytämään täydellisen ruokailukokemuksen. Löydä paikallisia helmiä, lue aitoja arvosteluja ja löydä ravintoloita keittiö-, tunnelma- ja hintaluokkamieltymystesi perusteella.",
   },
   contact: {
     title: "Ota yhteyttä",
@@ -3798,6 +3817,7 @@ cs: {
     privacy: "Zásady ochrany osobních údajů",
     terms: "Obchodní podmínky",
     rights: "Všechna práva vyhrazena.",
+    seoText: "EatNavigator je váš dokonalý průvodce objevováním restaurací po celém světě. S tisíci restaurací v naší databázi, mapami v reálném čase a komplexními údaji o poloze pomáháme milovníkům jídla najít ten pravý kulinářský zážitek. Objevujte místní skvosty, čtěte autentické recenze a najděte restaurace podle vašich preferencí kuchyně, atmosféry a cenové kategorie.",
   },
   contact: {
     title: "Kontaktujte nás",
@@ -4010,6 +4030,7 @@ cs: {
     privacy: "Politica de confidențialitate",
     terms: "Termeni și condiții",
     rights: "Toate drepturile rezervate.",
+    seoText: "EatNavigator este ghidul tău suprem pentru descoperirea restaurantelor din întreaga lume. Cu mii de restaurante în baza noastră de date, hărți în timp real și date complete despre locație, îi ajutăm pe iubitorii de mâncare să găsească experiența culinară perfectă. Descoperă comori locale ascunse, citește recenzii autentice și găsește restaurante pe baza preferințelor tale pentru bucătărie, atmosferă și gamă de prețuri.",
   },
   contact: {
     title: "Contactează-ne",

@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
 import { Utensils } from "lucide-react";
-import SitemapGenerator from "./SitemapGenerator";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -13,10 +12,10 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Utensils className="h-6 w-6 text-primary" />
-            <span className="text-lg font-bold text-foreground">EatNavigator</span>
-          </div>
+            <div className="flex items-center gap-2 mb-4">
+              <Utensils className="h-6 w-6 text-primary" />
+              <span className="text-lg font-bold text-foreground">EatNavigator</span>
+            </div>
             <p className="text-sm text-muted-foreground">
               {t("footer.description")}
             </p>
@@ -34,11 +33,13 @@ const Footer = () => {
           
           <div>
             <h3 className="font-semibold mb-4 text-foreground">{t("footer.info")}</h3>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-sm mb-4">
               <li><Link to={`/${lang}/privacy`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.privacy")}</Link></li>
               <li><Link to={`/${lang}/terms`} className="text-muted-foreground hover:text-foreground transition-colors">{t("footer.terms")}</Link></li>
-              <li className="pt-2"><SitemapGenerator /></li>
             </ul>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t("footer.seoText")}
+            </p>
           </div>
         </div>
         

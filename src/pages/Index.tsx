@@ -14,6 +14,7 @@ import LanguageDetectionPopup from "@/components/LanguageDetectionPopup";
 import InteractiveWorldMap from "@/components/InteractiveWorldMap";
 import RecentReviews from "@/components/RecentReviews";
 import TrendingRestaurants from "@/components/TrendingRestaurants";
+import RecentlyAddedRestaurants from "@/components/RecentlyAddedRestaurants";
 import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
@@ -403,6 +404,8 @@ const Index = () => {
             </div>
             
             <TrendingRestaurants />
+            
+            <RecentlyAddedRestaurants />
             
             <RecentReviews />
           </div>

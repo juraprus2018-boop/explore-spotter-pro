@@ -32,6 +32,7 @@ import { PriceRangeIndicator } from "@/components/PriceRangeIndicator";
 import { SimilarRestaurants } from "@/components/SimilarRestaurants";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { OpeningHoursDisplay } from "@/components/OpeningHoursDisplay";
+import { ReviewStatistics } from "@/components/ReviewStatistics";
 
 const RestaurantDetail = () => {
   const { placeId, city, province, lang } = useParams();
@@ -434,8 +435,13 @@ const RestaurantDetail = () => {
             </div>
           </div>
 
-          {/* Reviews Section */}
+          {/* Reviews Statistics */}
           <div className="mt-12">
+            <ReviewStatistics reviews={reviews} />
+          </div>
+
+          {/* Reviews Section */}
+          <div className="mt-8">
             <ReviewSection 
               restaurantId={restaurant.id}
               restaurantName={restaurant.name}

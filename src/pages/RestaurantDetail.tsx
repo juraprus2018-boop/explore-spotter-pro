@@ -276,6 +276,24 @@ const RestaurantDetail = () => {
                     <p className="font-medium">{(restaurant as any).brand}</p>
                   </div>
                 )}
+                {(restaurant as any).capacity && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Capaciteit</p>
+                    <p className="font-medium">{(restaurant as any).capacity} zitplaatsen</p>
+                  </div>
+                )}
+                {(restaurant as any).start_date && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Geopend sinds</p>
+                    <p className="font-medium">{(restaurant as any).start_date}</p>
+                  </div>
+                )}
+                {(restaurant as any).stars && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Classificatie</p>
+                    <p className="font-medium">{(restaurant as any).stars} ⭐</p>
+                  </div>
+                )}
                 {(restaurant as any).phone && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Telefoonnummer</p>
@@ -297,9 +315,15 @@ const RestaurantDetail = () => {
                     </a>
                   </div>
                 )}
+                {(restaurant as any).accepts_reservations && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Reserveren</p>
+                    <p className="font-medium capitalize">{(restaurant as any).accepts_reservations === 'yes' ? 'Mogelijk' : (restaurant as any).accepts_reservations}</p>
+                  </div>
+                )}
                 
                 {/* Facilities */}
-                {((restaurant as any).wheelchair || (restaurant as any).outdoor_seating || (restaurant as any).takeaway || (restaurant as any).delivery) && (
+                {((restaurant as any).wheelchair || (restaurant as any).outdoor_seating || (restaurant as any).takeaway || (restaurant as any).delivery || (restaurant as any).internet_access || (restaurant as any).air_conditioning || (restaurant as any).smoking || (restaurant as any).parking) && (
                   <div className="pt-4 border-t">
                     <p className="text-sm text-muted-foreground mb-2">Faciliteiten</p>
                     <div className="flex flex-wrap gap-2">
@@ -321,6 +345,26 @@ const RestaurantDetail = () => {
                       {(restaurant as any).delivery === 'yes' && (
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
                           🚚 Bezorgen
+                        </span>
+                      )}
+                      {(restaurant as any).internet_access && (restaurant as any).internet_access !== 'no' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                          📶 WiFi
+                        </span>
+                      )}
+                      {(restaurant as any).air_conditioning === 'yes' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                          ❄️ Airconditioning
+                        </span>
+                      )}
+                      {(restaurant as any).parking && (restaurant as any).parking !== 'no' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                          🅿️ Parkeren
+                        </span>
+                      )}
+                      {(restaurant as any).smoking && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                          {(restaurant as any).smoking === 'no' ? '🚭 Rookvrij' : (restaurant as any).smoking === 'outside' ? '🚬 Roken buiten' : '🚬 ' + (restaurant as any).smoking}
                         </span>
                       )}
                     </div>

@@ -48,6 +48,14 @@ export interface NominatimResult {
     phone?: string;
     website?: string;
     opening_hours?: string;
+    capacity?: string;
+    start_date?: string;
+    air_conditioning?: string;
+    internet_access?: string;
+    smoking?: string;
+    reservation?: string;
+    stars?: string;
+    parking?: string;
     'diet:vegetarian'?: string;
     'diet:vegan'?: string;
     'diet:gluten_free'?: string;

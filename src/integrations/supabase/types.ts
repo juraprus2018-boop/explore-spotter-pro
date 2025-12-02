@@ -252,22 +252,28 @@ export type Database = {
       }
       restaurants: {
         Row: {
+          accepts_reservations: string | null
+          accessibility_details: Json | null
           address_type: string | null
+          air_conditioning: string | null
           amenity: string | null
           brand: string | null
           building: string | null
+          capacity: number | null
           city_id: string | null
           claim_status: string | null
           claimed_at: string | null
           contact_info: Json | null
           created_at: string | null
           cuisine: string | null
+          cuisine_details: Json | null
           delivery: string | null
           description: string | null
           diet_options: Json | null
           display_name: string
           extratags: Json | null
           id: string
+          internet_access: string | null
           lat: number
           lon: number
           name: string
@@ -276,14 +282,20 @@ export type Database = {
           osm_id: number | null
           osm_type: string | null
           outdoor_seating: string | null
+          outdoor_seating_details: string | null
           owner_email: string | null
           owner_id: string | null
+          parking: string | null
           payment_options: Json | null
           phone: string | null
           photos: string[] | null
           place_id: number
           price_range: number | null
+          reservation: string | null
           search_count: number | null
+          smoking: string | null
+          stars: string | null
+          start_date: string | null
           status: string | null
           takeaway: string | null
           type: string | null
@@ -297,22 +309,28 @@ export type Database = {
           wheelchair: string | null
         }
         Insert: {
+          accepts_reservations?: string | null
+          accessibility_details?: Json | null
           address_type?: string | null
+          air_conditioning?: string | null
           amenity?: string | null
           brand?: string | null
           building?: string | null
+          capacity?: number | null
           city_id?: string | null
           claim_status?: string | null
           claimed_at?: string | null
           contact_info?: Json | null
           created_at?: string | null
           cuisine?: string | null
+          cuisine_details?: Json | null
           delivery?: string | null
           description?: string | null
           diet_options?: Json | null
           display_name: string
           extratags?: Json | null
           id?: string
+          internet_access?: string | null
           lat: number
           lon: number
           name: string
@@ -321,14 +339,20 @@ export type Database = {
           osm_id?: number | null
           osm_type?: string | null
           outdoor_seating?: string | null
+          outdoor_seating_details?: string | null
           owner_email?: string | null
           owner_id?: string | null
+          parking?: string | null
           payment_options?: Json | null
           phone?: string | null
           photos?: string[] | null
           place_id: number
           price_range?: number | null
+          reservation?: string | null
           search_count?: number | null
+          smoking?: string | null
+          stars?: string | null
+          start_date?: string | null
           status?: string | null
           takeaway?: string | null
           type?: string | null
@@ -342,22 +366,28 @@ export type Database = {
           wheelchair?: string | null
         }
         Update: {
+          accepts_reservations?: string | null
+          accessibility_details?: Json | null
           address_type?: string | null
+          air_conditioning?: string | null
           amenity?: string | null
           brand?: string | null
           building?: string | null
+          capacity?: number | null
           city_id?: string | null
           claim_status?: string | null
           claimed_at?: string | null
           contact_info?: Json | null
           created_at?: string | null
           cuisine?: string | null
+          cuisine_details?: Json | null
           delivery?: string | null
           description?: string | null
           diet_options?: Json | null
           display_name?: string
           extratags?: Json | null
           id?: string
+          internet_access?: string | null
           lat?: number
           lon?: number
           name?: string
@@ -366,14 +396,20 @@ export type Database = {
           osm_id?: number | null
           osm_type?: string | null
           outdoor_seating?: string | null
+          outdoor_seating_details?: string | null
           owner_email?: string | null
           owner_id?: string | null
+          parking?: string | null
           payment_options?: Json | null
           phone?: string | null
           photos?: string[] | null
           place_id?: number
           price_range?: number | null
+          reservation?: string | null
           search_count?: number | null
+          smoking?: string | null
+          stars?: string | null
+          start_date?: string | null
           status?: string | null
           takeaway?: string | null
           type?: string | null

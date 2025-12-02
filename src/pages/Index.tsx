@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { useTranslation } from "react-i18next";
@@ -15,6 +15,7 @@ import InteractiveWorldMap from "@/components/InteractiveWorldMap";
 import RecentReviews from "@/components/RecentReviews";
 import TrendingRestaurants from "@/components/TrendingRestaurants";
 import RecentlyAddedRestaurants from "@/components/RecentlyAddedRestaurants";
+import CuisineFilter from "@/components/CuisineFilter";
 import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
@@ -33,7 +34,26 @@ const Index = () => {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [highlightedPlaceId, setHighlightedPlaceId] = useState<number | null>(null);
+  const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Extract unique cuisines from results
+  const availableCuisines = useMemo(() => {
+    const cuisines = dbResults
+      .map(r => r.cuisine)
+      .filter((cuisine): cuisine is string => !!cuisine)
+      .flatMap(cuisine => cuisine.split(/[;,]/).map(c => c.trim()))
+      .filter(Boolean);
+    return Array.from(new Set(cuisines)).sort();
+  }, [dbResults]);
+
+  // Filter restaurants by selected cuisine
+  const filteredResults = useMemo(() => {
+    if (!selectedCuisine) return dbResults;
+    return dbResults.filter(r => 
+      r.cuisine?.split(/[;,]/).map(c => c.trim()).includes(selectedCuisine)
+    );
+  }, [dbResults, selectedCuisine]);
 
   useEffect(() => {
     // Get user's location
@@ -243,7 +263,7 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const locations = dbResults.map(r => ({
+  const locations = filteredResults.map(r => ({
     name: r.name,
     lat: r.lat,
     lon: r.lon,
@@ -290,7 +310,7 @@ const Index = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold text-foreground">
-                {t("results.title")} ({dbResults.length})
+                {t("results.title")} ({filteredResults.length})
               </h2>
               <button
                 onClick={() => setShowMap(!showMap)}
@@ -301,12 +321,18 @@ const Index = () => {
               </button>
             </div>
 
+            <CuisineFilter
+              cuisines={availableCuisines}
+              selectedCuisine={selectedCuisine}
+              onSelectCuisine={setSelectedCuisine}
+            />
+
             {showMap && !isMobile ? (
               <ResizablePanelGroup direction="horizontal" className="h-[70vh] max-h-[500px] rounded-lg border">
                 <ResizablePanel defaultSize={33} minSize={25} maxSize={50}>
                   <div className="h-full overflow-y-auto p-4">
                     <div className="grid grid-cols-1 gap-4">
-                      {dbResults.map((restaurant) => (
+                      {filteredResults.map((restaurant) => (
                         <RestaurantCard
                           key={restaurant.place_id}
                           placeId={restaurant.place_id}
@@ -346,7 +372,7 @@ const Index = () => {
                   />
                 </div>
                 <div className="grid grid-cols-1 gap-6">
-                  {dbResults.map((restaurant) => (
+                  {filteredResults.map((restaurant) => (
                     <RestaurantCard
                       key={restaurant.place_id}
                       placeId={restaurant.place_id}
@@ -364,7 +390,7 @@ const Index = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {dbResults.map((restaurant) => (
+                {filteredResults.map((restaurant) => (
                   <RestaurantCard
                     key={restaurant.place_id}
                     placeId={restaurant.place_id}

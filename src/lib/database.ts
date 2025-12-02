@@ -69,6 +69,18 @@ export interface DatabaseRestaurant {
   contact_info?: any | null;
   extratags?: any | null;
   price_range?: number | null;
+  capacity?: number | null;
+  start_date?: string | null;
+  air_conditioning?: string | null;
+  internet_access?: string | null;
+  smoking?: string | null;
+  reservation?: string | null;
+  stars?: string | null;
+  parking?: string | null;
+  outdoor_seating_details?: string | null;
+  accepts_reservations?: string | null;
+  cuisine_details?: any | null;
+  accessibility_details?: any | null;
   city?: City;
 }
 
@@ -326,6 +338,17 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
       if (extratags.website) contactInfo.website = extratags.website;
       if (extratags.email) contactInfo.email = extratags.email;
 
+      // Extract cuisine details
+      const cuisineDetails: any = {};
+      if (extratags.cuisine) {
+        cuisineDetails.main = extratags.cuisine;
+      }
+      
+      // Extract accessibility details
+      const accessibilityDetails: any = {};
+      if (extratags.wheelchair) accessibilityDetails.wheelchair = extratags.wheelchair;
+      if (extratags['wheelchair:description']) accessibilityDetails.description = extratags['wheelchair:description'];
+
       restaurantsToSave.push({
         place_id: r.place_id,
         name: r.name || r.display_name.split(',')[0],
@@ -352,6 +375,18 @@ export const saveRestaurants = async (restaurants: NominatimResult[]) => {
         phone: extratags.phone || null,
         website: extratags.website || null,
         opening_hours: extratags.opening_hours || null,
+        capacity: extratags.capacity ? parseInt(extratags.capacity) : null,
+        start_date: extratags.start_date || null,
+        air_conditioning: extratags.air_conditioning || null,
+        internet_access: extratags.internet_access || null,
+        smoking: extratags.smoking || null,
+        reservation: extratags.reservation || null,
+        stars: extratags.stars || null,
+        parking: extratags.parking || null,
+        outdoor_seating_details: extratags['outdoor_seating:comfort'] || extratags['outdoor_seating:heated'] || null,
+        accepts_reservations: extratags.reservation || null,
+        cuisine_details: Object.keys(cuisineDetails).length > 0 ? cuisineDetails : null,
+        accessibility_details: Object.keys(accessibilityDetails).length > 0 ? accessibilityDetails : null,
         extratags: extratags,
         status: 'approved', // OpenStreetMap restaurants are automatically approved
       });

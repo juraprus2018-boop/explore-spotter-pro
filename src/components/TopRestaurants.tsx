@@ -68,6 +68,7 @@ const TopRestaurants = ({ citySlug, provinceSlug }: TopRestaurantsProps) => {
                 citySlug={citySlug}
                 provinceSlug={provinceSlug}
                 cuisine={(restaurant as any).cuisine}
+                openingHours={(restaurant as any).opening_hours}
                 facilities={{
                   wheelchair: (restaurant as any).wheelchair,
                   outdoor_seating: (restaurant as any).outdoor_seating,

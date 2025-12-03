@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { OpenStatusBadge } from "./OpenStatusBadge";
 
 interface RestaurantCardProps {
   placeId: number;
@@ -22,6 +23,7 @@ interface RestaurantCardProps {
     takeaway?: string;
     delivery?: string;
   };
+  openingHours?: any;
 }
 
 const RestaurantCard = ({
@@ -35,6 +37,7 @@ const RestaurantCard = ({
   cuisine,
   distance,
   facilities,
+  openingHours,
 }: RestaurantCardProps) => {
   const { lang } = useParams();
   const navigate = useNavigate();
@@ -49,9 +52,12 @@ const RestaurantCard = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="text-lg mb-1 group-hover:text-primary transition-colors">
-              {name}
-            </CardTitle>
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                {name}
+              </CardTitle>
+              <OpenStatusBadge openingHours={openingHours} size="sm" />
+            </div>
             {cuisine && (
               <p className="text-sm text-muted-foreground capitalize mb-1">
                 {cuisine.replace(/_/g, ' ')}

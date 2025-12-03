@@ -343,6 +343,7 @@ const Index = () => {
                           type={restaurant.type || "restaurant"}
                           citySlug={restaurant.city?.slug || "unknown"}
                           provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                          openingHours={(restaurant as any).opening_hours}
                           onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                         />
                       ))}
@@ -383,6 +384,7 @@ const Index = () => {
                       type={restaurant.type || "restaurant"}
                       citySlug={restaurant.city?.slug || "unknown"}
                       provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                      openingHours={(restaurant as any).opening_hours}
                           onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                     />
                   ))}
@@ -401,6 +403,7 @@ const Index = () => {
                     type={restaurant.type || "restaurant"}
                     citySlug={restaurant.city?.slug || "unknown"}
                     provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                    openingHours={(restaurant as any).opening_hours}
                     onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                   />
                 ))}

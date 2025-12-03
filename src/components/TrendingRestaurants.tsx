@@ -133,6 +133,7 @@ const TrendingRestaurants = () => {
                 citySlug={restaurant.city?.slug || "unknown"}
                 provinceSlug={restaurant.city?.province?.slug || "unknown"}
                 cuisine={(restaurant as any).cuisine}
+                openingHours={(restaurant as any).opening_hours}
                 facilities={{
                   wheelchair: (restaurant as any).wheelchair,
                   outdoor_seating: (restaurant as any).outdoor_seating,

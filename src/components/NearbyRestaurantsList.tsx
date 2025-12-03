@@ -20,7 +20,7 @@ export const NearbyRestaurantsList = ({ restaurantId, lat, lon }: NearbyRestaura
   useEffect(() => {
     const fetchNearby = async () => {
       setIsLoading(true);
-      const nearby = await getNearbyRestaurants(lat, lon, 2); // 2km radius
+      const nearby = await getNearbyRestaurants(lat, lon, 15); // 15km radius
       // Filter out the current restaurant
       const filtered = nearby.filter(r => r.id !== restaurantId).slice(0, 4);
       setRestaurants(filtered);

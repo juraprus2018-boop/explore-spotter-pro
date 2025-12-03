@@ -33,6 +33,7 @@ import { SimilarRestaurants } from "@/components/SimilarRestaurants";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { OpeningHoursDisplay } from "@/components/OpeningHoursDisplay";
 import { ReviewStatistics } from "@/components/ReviewStatistics";
+import { OpenStatusBadge } from "@/components/OpenStatusBadge";
 
 const RestaurantDetail = () => {
   const { placeId, city, province, lang } = useParams();
@@ -218,7 +219,14 @@ const RestaurantDetail = () => {
           <div className="mb-8">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-4xl font-bold mb-4 text-foreground">{restaurant.name}</h1>
+                <div className="flex items-center gap-3 mb-4">
+                  <h1 className="text-4xl font-bold text-foreground">{restaurant.name}</h1>
+                  <OpenStatusBadge 
+                    openingHours={(restaurant as any).opening_hours} 
+                    size="lg" 
+                    showDetails={true} 
+                  />
+                </div>
                 <div className="flex items-start gap-2 text-muted-foreground">
                   <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
                   <p className="text-lg">{restaurant.display_name}</p>

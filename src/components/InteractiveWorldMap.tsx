@@ -232,8 +232,8 @@ const InteractiveWorldMap = () => {
         description: `Zoeken naar restaurants bij ${locationData.display_name}...`,
       });
 
-      // 2. Search for restaurants within 2km radius
-      const restaurants = await searchNearbyRestaurants(lat, lon, 2);
+      // 2. Search for restaurants within 15km radius
+      const restaurants = await searchNearbyRestaurants(lat, lon, 15);
       
       if (restaurants.length === 0) {
         toast({

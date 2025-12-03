@@ -1,6 +1,6 @@
 import { Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { OpenStatusBadge } from './OpenStatusBadge';
 
 interface OpeningHoursDisplayProps {
   openingHours: any;
@@ -8,21 +8,6 @@ interface OpeningHoursDisplayProps {
 
 export const OpeningHoursDisplay = ({ openingHours }: OpeningHoursDisplayProps) => {
   if (!openingHours) return null;
-
-  const getCurrentStatus = () => {
-    const now = new Date();
-    const currentDay = now.toLocaleDateString('nl-NL', { weekday: 'long' }).toLowerCase();
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-
-    if (typeof openingHours === 'object' && openingHours.hours) {
-      // Parse opening hours if structured
-      return { isOpen: true, nextChange: null };
-    }
-
-    return { isOpen: null, nextChange: null };
-  };
-
-  const status = getCurrentStatus();
   
   const formatHours = (hours: any) => {
     if (typeof hours === 'string') {
@@ -52,11 +37,7 @@ export const OpeningHoursDisplay = ({ openingHours }: OpeningHoursDisplayProps) 
             <Clock className="h-5 w-5" />
             Openingstijden
           </CardTitle>
-          {status.isOpen !== null && (
-            <Badge variant={status.isOpen ? "default" : "secondary"}>
-              {status.isOpen ? "Nu open" : "Gesloten"}
-            </Badge>
-          )}
+          <OpenStatusBadge openingHours={openingHours} />
         </div>
       </CardHeader>
       <CardContent>

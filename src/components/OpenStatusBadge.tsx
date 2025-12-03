@@ -1,25 +1,54 @@
 import { Badge } from '@/components/ui/badge';
-import { isCurrentlyOpen } from '@/lib/openingHours';
+import { getOpenStatus } from '@/lib/openingHours';
 
 interface OpenStatusBadgeProps {
   openingHours: any;
   className?: string;
-  size?: 'sm' | 'default';
+  size?: 'sm' | 'default' | 'lg';
+  showDetails?: boolean;
 }
 
-export const OpenStatusBadge = ({ openingHours, className = '', size = 'default' }: OpenStatusBadgeProps) => {
-  const isOpen = isCurrentlyOpen(openingHours);
+export const OpenStatusBadge = ({ 
+  openingHours, 
+  className = '', 
+  size = 'default',
+  showDetails = false 
+}: OpenStatusBadgeProps) => {
+  const status = getOpenStatus(openingHours);
   
-  if (isOpen === null) return null;
+  if (status.isOpen === null) return null;
   
-  const sizeClasses = size === 'sm' ? 'text-xs px-1.5 py-0.5' : '';
+  const sizeClasses = {
+    sm: 'text-xs px-1.5 py-0.5',
+    default: 'text-sm px-2.5 py-0.5',
+    lg: 'text-base px-3 py-1'
+  };
+
+  if (status.isOpen) {
+    const text = showDetails && status.closesAt 
+      ? `Open tot ${status.closesAt}` 
+      : 'Open';
+    
+    return (
+      <Badge 
+        variant="default"
+        className={`bg-green-600 hover:bg-green-700 text-white ${sizeClasses[size]} ${className}`}
+      >
+        {text}
+      </Badge>
+    );
+  }
+  
+  const closedText = showDetails && status.opensAt && status.opensDay
+    ? `Gesloten · Opent ${status.opensDay} om ${status.opensAt}`
+    : 'Gesloten';
   
   return (
     <Badge 
-      variant={isOpen ? "default" : "secondary"}
-      className={`${isOpen ? 'bg-green-600 hover:bg-green-700' : 'bg-muted text-muted-foreground'} ${sizeClasses} ${className}`}
+      variant="secondary"
+      className={`bg-muted text-muted-foreground ${sizeClasses[size]} ${className}`}
     >
-      {isOpen ? 'Open' : 'Gesloten'}
+      {closedText}
     </Badge>
   );
 };

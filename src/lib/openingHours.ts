@@ -5,6 +5,8 @@ const DAY_MAP: Record<string, number> = {
   'ma': 1, 'di': 2, 'wo': 3, 'do': 4, 'vr': 5, 'za': 6, 'zo': 0, // Dutch
 };
 
+const DAY_NAMES: string[] = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
+
 interface TimeRange {
   open: number; // minutes from midnight
   close: number; // minutes from midnight
@@ -18,6 +20,13 @@ interface ParsedRule {
 function parseTime(timeStr: string): number {
   const [hours, minutes] = timeStr.split(':').map(Number);
   return hours * 60 + (minutes || 0);
+}
+
+function formatTime(minutes: number): string {
+  const normalizedMinutes = minutes % (24 * 60);
+  const hours = Math.floor(normalizedMinutes / 60);
+  const mins = normalizedMinutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
 }
 
 function parseDays(dayStr: string): number[] {
@@ -81,8 +90,22 @@ function parseOpeningHoursString(hoursStr: string): ParsedRule[] {
   return rules;
 }
 
-export function isCurrentlyOpen(openingHours: any): boolean | null {
-  if (!openingHours) return null;
+export interface OpenStatusInfo {
+  isOpen: boolean | null;
+  closesAt: string | null;  // e.g., "22:00"
+  opensAt: string | null;   // e.g., "09:00"
+  opensDay: string | null;  // e.g., "vandaag", "morgen", "maandag"
+}
+
+export function getOpenStatus(openingHours: any): OpenStatusInfo {
+  const result: OpenStatusInfo = {
+    isOpen: null,
+    closesAt: null,
+    opensAt: null,
+    opensDay: null,
+  };
+
+  if (!openingHours) return result;
   
   let hoursStr: string | null = null;
   
@@ -92,33 +115,37 @@ export function isCurrentlyOpen(openingHours: any): boolean | null {
     hoursStr = openingHours.hours;
   }
   
-  if (!hoursStr) return null;
+  if (!hoursStr) return result;
   
   // Skip month-based or complex formats we can't parse
-  if (/^[A-Z][a-z]{2}-[A-Z][a-z]{2}$/.test(hoursStr)) return null; // "Aug-Sep"
-  if (hoursStr.includes('PH') || hoursStr.includes('SH')) return null; // Public/School holidays
+  if (/^[A-Z][a-z]{2}-[A-Z][a-z]{2}$/.test(hoursStr)) return result;
+  if (hoursStr.includes('PH') || hoursStr.includes('SH')) return result;
   
   const rules = parseOpeningHoursString(hoursStr);
-  if (rules.length === 0) return null;
+  if (rules.length === 0) return result;
   
   const now = new Date();
   const currentDay = now.getDay(); // 0=Sunday
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   
+  // Check if currently open
   for (const rule of rules) {
     if (rule.days.includes(currentDay)) {
       for (const time of rule.times) {
         if (currentMinutes >= time.open && currentMinutes < time.close) {
-          return true;
+          result.isOpen = true;
+          result.closesAt = formatTime(time.close);
+          return result;
         }
         // Check if we're in overnight period from yesterday
         if (time.close > 24 * 60) {
           const adjustedClose = time.close - 24 * 60;
           if (currentMinutes < adjustedClose) {
-            // Check if yesterday was in the rule
             const yesterday = (currentDay + 6) % 7;
             if (rule.days.includes(yesterday)) {
-              return true;
+              result.isOpen = true;
+              result.closesAt = formatTime(adjustedClose);
+              return result;
             }
           }
         }
@@ -126,18 +153,66 @@ export function isCurrentlyOpen(openingHours: any): boolean | null {
     }
   }
   
-  return false;
+  // Not open, find next opening time
+  result.isOpen = false;
+  
+  // Check if opens later today
+  for (const rule of rules) {
+    if (rule.days.includes(currentDay)) {
+      for (const time of rule.times) {
+        if (time.open > currentMinutes) {
+          result.opensAt = formatTime(time.open);
+          result.opensDay = 'vandaag';
+          return result;
+        }
+      }
+    }
+  }
+  
+  // Check next 7 days for opening
+  for (let i = 1; i <= 7; i++) {
+    const checkDay = (currentDay + i) % 7;
+    for (const rule of rules) {
+      if (rule.days.includes(checkDay)) {
+        if (rule.times.length > 0) {
+          const earliestOpen = Math.min(...rule.times.map(t => t.open));
+          result.opensAt = formatTime(earliestOpen);
+          if (i === 1) {
+            result.opensDay = 'morgen';
+          } else {
+            result.opensDay = DAY_NAMES[checkDay];
+          }
+          return result;
+        }
+      }
+    }
+  }
+  
+  return result;
+}
+
+export function isCurrentlyOpen(openingHours: any): boolean | null {
+  return getOpenStatus(openingHours).isOpen;
 }
 
 export function getOpenStatusText(openingHours: any): { isOpen: boolean | null; text: string } {
-  const isOpen = isCurrentlyOpen(openingHours);
+  const status = getOpenStatus(openingHours);
   
-  if (isOpen === null) {
+  if (status.isOpen === null) {
     return { isOpen: null, text: '' };
   }
   
+  if (status.isOpen) {
+    return {
+      isOpen: true,
+      text: status.closesAt ? `Open tot ${status.closesAt}` : 'Nu open'
+    };
+  }
+  
   return {
-    isOpen,
-    text: isOpen ? 'Nu open' : 'Gesloten'
+    isOpen: false,
+    text: status.opensAt && status.opensDay 
+      ? `Opent ${status.opensDay} om ${status.opensAt}`
+      : 'Gesloten'
   };
 }

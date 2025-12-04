@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet";
 import { getRestaurantsByCity, getCityBySlug, DatabaseRestaurant, City } from "@/lib/database";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, MapPin, Home, Filter as FilterIcon, Map } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Home, Filter as FilterIcon, Map, Clock } from "lucide-react";
+import { getOpenStatus } from "@/lib/openingHours";
 import RestaurantCard from "@/components/RestaurantCard";
 import MapView from "@/components/MapView";
 import Header from "@/components/Header";
@@ -48,6 +49,7 @@ const CityPage = () => {
   const [selectedCuisine, setSelectedCuisine] = useState<string>("all");
   const [selectedFacility, setSelectedFacility] = useState<string>("all");
   const [selectedDiet, setSelectedDiet] = useState<string>("all");
+  const [showOpenOnly, setShowOpenOnly] = useState<boolean>(false);
   const [showMap, setShowMap] = useState(true);
 
   useEffect(() => {
@@ -90,6 +92,14 @@ const CityPage = () => {
   useEffect(() => {
     let filtered = [...restaurants];
 
+    // Filter by open status
+    if (showOpenOnly) {
+      filtered = filtered.filter(r => {
+        const status = getOpenStatus((r as any).opening_hours);
+        return status.isOpen === true;
+      });
+    }
+
     // Filter by cuisine
     if (selectedCuisine !== "all") {
       filtered = filtered.filter(r => (r as any).cuisine === selectedCuisine);
@@ -124,7 +134,7 @@ const CityPage = () => {
     }
 
     setFilteredRestaurants(filtered);
-  }, [restaurants, selectedCuisine, selectedFacility, selectedDiet]);
+  }, [restaurants, selectedCuisine, selectedFacility, selectedDiet, showOpenOnly]);
 
   // Get unique cuisines from restaurants
   const uniqueCuisines = Array.from(
@@ -159,9 +169,10 @@ const CityPage = () => {
     setSelectedCuisine("all");
     setSelectedFacility("all");
     setSelectedDiet("all");
+    setShowOpenOnly(false);
   };
 
-  const hasActiveFilters = selectedCuisine !== "all" || selectedFacility !== "all" || selectedDiet !== "all";
+  const hasActiveFilters = selectedCuisine !== "all" || selectedFacility !== "all" || selectedDiet !== "all" || showOpenOnly;
 
   const cityName = cityData?.name || city || "";
   const provinceName = cityData?.province?.name || province || "";
@@ -289,6 +300,24 @@ const CityPage = () => {
                         Wis filters
                       </Button>
                     )}
+                  </div>
+                  
+                  {/* Open Now Toggle */}
+                  <div className="mb-4">
+                    <Button
+                      variant={showOpenOnly ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setShowOpenOnly(!showOpenOnly)}
+                      className="gap-2"
+                    >
+                      <Clock className="h-4 w-4" />
+                      Nu open
+                      {showOpenOnly && (
+                        <span className="ml-1 bg-primary-foreground/20 px-1.5 py-0.5 rounded text-xs">
+                          ✓
+                        </span>
+                      )}
+                    </Button>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

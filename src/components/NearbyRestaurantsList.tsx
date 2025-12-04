@@ -5,6 +5,7 @@ import { MapPin } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getCuisineImage } from '@/lib/cuisineImages';
 
 interface NearbyRestaurantsProps {
   restaurantId: string;
@@ -73,17 +74,13 @@ export const NearbyRestaurantsList = ({ restaurantId, lat, lon }: NearbyRestaura
                 className="block group"
               >
                 <div className="flex items-start gap-4 p-3 rounded-lg border border-border hover:border-primary transition-colors">
-                  {restaurant.photos && restaurant.photos.length > 0 ? (
-                    <img
-                      src={restaurant.photos[0]}
-                      alt={restaurant.name}
-                      className="w-16 h-16 object-cover rounded-md"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
-                      <MapPin className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                  )}
+                  <img
+                    src={restaurant.photos && restaurant.photos.length > 0 
+                      ? restaurant.photos[0] 
+                      : getCuisineImage(restaurant.cuisine)}
+                    alt={restaurant.name}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                       {restaurant.name}

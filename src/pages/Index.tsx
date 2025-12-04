@@ -343,7 +343,9 @@ const Index = () => {
                           type={restaurant.type || "restaurant"}
                           citySlug={restaurant.city?.slug || "unknown"}
                           provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                          cuisine={restaurant.cuisine}
                           openingHours={(restaurant as any).opening_hours}
+                          photos={restaurant.photos || []}
                           onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                         />
                       ))}
@@ -384,8 +386,10 @@ const Index = () => {
                       type={restaurant.type || "restaurant"}
                       citySlug={restaurant.city?.slug || "unknown"}
                       provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                      cuisine={restaurant.cuisine}
                       openingHours={(restaurant as any).opening_hours}
-                          onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
+                      photos={restaurant.photos || []}
+                      onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                     />
                   ))}
                 </div>
@@ -403,7 +407,9 @@ const Index = () => {
                     type={restaurant.type || "restaurant"}
                     citySlug={restaurant.city?.slug || "unknown"}
                     provinceSlug={restaurant.city?.province?.slug || "unknown"}
+                    cuisine={restaurant.cuisine}
                     openingHours={(restaurant as any).opening_hours}
+                    photos={restaurant.photos || []}
                     onViewOnMap={() => handleViewOnMap(restaurant.lat, restaurant.lon, restaurant.place_id)}
                   />
                 ))}

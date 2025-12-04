@@ -238,7 +238,7 @@ const InteractiveWorldMap = () => {
       if (restaurants.length === 0) {
         toast({
           title: "Geen restaurants gevonden",
-          description: "Er zijn geen restaurants gevonden in een straal van 2 km.",
+          description: "Er zijn geen restaurants gevonden in een straal van 15 km.",
           variant: "destructive",
         });
         if (markerRef.current) {

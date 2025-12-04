@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet";
 import { getRestaurantByPlaceId, DatabaseRestaurant } from "@/lib/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, MapPin, Home } from "lucide-react";
+import { Loader2, MapPin, Home, Clock } from "lucide-react";
 import MapView from "@/components/MapView";
 import RouteNavigation from "@/components/RouteNavigation";
 import ReviewSection from "@/components/ReviewSection";
@@ -34,6 +34,7 @@ import { PhotoGallery } from "@/components/PhotoGallery";
 import { OpeningHoursDisplay } from "@/components/OpeningHoursDisplay";
 import { ReviewStatistics } from "@/components/ReviewStatistics";
 import { OpenStatusBadge } from "@/components/OpenStatusBadge";
+import { getCuisineImage } from "@/lib/cuisineImages";
 
 const RestaurantDetail = () => {
   const { placeId, city, province, lang } = useParams();
@@ -183,68 +184,91 @@ const RestaurantDetail = () => {
       <Header />
       
       <main className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <Breadcrumb className="mb-6">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <NavLink to={`/${lang}`}>
-                    <Home className="h-4 w-4" />
-                  </NavLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <NavLink to={`/${lang}/${provinceSlug}`}>
-                    {provinceName}
-                  </NavLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <NavLink to={`/${lang}/${provinceSlug}/${citySlug}`}>
-                    {cityName}
-                  </NavLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{restaurant.name}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          <div className="mb-8">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-4">
-                  <h1 className="text-4xl font-bold text-foreground">{restaurant.name}</h1>
-                  <OpenStatusBadge 
-                    openingHours={(restaurant as any).opening_hours} 
-                    size="lg" 
-                    showDetails={true} 
-                  />
+        {/* Hero Banner */}
+        {(() => {
+          const photos = (restaurant as any).photos || [];
+          const heroImage = photos.length > 0 ? photos[0] : getCuisineImage((restaurant as any).cuisine);
+          return (
+            <div className="relative h-[300px] md:h-[400px] w-full overflow-hidden">
+              <img
+                src={heroImage}
+                alt={restaurant.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <div className="container mx-auto">
+                  <Breadcrumb className="mb-4">
+                    <BreadcrumbList>
+                      <BreadcrumbItem>
+                        <BreadcrumbLink asChild>
+                          <NavLink to={`/${lang}`} className="text-white/80 hover:text-white">
+                            <Home className="h-4 w-4" />
+                          </NavLink>
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbItem>
+                        <BreadcrumbLink asChild>
+                          <NavLink to={`/${lang}/${provinceSlug}`} className="text-white/80 hover:text-white">
+                            {provinceName}
+                          </NavLink>
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbItem>
+                        <BreadcrumbLink asChild>
+                          <NavLink to={`/${lang}/${provinceSlug}/${citySlug}`} className="text-white/80 hover:text-white">
+                            {cityName}
+                          </NavLink>
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbItem>
+                        <BreadcrumbPage className="text-white">{restaurant.name}</BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                  <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                    <div>
+                      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">
+                        {restaurant.name}
+                      </h1>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <OpenStatusBadge 
+                          openingHours={(restaurant as any).opening_hours} 
+                          size="lg" 
+                          showDetails={true} 
+                        />
+                        {(restaurant as any).cuisine && (
+                          <span className="text-white/90 text-lg capitalize">
+                            {(restaurant as any).cuisine.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                        {(restaurant as any).price_range && (
+                          <PriceRangeIndicator priceRange={(restaurant as any).price_range} />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FavoriteButton restaurantId={restaurant.id} restaurantName={restaurant.name} />
+                      <SocialShareButtons 
+                        restaurantName={restaurant.name} 
+                        restaurantUrl={`/${lang}/${province}/${city}/${restaurant.place_id}`} 
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-start gap-2 text-muted-foreground">
-                  <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                  <p className="text-lg">{restaurant.display_name}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <FavoriteButton restaurantId={restaurant.id} restaurantName={restaurant.name} />
-                <SocialShareButtons 
-                  restaurantName={restaurant.name} 
-                  restaurantUrl={`/${lang}/${province}/${city}/${restaurant.place_id}`} 
-                />
               </div>
             </div>
-            {(restaurant as any).price_range && (
-              <div className="mt-4">
-                <PriceRangeIndicator priceRange={(restaurant as any).price_range} />
-              </div>
-            )}
+          );
+        })()}
+
+        <div className="container mx-auto px-4 py-8">
+          {/* Address bar */}
+          <div className="flex items-start gap-2 text-muted-foreground mb-8 p-4 bg-muted/50 rounded-lg">
+            <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+            <p className="text-lg">{restaurant.display_name}</p>
           </div>
 
           {/* Restaurant Photos */}

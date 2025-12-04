@@ -1,9 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { OpenStatusBadge } from "./OpenStatusBadge";
+import { getCuisineImage } from "@/lib/cuisineImages";
 
 interface RestaurantCardProps {
   placeId: number;
@@ -16,7 +17,7 @@ interface RestaurantCardProps {
   provinceSlug: string;
   onViewOnMap?: () => void;
   cuisine?: string | null;
-  distance?: number; // Distance in meters
+  distance?: number;
   facilities?: {
     wheelchair?: string;
     outdoor_seating?: string;
@@ -24,6 +25,7 @@ interface RestaurantCardProps {
     delivery?: string;
   };
   openingHours?: any;
+  photos?: string[];
 }
 
 const RestaurantCard = ({
@@ -38,6 +40,7 @@ const RestaurantCard = ({
   distance,
   facilities,
   openingHours,
+  photos,
 }: RestaurantCardProps) => {
   const { lang } = useParams();
   const navigate = useNavigate();
@@ -47,40 +50,53 @@ const RestaurantCard = ({
     navigate(`/${lang}/${provinceSlug}/${citySlug}/${placeId}`);
   };
 
+  // Use first photo if available, otherwise use cuisine-based image
+  const imageUrl = photos && photos.length > 0 ? photos[0] : getCuisineImage(cuisine);
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group" onClick={handleCardClick}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                {name}
-              </CardTitle>
-              <OpenStatusBadge openingHours={openingHours} size="sm" />
-            </div>
-            {cuisine && (
-              <p className="text-sm text-muted-foreground capitalize mb-1">
-                {cuisine.replace(/_/g, ' ')}
-              </p>
-            )}
-            <CardDescription className="text-sm">
-              {displayName.split(",").slice(1, 3).join(",")}
-            </CardDescription>
-            {distance !== undefined && (
-              <p className="text-xs text-muted-foreground mt-1">
-                📍 {distance < 1000 
-                  ? `${Math.round(distance)} m` 
-                  : `${(distance / 1000).toFixed(1)} km`
-                }
-              </p>
-            )}
-          </div>
-          <Badge variant="secondary" className="shrink-0 capitalize">
-            {type}
-          </Badge>
+      {/* Image Header */}
+      <div className="relative h-40 overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute bottom-3 left-3 right-3">
+          <h3 className="text-white font-semibold text-lg line-clamp-1 drop-shadow-md">
+            {name}
+          </h3>
+          {cuisine && (
+            <p className="text-white/90 text-sm capitalize drop-shadow-md">
+              {cuisine.replace(/_/g, ' ')}
+            </p>
+          )}
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+        <div className="absolute top-3 right-3">
+          <OpenStatusBadge openingHours={openingHours} size="sm" />
+        </div>
+        <Badge variant="secondary" className="absolute top-3 left-3 capitalize bg-background/90">
+          {type}
+        </Badge>
+      </div>
+
+      <CardContent className="p-4 space-y-3">
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {displayName.split(",").slice(1, 3).join(",")}
+        </p>
+        
+        {distance !== undefined && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <MapPin className="h-3 w-3" />
+            {distance < 1000 
+              ? `${Math.round(distance)} m` 
+              : `${(distance / 1000).toFixed(1)} km`
+            }
+          </p>
+        )}
+
         {facilities && (Object.values(facilities).some(v => v === 'yes')) && (
           <div className="flex flex-wrap gap-1.5">
             {facilities.wheelchair === 'yes' && (
@@ -105,7 +121,8 @@ const RestaurantCard = ({
             )}
           </div>
         )}
-        <div className="flex gap-2">
+
+        <div className="flex gap-2 pt-2">
           <Button
             variant="default"
             size="sm"

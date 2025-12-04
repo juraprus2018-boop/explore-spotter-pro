@@ -90,6 +90,7 @@ const RecentlyAddedRestaurants = () => {
                 provinceSlug={restaurant.city?.province?.slug || "unknown"}
                 cuisine={restaurant.cuisine}
                 openingHours={restaurant.opening_hours}
+                photos={restaurant.photos || []}
                 facilities={{
                   wheelchair: restaurant.wheelchair,
                   outdoor_seating: restaurant.outdoor_seating,

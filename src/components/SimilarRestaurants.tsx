@@ -78,6 +78,7 @@ export const SimilarRestaurants = ({
             provinceSlug={restaurant.city?.province?.slug || ''}
             cuisine={restaurant.cuisine}
             openingHours={restaurant.opening_hours}
+            photos={restaurant.photos || []}
             distance={(restaurant as any).distance}
           />
         ))}

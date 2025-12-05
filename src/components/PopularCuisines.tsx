@@ -109,7 +109,7 @@ const PopularCuisines = ({ restaurants, citySlug, provinceSlug }: PopularCuisine
             );
             
             return canLink ? (
-              <NavLink key={cuisine} to={`/${lang}/${provinceSlug}/${citySlug}/cuisine-${cuisineSlug}`}>
+              <NavLink key={cuisine} to={`/${lang}/${provinceSlug}/${citySlug}/cuisine/${cuisineSlug}`}>
                 {content}
               </NavLink>
             ) : (

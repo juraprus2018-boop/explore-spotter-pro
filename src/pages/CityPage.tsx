@@ -54,13 +54,13 @@ const CityPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!city) return;
+      if (!city || !province) return;
 
       setIsLoading(true);
       try {
         const [cityResult, restaurantsResult] = await Promise.all([
-          getCityBySlug(city),
-          getRestaurantsByCity(city)
+          getCityBySlug(city, province),
+          getRestaurantsByCity(city, province)
         ]);
         
         setCityData(cityResult);
@@ -86,7 +86,7 @@ const CityPage = () => {
     };
 
     loadData();
-  }, [city, toast]);
+  }, [city, province, toast]);
 
   // Filter restaurants when filters change
   useEffect(() => {

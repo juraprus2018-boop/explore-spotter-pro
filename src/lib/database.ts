@@ -548,24 +548,30 @@ export const getNearbyRestaurants = async (
   }
 };
 
-export const getRestaurantsByCity = async (citySlug: string): Promise<DatabaseRestaurant[]> => {
+export const getRestaurantsByCity = async (citySlug: string, provinceSlug?: string): Promise<DatabaseRestaurant[]> => {
   try {
-    const { data, error } = await db
+    let query = db
       .from("restaurants")
       .select(
         `
         *,
         city:cities!inner (
           *,
-          province:provinces (
+          province:provinces!inner (
             *,
             country:countries (*)
           )
         )
       `,
       )
-      .eq("city.slug", citySlug)
-      .order("search_count", { ascending: false });
+      .eq("city.slug", citySlug);
+
+    // Filter by province if provided
+    if (provinceSlug) {
+      query = query.eq("city.province.slug", provinceSlug);
+    }
+
+    const { data, error } = await query.order("search_count", { ascending: false });
 
     if (error) {
       console.error("Error fetching restaurants by city:", error);
@@ -679,21 +685,27 @@ export const getCitiesByCountryCode = async (countryCode: string): Promise<City[
   return data || [];
 };
 
-export const getCityBySlug = async (slug: string): Promise<City | null> => {
+export const getCityBySlug = async (slug: string, provinceSlug?: string): Promise<City | null> => {
   try {
-    const { data, error } = await db
+    let query = db
       .from("cities")
       .select(
         `
         *,
-        province:provinces (
+        province:provinces!inner (
           *,
           country:countries (*)
         )
       `,
       )
-      .eq("slug", slug)
-      .maybeSingle();
+      .eq("slug", slug);
+
+    // Filter by province if provided
+    if (provinceSlug) {
+      query = query.eq("province.slug", provinceSlug);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
       console.error("Error fetching city:", error);

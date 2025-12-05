@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
-import { getCityBySlug, City } from "@/lib/database";
+import { City } from "@/lib/database";
 import { Button } from "@/components/ui/button";
 import { Loader2, MapPin, Home, Map, Clock, UtensilsCrossed } from "lucide-react";
 import { getOpenStatus } from "@/lib/openingHours";
@@ -63,11 +63,29 @@ const CuisineCityPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!city || !cuisineSlug) return;
+      if (!city || !cuisineSlug || !province) return;
 
       setIsLoading(true);
       try {
-        const cityResult = await getCityBySlug(city);
+        // Fetch city by both city slug AND province slug to avoid duplicates
+        const { data: cityResults, error: cityError } = await supabase
+          .from("cities")
+          .select(`
+            *,
+            province:provinces!inner (
+              *,
+              country:countries (*)
+            )
+          `)
+          .eq("slug", city)
+          .eq("provinces.slug", province);
+        
+        if (cityError) {
+          console.error("Error fetching city:", cityError);
+        }
+        
+        // Take the first result (should be unique now with province filter)
+        const cityResult = cityResults && cityResults.length > 0 ? cityResults[0] : null;
         setCityData(cityResult);
 
         if (cityResult) {
@@ -121,7 +139,7 @@ const CuisineCityPage = () => {
     };
 
     loadData();
-  }, [city, cuisineSlug, toast]);
+  }, [city, province, cuisineSlug, cuisineName, toast]);
 
   const filteredRestaurants = useMemo(() => {
     if (!showOpenOnly) return restaurants;

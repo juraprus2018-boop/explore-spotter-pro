@@ -58,8 +58,7 @@ const CuisineCityPage = () => {
   const [showOpenOnly, setShowOpenOnly] = useState<boolean>(false);
   const [showMap, setShowMap] = useState(true);
 
-  // Remove "cuisine-" prefix from URL param
-  const cuisineSlug = cuisine?.replace("cuisine-", "") || "";
+  const cuisineSlug = cuisine || "";
   const cuisineName = cuisineSlug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 
   useEffect(() => {

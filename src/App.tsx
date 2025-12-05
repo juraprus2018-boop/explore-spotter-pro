@@ -105,7 +105,7 @@ const App = () => (
             }
           />
           <Route
-            path="/:lang/:province/:city/cuisine-:cuisine"
+            path="/:lang/:province/:city/cuisine/:cuisine"
             element={
               <LanguageWrapper>
                 <CuisineCityPage />

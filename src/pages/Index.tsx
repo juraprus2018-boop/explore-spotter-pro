@@ -346,6 +346,13 @@ const Index = () => {
               >
                 <Clock className="h-4 w-4" />
                 Nu open
+                <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
+                  showOpenOnly
+                    ? 'bg-white/20'
+                    : 'bg-green-500/20 text-green-600'
+                }`}>
+                  {dbResults.filter(r => getOpenStatus((r as any).opening_hours).isOpen === true).length}
+                </span>
               </button>
               <CuisineFilter
                 cuisines={availableCuisines}

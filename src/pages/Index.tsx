@@ -19,9 +19,10 @@ import CuisineFilter from "@/components/CuisineFilter";
 import { searchRestaurants, searchNearbyRestaurants } from "@/lib/nominatim";
 import { saveRestaurants, searchRestaurantsInDatabase, getNearbyRestaurants, DatabaseRestaurant } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Utensils, Map } from "lucide-react";
+import { Loader2, Utensils, Map, Clock } from "lucide-react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getOpenStatus } from "@/lib/openingHours";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -35,6 +36,7 @@ const Index = () => {
   const [showMap, setShowMap] = useState(false);
   const [highlightedPlaceId, setHighlightedPlaceId] = useState<number | null>(null);
   const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
+  const [showOpenOnly, setShowOpenOnly] = useState(false);
   const { toast } = useToast();
 
   // Extract unique cuisines from results
@@ -47,13 +49,25 @@ const Index = () => {
     return Array.from(new Set(cuisines)).sort();
   }, [dbResults]);
 
-  // Filter restaurants by selected cuisine
+  // Filter restaurants by selected cuisine and open status
   const filteredResults = useMemo(() => {
-    if (!selectedCuisine) return dbResults;
-    return dbResults.filter(r => 
-      r.cuisine?.split(/[;,]/).map(c => c.trim()).includes(selectedCuisine)
-    );
-  }, [dbResults, selectedCuisine]);
+    let results = dbResults;
+    
+    if (selectedCuisine) {
+      results = results.filter(r => 
+        r.cuisine?.split(/[;,]/).map(c => c.trim()).includes(selectedCuisine)
+      );
+    }
+    
+    if (showOpenOnly) {
+      results = results.filter(r => {
+        const status = getOpenStatus((r as any).opening_hours);
+        return status.isOpen === true;
+      });
+    }
+    
+    return results;
+  }, [dbResults, selectedCuisine, showOpenOnly]);
 
   useEffect(() => {
     // Get user's location
@@ -321,11 +335,24 @@ const Index = () => {
               </button>
             </div>
 
-            <CuisineFilter
-              cuisines={availableCuisines}
-              selectedCuisine={selectedCuisine}
-              onSelectCuisine={setSelectedCuisine}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setShowOpenOnly(!showOpenOnly)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  showOpenOnly
+                    ? 'bg-green-500 text-white'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                <Clock className="h-4 w-4" />
+                Nu open
+              </button>
+              <CuisineFilter
+                cuisines={availableCuisines}
+                selectedCuisine={selectedCuisine}
+                onSelectCuisine={setSelectedCuisine}
+              />
+            </div>
 
             {showMap && !isMobile ? (
               <ResizablePanelGroup direction="horizontal" className="h-[70vh] max-h-[500px] rounded-lg border">

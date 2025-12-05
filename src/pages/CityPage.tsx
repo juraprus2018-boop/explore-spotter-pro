@@ -277,7 +277,7 @@ const CityPage = () => {
 
               {/* Statistics Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <PopularCuisines restaurants={restaurants} />
+                <PopularCuisines restaurants={restaurants} citySlug={city} provinceSlug={provinceSlug} />
                 <PriceDistribution restaurants={restaurants} />
               </div>
               

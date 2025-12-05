@@ -10,6 +10,7 @@ import { usePageTracking } from "./hooks/usePageTracking";
 import Index from "./pages/Index";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import CityPage from "./pages/CityPage";
+import CuisineCityPage from "./pages/CuisineCityPage";
 import CitiesPage from "./pages/CitiesPage";
 import ProvincePage from "./pages/ProvincePage";
 import NotFound from "./pages/NotFound";
@@ -100,6 +101,14 @@ const App = () => (
             element={
               <LanguageWrapper>
                 <CityPage />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/:lang/:province/:city/cuisine-:cuisine"
+            element={
+              <LanguageWrapper>
+                <CuisineCityPage />
               </LanguageWrapper>
             }
           />

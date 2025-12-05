@@ -1,13 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Utensils, TrendingUp } from "lucide-react";
+import { TrendingUp, ChevronRight } from "lucide-react";
 import { DatabaseRestaurant } from "@/lib/database";
 import { Badge } from "@/components/ui/badge";
+import { NavLink } from "@/components/NavLink";
+import { useParams } from "react-router-dom";
 
 interface PopularCuisinesProps {
   restaurants: DatabaseRestaurant[];
+  citySlug?: string;
+  provinceSlug?: string;
 }
 
-const PopularCuisines = ({ restaurants }: PopularCuisinesProps) => {
+const PopularCuisines = ({ restaurants, citySlug, provinceSlug }: PopularCuisinesProps) => {
+  const { lang } = useParams();
   // Count cuisines
   const cuisineCounts = restaurants.reduce((acc, r) => {
     const cuisine = (r as any).cuisine;
@@ -72,8 +77,11 @@ const PopularCuisines = ({ restaurants }: PopularCuisinesProps) => {
         <div className="space-y-3">
           {topCuisines.map(([cuisine, count], index) => {
             const percentage = (count / maxCount) * 100;
-            return (
-              <div key={cuisine} className="space-y-1">
+            const cuisineSlug = cuisine.split(';')[0].toLowerCase().replace(/_/g, '-').replace(/\s+/g, '-');
+            const canLink = citySlug && provinceSlug;
+            
+            const content = (
+              <div className={`space-y-1 p-2 rounded-lg transition-colors ${canLink ? 'hover:bg-accent cursor-pointer' : ''}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">{getCuisineEmoji(cuisine)}</span>
@@ -84,9 +92,12 @@ const PopularCuisines = ({ restaurants }: PopularCuisinesProps) => {
                       </Badge>
                     )}
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    {count} {count === 1 ? 'restaurant' : 'restaurants'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {count} {count === 1 ? 'restaurant' : 'restaurants'}
+                    </span>
+                    {canLink && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                  </div>
                 </div>
                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
                   <div
@@ -95,6 +106,14 @@ const PopularCuisines = ({ restaurants }: PopularCuisinesProps) => {
                   />
                 </div>
               </div>
+            );
+            
+            return canLink ? (
+              <NavLink key={cuisine} to={`/${lang}/${provinceSlug}/${citySlug}/cuisine-${cuisineSlug}`}>
+                {content}
+              </NavLink>
+            ) : (
+              <div key={cuisine}>{content}</div>
             );
           })}
         </div>

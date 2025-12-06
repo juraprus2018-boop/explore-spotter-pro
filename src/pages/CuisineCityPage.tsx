@@ -12,6 +12,7 @@ import MapView from "@/components/MapView";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HreflangAlternates from "@/components/HreflangAlternates";
+import CuisineCityStructuredData from "@/components/CuisineCityStructuredData";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -186,6 +187,12 @@ const CuisineCityPage = () => {
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
       </Helmet>
+      <CuisineCityStructuredData
+        cuisineName={cuisineName}
+        cityName={cityName}
+        provinceName={provinceName}
+        restaurants={restaurants}
+      />
       <HreflangAlternates />
       <Header />
 

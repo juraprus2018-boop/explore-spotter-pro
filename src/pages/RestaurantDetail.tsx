@@ -26,6 +26,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import ClaimRestaurantDialog from "@/components/ClaimRestaurantDialog";
 import SuggestChangeDialog from "@/components/SuggestChangeDialog";
+import EmbedBadgeDialog from "@/components/EmbedBadgeDialog";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { PriceRangeIndicator } from "@/components/PriceRangeIndicator";
@@ -250,11 +251,20 @@ const RestaurantDetail = () => {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <FavoriteButton restaurantId={restaurant.id} restaurantName={restaurant.name} />
                       <SocialShareButtons 
                         restaurantName={restaurant.name} 
                         restaurantUrl={`/${lang}/${province}/${city}/${restaurant.place_id}`} 
+                      />
+                      <EmbedBadgeDialog
+                        restaurantName={restaurant.name}
+                        placeId={restaurant.place_id}
+                        averageRating={averageRating}
+                        reviewCount={reviews.filter((r: any) => r.status === 'approved').length}
+                        province={province}
+                        city={city}
+                        lang={lang}
                       />
                     </div>
                   </div>

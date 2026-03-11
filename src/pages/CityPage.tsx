@@ -39,6 +39,7 @@ import { NavLink } from "@/components/NavLink";
 
 const CityPage = () => {
   const { city, province, lang } = useParams();
+  const activeLang = lang || "nl";
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -54,7 +55,7 @@ const CityPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!city || !province) return;
+      if (!city) return;
 
       setIsLoading(true);
       try {
@@ -68,8 +69,8 @@ const CityPage = () => {
 
         if (restaurantsResult.length === 0) {
           toast({
-            title: "Geen restaurants gevonden",
-            description: `Er zijn nog geen restaurants gevonden in ${cityResult?.name || city}`,
+            title: "Geen woningen gevonden",
+            description: `Er zijn nog geen woningen gevonden in ${cityResult?.name || city}`,
             variant: "destructive",
           });
         }
@@ -178,11 +179,11 @@ const CityPage = () => {
   const provinceName = cityData?.province?.name || province || "";
   const provinceSlug = cityData?.province?.slug || province || "";
 
-  const displayRestaurants = filteredRestaurants.length > 0 ? filteredRestaurants : restaurants;
+  const displayRestaurants = hasActiveFilters ? filteredRestaurants : restaurants;
   
   // SEO meta tags
-  const seoTitle = `${t('page.restaurantsIn')} ${cityName}, ${provinceName} | EatNavigator`;
-  const seoDescription = `${t('page.discoverRestaurants')} ${cityName}, ${provinceName}. ${t('detail.aboutDesc')}`;
+  const seoTitle = `Woningen in ${cityName}${provinceName ? `, ${provinceName}` : ''} | EatNavigator`;
+  const seoDescription = `Bekijk alle beschikbare woningen in ${cityName}${provinceName ? `, ${provinceName}` : ''}. Filter op kenmerken en ontdek het actuele aanbod.`;
 
   const locations = displayRestaurants.map(r => ({
     name: r.name,
@@ -225,19 +226,23 @@ const CityPage = () => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <NavLink to={`/${lang}`}>
+                  <NavLink to={`/${activeLang}`}>
                     <Home className="h-4 w-4" />
                   </NavLink>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <NavLink to={`/${lang}/${provinceSlug}`}>
-                    {provinceName}
-                  </NavLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
+              {provinceSlug && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <NavLink to={`/${activeLang}/${provinceSlug}`}>
+                        {provinceName}
+                      </NavLink>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage>{cityName}</BreadcrumbPage>
@@ -249,10 +254,10 @@ const CityPage = () => {
             <div>
               <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
                 <MapPin className="h-8 w-8 text-primary" />
-                {t('page.restaurantsIn')} {cityName}
+                Woningen in {cityName}
               </h1>
               <p className="text-muted-foreground text-lg">
-                Ontdek {restaurants.length} {restaurants.length === 1 ? "restaurant" : "restaurants"} in {cityName}, {provinceName}
+                Ontdek {restaurants.length} {restaurants.length === 1 ? "woning" : "woningen"} in {cityName}{provinceName ? `, ${provinceName}` : ""}
               </p>
             </div>
             
@@ -264,7 +269,7 @@ const CityPage = () => {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Restaurants laden...</p>
+              <p className="text-muted-foreground">Woningen laden...</p>
             </div>
           ) : restaurants.length > 0 ? (
             <div className="space-y-8">
@@ -402,12 +407,24 @@ const CityPage = () => {
                   {hasActiveFilters && (
                     <div className="mt-4 pt-4 border-t">
                       <p className="text-sm text-muted-foreground">
-                        {filteredRestaurants.length} van {restaurants.length} restaurants gevonden
+                        {filteredRestaurants.length} van {restaurants.length} woningen gevonden
                       </p>
                     </div>
                   )}
                 </CardContent>
               </Card>
+
+              <section className="rounded-lg border bg-card p-6">
+                <h2 className="text-2xl font-bold mb-3">Woningen in {cityName}</h2>
+                <p className="text-muted-foreground mb-3">
+                  Bekijk het volledige woningaanbod in {cityName}. Gebruik de filters om snel te zoeken op type,
+                  voorzieningen en kenmerken die voor jou belangrijk zijn.
+                </p>
+                <p className="text-muted-foreground">
+                  {cityName} is een populaire stad in {provinceName || "Nederland"} met een gevarieerd aanbod.
+                  Op deze pagina vind je alle beschikbare woningen in één overzicht inclusief kaartweergave en extra details.
+                </p>
+              </section>
 
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -435,13 +452,13 @@ const CityPage = () => {
 
               <div>
                 <h2 className="text-3xl font-bold mb-6 text-foreground">
-                  {hasActiveFilters ? `Gefilterde restaurants (${filteredRestaurants.length})` : 'Alle restaurants'}
+                  {hasActiveFilters ? `Gefilterde woningen (${filteredRestaurants.length})` : "Alle woningen"}
                 </h2>
                 {displayRestaurants.length === 0 ? (
                   <Card>
                     <CardContent className="py-8 text-center">
                       <p className="text-muted-foreground">
-                        Geen restaurants gevonden met de geselecteerde filters.
+                        Geen woningen gevonden met de geselecteerde filters.
                       </p>
                       <Button onClick={clearFilters} className="mt-4">
                         Wis filters
@@ -483,12 +500,12 @@ const CityPage = () => {
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <MapPin className="h-20 w-20 text-muted-foreground mb-4" />
               <h3 className="text-2xl font-semibold mb-2 text-foreground">
-                Geen restaurants gevonden
+                Geen woningen gevonden
               </h3>
               <p className="text-muted-foreground max-w-md">
-                Er zijn nog geen restaurants gevonden in {cityName}. Probeer een andere stad of gebruik de zoekfunctie.
+                Er zijn nog geen woningen gevonden in {cityName}. Probeer een andere stad of pas je filters aan.
               </p>
-              <Button onClick={() => navigate(`/${lang}`)} className="mt-6">
+              <Button onClick={() => navigate(`/${activeLang}`)} className="mt-6">
                 Terug naar zoeken
               </Button>
             </div>

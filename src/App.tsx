@@ -105,6 +105,22 @@ const App = () => (
             }
           />
           <Route
+            path="/:lang/woningen-:city"
+            element={
+              <LanguageWrapper>
+                <CityPage />
+              </LanguageWrapper>
+            }
+          />
+          <Route
+            path="/woningen-:city"
+            element={
+              <LanguageWrapper>
+                <CityPage />
+              </LanguageWrapper>
+            }
+          />
+          <Route
             path="/:lang/:province/:city/cuisine/:cuisine"
             element={
               <LanguageWrapper>
